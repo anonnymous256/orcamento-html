@@ -1,0 +1,119 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f5f5f5;
+}
+
+header {
+    background-color: #1976d2;
+    color: white;
+    text-align: center;
+    position: relative;
+    padding: 15px;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+header button {
+    position: absolute;
+    left: 10px; /* Botão posicionado no canto esquerdo */
+    color: black;
+    top: 50%; /* Centralizado verticalmente */
+    transform: translateY(-50%);
+    background-color: transparent;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+header button:hover {
+    color: white;
+    background-color: rgba(0, 0, 0, 0.1);
+    transform: scale(1.1);
+}
+
+header button:focus {
+    outline: none;
+}
+
+header button:active {
+    transform: scale(0.95);
+}
+
+.container {
+    max-width: 600px;
+    margin: 30px auto;
+    background-color: white;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.input-group {
+    margin-bottom: 20px;
+}
+
+.input-group label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 10px 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    box-sizing: border-box;
+}
+
+#botao {
+    width: 100%;
+    background-color: #1976d2;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    padding: 12px;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#botao:hover {
+    background-color: #155a9e;
+}
+
+#botao i {
+    margin-right: 10px;
+    font-size: 18px;
+}
+
+.company-info {
+    margin-top: 30px;
+    text-align: center;
+}
+
+.company-info .logo-container {
+    margin-top: 15px;
+    width: 150px; /* Largura fixa do container */
+    height: 150px; /* Altura fixa do container */
+    overflow: hidden; /* Oculta qualquer parte da imagem que ultrapasse o container */
+    border-radius: 50%; /* Faz o container ser circular */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #f0f0f0; /* Cor de fundo para visualização */
+}
+
+.company-info .logo-container img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: cover; /* Garante que a imagem preencha o container */
+}
+
