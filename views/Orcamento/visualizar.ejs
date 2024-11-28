@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualizar Orçamento</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+        header {
+            background-color: #1976d2;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            font-size: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+        .image-container {
+            flex: 1;
+            max-width: 250px;
+            max-height: 250px;
+            overflow: hidden;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f0f0f0;
+        }
+        .image-container img {
+            max-width: 100%;
+            max-height: 100%;
+        }
+        .info-container {
+            flex: 2;
+        }
+        .info-container h2 {
+            margin-top: 0;
+            color: #333;
+        }
+        .info-container p {
+            margin: 5px 0;
+            font-size: 16px;
+            color: #555;
+        }
+        .button-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .button-container button {
+            padding: 10px 20px;
+            background-color: #1976d2;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .button-container button:hover {
+            background-color: #155a9e;
+        }
+    </style>
+</head>
+<body>
+    <header>Visualizar Orçamento</header>
+    <div class="container" id="pdf-content">
+        <div class="image-container">
+            <img id="service-image" src="" alt="Imagem do serviço">
+        </div>
+        <div class="info-container">
+            <h2>Detalhes do Serviço</h2>
+            <p><strong>Descrição:</strong> <span id="service-description"></span></p>
+            <p><strong>Largura:</strong> <span id="service-width"></span> m</p>
+            <p><strong>Altura:</strong> <span id="service-height"></span> m</p>
+            <p><strong>Metro Quadrado:</strong> <span id="service-meter"></span> m²</p>
+            <p><strong>Quantidade:</strong> <span id="service-quantity"></span></p>
+        </div>
+    </div>
+    <div class="button-container">
+        <button onclick="goBack()">Voltar</button>
+        <button onclick="generatePDF()">Gerar PDF</button>
+    </div>
+
+    <script>
+        // Recuperar dados do Local Storage
+        const serviceData = JSON.parse(localStorage.getItem("serviceData"));
+
+        if (serviceData) {
+            document.getElementById("service-description").textContent = serviceData.description;
+            document.getElementById("service-width").textContent = serviceData.width;
+            document.getElementById("service-height").textContent = serviceData.height;
+            document.getElementById("service-meter").textContent = serviceData.meter;
+            document.getElementById("service-quantity").textContent = serviceData.quantity;
+            document.getElementById("service-image").src = serviceData.image;
+        } else {
+            alert("Nenhum serviço encontrado.");
+        }
+
+        // Função para voltar à tela de cadastro
+        function goBack() {
+            window.location.href = "cadastro.html";
+        }
+
+        // Função para gerar o PDF
+        async function generatePDF() {
+    const pdfContent = document.getElementById("pdf-content");
+
+    // Capturar o conteúdo da página usando html2canvas
+    const canvas = await html2canvas(pdfContent, { scale: 2 });
+    const imgData = canvas.toDataURL("image/png");
+
+    // Configurar o PDF com margens e estilo
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4"
+    });
+
+    // Adicionar cabeçalho
+    pdf.setFontSize(14);
+    pdf.setFont("helvetica", "bold");
+    pdf.text("Orçamento Detalhado", 105, 15, { align: "center" });
+    pdf.setDrawColor(0, 0, 0);
+    pdf.setLineWidth(0.5);
+    pdf.line(10, 20, 200, 20); // Linha horizontal abaixo do cabeçalho
+
+    // Adicionar imagem capturada no corpo
+    const imgWidth = 190; // Largura da imagem no PDF
+    const pageHeight = pdf.internal.pageSize.height;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+    let yPosition = 30; // Margem inicial
+
+    if (imgHeight > pageHeight - 40) {
+        // Se a imagem for maior que a página, redimensionar
+        pdf.addImage(imgData, "PNG", 10, yPosition, imgWidth, pageHeight - 50);
+        pdf.addPage();
+        pdf.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight - (pageHeight - 50));
+    } else {
+        pdf.addImage(imgData, "PNG", 10, yPosition, imgWidth, imgHeight);
+    }
+
+    // Adicionar rodapé
+    pdf.setFontSize(10);
+    pdf.setFont("helvetica", "normal");
+    pdf.text(`Gerado em: ${new Date().toLocaleString()}`, 10, pdf.internal.pageSize.height - 10);
+    pdf.text("Página 1", 200 - 10, pdf.internal.pageSize.height - 10, { align: "right" });
+
+    // Baixar o PDF estilizado
+    pdf.save("orcamento_estilizado.pdf");
+}
+
+    </script>
+</body>
+</html>

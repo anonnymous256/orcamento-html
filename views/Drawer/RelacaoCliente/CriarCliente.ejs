@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criar Cliente</title>
+
+    <!-- Link para Fonte Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/stylesheets/RelacaoCliente/CriarCliente.css">
+</head>
+
+<body>
+    <header>
+        <button class ="fas fa-arrow-left" onclick="window.history.back()"></button>Criar Cliente
+    </header>
+    <div class="caixa">
+        <form id="formulario-cliente">
+            <div class="grupo-formulario">
+                <label for="nome">Nome do Cliente:</label>
+                <i class="fas fa-user"></i>
+                <input type="text" id="nome" placeholder="Digite o nome" required>
+            </div>
+            <div class="grupo-formulario">
+                <label for="email">Email:</label>
+                <i class="fas fa-envelope"></i>
+                <input type="email" id="email" placeholder="Digite o email">
+            </div>
+            <div class="grupo-formulario">
+                <label for="telefone">Telefone:</label>
+                <i class="fas fa-phone"></i>
+                <input type="tel" id="telefone" placeholder="Digite o telefone" required>
+            </div>
+            <div class="grupo-formulario">
+                <label for="endereco">Endereço:</label>
+                <i class="fas fa-map-marker-alt"></i>
+                <input type="text" id="endereco" placeholder="Digite o endereço">
+            </div>
+            <div class="grupo-formulario">
+                <button type="button" class="botao" onclick="saveClient()">
+                    <i class="fas fa-save"></i> Salvar Cliente
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script src="/javascripts//RelacaoCliente/CriarCliente.js" type="module"></script>
+
+</body>
+
+</html>

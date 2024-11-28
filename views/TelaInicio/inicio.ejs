@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gráfico de Entradas e Saídas</title>
+    <link rel="stylesheet" href="/stylesheets/TelaInicio/inicio.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <script src="javascripts/Logar/Deslogar.js" type="module"></script>
+</head>
+
+<body>
+    <header>
+        <button class="menu-button" onclick="toggleDrawer()">☰</button>
+        Bem-vindo
+    </header>
+
+    <div class="drawer" id="drawer">
+        <button class="menu-button" onclick="closeDrawer()">☰</button>
+        <h2>Menu</h2>
+        <ul class="menu-list">
+            <li><i class="fas fa-pen"></i> Criar Orçamento (Com Medida)</li>
+            <li><i class="fas fa-pen"></i> Criar Orçamento - Metro</li>
+            <li><i class="fas fa-pen"></i> Criar Orçamento (Sem Medida)</li>
+            <li><i class="fas fa-plus"></i><span onclick ="window.location.href = '/Cabecalho'">Editar Cabeçalho</span></li>
+            <li><i class="fas fa-users"></i><span onclick="window.location.href = '/VerCli'">Visualizar Clientes</span>
+            </li>
+            <li><i class="fas fa-box"></i> Estoque</li>
+            <li><i class="fas fa-chart-line"></i> Fluxo de Caixa</li>
+            <li><i class="fas fa-bell"></i> Pedido de Tempera (Teste)</li>
+            <li><i class="fas fa-sign-out-alt"></i><span onclick="logout()">Deslogar</span></li>
+            <li><i class="fas fa-file-pdf"></i> PDFs Gerados</li>
+            <li><i class="fas fa-info-circle"></i> Sobre</li>
+        </ul>
+    </div>
+
+    <div class="content">
+        <div class="container">
+            <div class="section-title">Gráfico de Entradas e Saídas</div>
+            <div class="dropdown-container">
+                <select>
+                    <option>2024</option>
+                </select>
+                <select>
+                    <option>Novembro</option>
+                </select>
+            </div>
+            <div class="chart-container">
+                <div class="chart">
+                    <div class="chart-bar bar-lucro"></div>
+                    <div class="chart-bar bar-gastos"></div>
+                </div>
+            </div>
+            <div class="info-container">
+                <div class="info">
+                    <img src="https://img.icons8.com/ios-filled/50/00ff00/up--v1.png" alt="Seta para cima" width="24">
+                    Total de Entradas: R$8000.00
+                </div>
+                <div class="info">
+                    <img src="https://img.icons8.com/ios-filled/50/ff0000/down--v1.png" alt="Seta para baixo"
+                        width="24">
+                    Total de Saídas: R$20.00
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Funções auxiliares para o menu
+        function toggleDrawer() {
+            const drawer = document.getElementById('drawer');
+            drawer.classList.toggle('open');
+        }
+
+        function closeDrawer() {
+            const drawer = document.getElementById('drawer');
+            drawer.classList.remove('open');
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualizar Clientes</title>
+
+    <!-- Link para Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/stylesheets/RelacaoCliente/VisualizarCliente.css">
+    
+</head>
+
+<body>
+    <header>
+        <button class ="fas fa-arrow-left" onclick="window.history.back()"></button> Visualizar Cliente
+    </header>
+    <div class="caixa">
+        <h2>Lista de Clientes</h2>
+        <div id="carregando" class="loading">
+            <i class="fas fa-spinner fa-spin"></i> Carregando clientes...
+        </div>
+        <table id="tabela-clientes" style="display: none;">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Email</th>
+                    <th>Telefone</th>
+                    <th>Endereço</th>
+                    <th>Data de Criação</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Os dados dos clientes serão inseridos dinamicamente aqui -->
+            </tbody>
+        </table>
+        <button type="button" class="botao" onclick="window.location.href = '/CriarCli'">Criar Cliente</button>
+
+    </div>
+
+
+    <script src="javascripts/RelacaoCliente/VisualizarCliente.js" type="module"></script>
+</body>
+
+</html>

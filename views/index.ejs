@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login e Criação de Conta</title>
+  
+  <script src = "javascripts/Logar/login.js" type="module"> </script>
+  <link rel="stylesheet" href="/stylesheets/Login/Login.css">
+</head>
+
+<body>
+  <div class="container" id="login-container">
+    <div class="logo">
+      <img src="images/Logo/logo.jpg" alt="Logo"> 
+    </div>
+    <h2>Login</h2>
+    <input type="email" id="login-email" placeholder="Digite seu e-mail" required />
+    <input type="password" id="login-password" placeholder="Digite sua senha" required />
+    <button onclick="login()">Entrar</button>
+    <div class="toggle-link">
+      <p>Não tem uma conta? <a href="#" onclick="toggleForm()">Criar conta</a></p>
+    </div>
+  </div>
+
+  <div class="container" id="signup-container" style="display: none;">
+    <div class="logo">
+      <img src="images/Logo/logo.jpg" alt="Logo"> 
+    </div>
+    <h2>Criar Conta</h2>
+    <input type="text" id="create-name" placeholder="Digite seu nome completo" required />
+    <input type="email" id="create-email" placeholder="Digite seu e-mail" required />
+    <input type="password" id="create-password" placeholder="Digite sua senha" required />
+    <input type="password" id="create-password-confirm" placeholder="Confirme sua senha" required />
+    <button onclick="createAccount()">Criar Conta</button>
+    <div class="toggle-link">
+      <p>Já tem uma conta? <a href="#" onclick="toggleForm()">Fazer login</a></p>
+    </div>
+  </div>
+</body>
+</html>
