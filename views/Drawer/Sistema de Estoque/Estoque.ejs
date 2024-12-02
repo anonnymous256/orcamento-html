@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema de Estoque por Categoria</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Sistema de Estoque</h1>
+    <form id="add-product-form">
+      <h2>Adicionar Produto</h2>
+      <label for="product-name">Nome do Produto:</label>
+      <input type="text" id="product-name" placeholder="Digite o nome" required>
+
+      <label for="product-quantity">Quantidade:</label>
+      <input type="number" id="product-quantity" placeholder="Digite a quantidade" required>
+
+      <label for="product-category">Categoria:</label>
+      <select id="product-category" required>
+        <option value="Eletrônicos">Eletrônicos</option>
+        <option value="Roupas">Roupas</option>
+        <option value="Alimentos">Alimentos</option>
+        <option value="Outros">Outros</option>
+      </select>
+
+      <button type="submit">Adicionar ao Estoque</button>
+    </form>
+
+    <h2>Filtrar Produtos</h2>
+    <label for="filter-category">Categoria:</label>
+    <select id="filter-category">
+      <option value="Todos">Todos</option>
+      <option value="Eletrônicos">Eletrônicos</option>
+      <option value="Roupas">Roupas</option>
+      <option value="Alimentos">Alimentos</option>
+      <option value="Outros">Outros</option>
+    </select>
+
+    <h2>Lista de Produtos</h2>
+    <table id="product-table">
+      <thead>
+        <tr>
+          <th>Produto</th>
+          <th>Quantidade</th>
+          <th>Categoria</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Produtos serão adicionados aqui -->
+      </tbody>
+    </table>
+  </div>
+
+  <script src="script.js"></script>
+
+
+
+  <style>
+
+    /* Restante do estilo permanece igual */
+
+    /* Estilos gerais permanecem os mesmos */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f9f9f9;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.container {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  max-width: 600px;
+  width: 100%;
+}
+
+h1, h2 {
+  text-align: center;
+  color: #333;
+}
+
+form {
+  margin-bottom: 20px;
+}
+
+label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: #555;
+}
+
+input, select {
+  width: calc(100% - 12px);
+  padding: 8px;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+button {
+  width: 100%;
+  padding: 10px;
+  background-color: #4CAF50;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #45a049;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+table th, table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: center;
+}
+
+table th {
+  background-color: #4CAF50;
+  color: white;
+}
+
+table tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+table tr:hover {
+  background-color: #ddd;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.action-buttons button {
+  padding: 5px 10px;
+  font-size: 14px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+}
+
+.action-buttons .edit {
+  background-color: #ffa500;
+  color: white;
+}
+
+.action-buttons .delete {
+  background-color: #f44336;
+  color: white;
+}
+
+/* Modais */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.5);
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  width: 80%;
+  max-width: 400px;
+  text-align: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.modal-content .close {
+  float: right;
+  font-size: 24px;
+  font-weight: bold;
+  cursor: pointer;
+  color: #333;
+}
+
+.modal-content .close:hover {
+  color: #f44336;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .container {
+    padding: 10px;
+    max-width: 100%;
+  }
+
+  h1, h2 {
+    font-size: 1.5rem;
+  }
+
+  input, select, button {
+    font-size: 1rem;
+    padding: 10px;
+  }
+
+  table th, table td {
+    font-size: 0.9rem;
+    padding: 6px;
+  }
+
+  .action-buttons button {
+    font-size: 0.8rem;
+    padding: 4px;
+  }
+
+  .modal-content {
+    padding: 15px;
+    width: 90%;
+  }
+}
+
+@media (max-width: 480px) {
+  h1, h2 {
+    font-size: 1.2rem;
+  }
+
+  table th, table td {
+    font-size: 0.8rem;
+    padding: 5px;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .action-buttons button {
+    font-size: 0.7rem;
+  }
+}
+
+
+  </style>
+  <script>
+
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.getElementById("add-product-form");
+  const productTable = document.getElementById("product-table").querySelector("tbody");
+  const filterCategory = document.getElementById("filter-category");
+
+  let products = []; // Array para armazenar os produtos
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const productName = document.getElementById("product-name").value.trim();
+    const productQuantity = parseInt(document.getElementById("product-quantity").value, 10);
+    const productCategory = document.getElementById("product-category").value;
+
+    if (!productName || isNaN(productQuantity) || productQuantity <= 0) {
+      alert("Por favor, insira dados válidos.");
+      return;
+    }
+
+    const newProduct = {
+      name: productName,
+      quantity: productQuantity,
+      category: productCategory,
+    };
+
+    products.push(newProduct);
+    updateTable();
+    form.reset();
+  });
+
+  filterCategory.addEventListener("change", () => {
+    updateTable();
+  });
+
+  function updateTable() {
+    const filter = filterCategory.value;
+    productTable.innerHTML = ""; // Limpa a tabela
+
+    const filteredProducts = filter === "Todos"
+      ? products
+      : products.filter(product => product.category === filter);
+
+    filteredProducts.forEach((product, index) => {
+      const row = document.createElement("tr");
+
+      row.innerHTML = `
+        <td>${product.name}</td>
+        <td>${product.quantity}</td>
+        <td>${product.category}</td>
+        <td class="action-buttons">
+          <button class="edit" data-index="${index}">Editar</button>
+          <button class="delete" data-index="${index}">Excluir</button>
+        </td>
+      `;
+
+      productTable.appendChild(row);
+
+      row.querySelector(".edit").addEventListener("click", () => openEditModal(index));
+      row.querySelector(".delete").addEventListener("click", () => openDeleteModal(index));
+    });
+  }
+
+  function openEditModal(index) {
+    const product = products[index];
+
+    document.getElementById("edit-product-name").value = product.name;
+    document.getElementById("edit-product-quantity").value = product.quantity;
+    document.getElementById("product-category").value = product.category;
+
+    const editModal = document.getElementById("edit-modal");
+    editModal.style.display = "flex";
+
+    document.getElementById("edit-form").onsubmit = (e) => {
+      e.preventDefault();
+
+      const newName = document.getElementById("edit-product-name").value.trim();
+      const newQuantity = parseInt(document.getElementById("edit-product-quantity").value, 10);
+      const newCategory = document.getElementById("product-category").value;
+
+      if (newName && !isNaN(newQuantity) && newQuantity > 0) {
+        products[index] = { name: newName, quantity: newQuantity, category: newCategory };
+        editModal.style.display = "none";
+        updateTable();
+      } else {
+        alert("Dados inválidos.");
+      }
+    };
+  }
+
+  function openDeleteModal(index) {
+    const deleteModal = document.getElementById("delete-modal");
+    deleteModal.style.display = "flex";
+
+    document.getElementById("confirm-delete").onclick = () => {
+      products.splice(index, 1); // Remove o produto do array
+      deleteModal.style.display = "none";
+      updateTable();
+    };
+  }
+});
+
+  </script>
+</body>
+</html>

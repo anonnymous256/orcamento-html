@@ -21,6 +21,8 @@ import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.16.0/firebas
             signOut(auth)
                 .then(() => {
                     console.log("Logout bem-sucedido!");
+                    localStorage.clear();
+                    sessionStorage.clear();
                     window.location.replace('/Deslogar');
                 })
                 .catch((error) => {

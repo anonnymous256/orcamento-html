@@ -1,5 +1,5 @@
  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-app.js";
- import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-auth.js";
+ import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile, onAuthStateChanged,setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-auth.js";
 
 
  const firebaseConfig = {
@@ -16,15 +16,27 @@
  const app = initializeApp(firebaseConfig);
  const auth = getAuth(app);
 
+ setPersistence(auth, browserSessionPersistence)
+  .then(() => {
+    console.log("Persistência configurada para sessão.");
+  })
+  .catch((error) => {
+    console.error("Erro ao configurar persistência:", error.message);
+  });
+
  onAuthStateChanged(auth, (user) => {
-   if (user) {
-     console.log("Usuário já está autenticado:", user);
-     
-     window.location.replace('/Inicio'); 
-   } else {
-     console.log("Nenhum usuário autenticado");
-   }
- });
+  const isLogoutPage = window.location.pathname === '/Deslogar';
+
+  if (user && !isLogoutPage) {
+    console.log("Usuário já está autenticado:", user);
+    window.location.replace('/Inicio');
+  } else {
+    if (!isLogoutPage && window.location.pathname !== "/login") {
+      console.log("Redirecionando usuário deslogado para a tela de login.");
+      window.location.replace("/Deslogar");
+    }
+  }
+});
 
 
  window.login = function() {
@@ -41,7 +53,7 @@
        
        const user = userCredential.user;
        console.log("Login bem-sucedido:", user);
-       window.location.href = '/Inicio'; 
+       window.location.replace('/Inicio'); 
      })
      .catch((error) => {
        const errorMessage = error.message;
