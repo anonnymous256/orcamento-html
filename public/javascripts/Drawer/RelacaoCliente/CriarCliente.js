@@ -24,7 +24,13 @@ async function saveClient() {
     const endereco = document.getElementById("endereco").value;
 
     if (!nome || !telefone) {
-        alert("Por favor, preencha os campos obrigatórios.");
+        Swal.fire({
+            position: "center",
+            icon: "info",
+            title: "Preencha todos os campos",
+            showConfirmButton: false,
+            timer: 1500
+          });
         return;
     }
 
@@ -45,11 +51,23 @@ async function saveClient() {
 
         });
         console.log("Cliente salvo com sucesso! ID do documento:", docRef.id);
-        alert("Cliente salvo com sucesso!");
+        Swal.fire({
+            position: "center",
+            icon: "success",
+            title: "Cliente cadastrado com sucesso!",
+            showConfirmButton: false,
+            timer: 1500
+          });
         document.getElementById("formulario-cliente").reset(); 
     } catch (error) {
         console.error("Erro ao salvar cliente: ", error);
-        alert("Erro ao salvar cliente. Por favor, tente novamente.");
+        Swal.fire({
+            position: "center",
+            icon: "error",
+            title: "Ocorreu um erro ao salvar o cliente",
+            showConfirmButton: false,
+            
+          });
     }
 }
 

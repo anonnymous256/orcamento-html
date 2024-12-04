@@ -36,9 +36,21 @@ async function submitForm(userId) {
     const logoInput = document.getElementById("logo");
     let logoBase64 = "";
 
-    if (logoInput.files.length > 0) {
+    if (!nome || !cnpj || !endereco || !telefone || !instagram) {
+        Swal.fire({
+            position: "center",
+            icon: "info",
+            title: "Preencha todos os campos obrigatórios",
+            showConfirmButton: false,
+            timer: 1500
+          });
+        return;
+    }
+
+    else if (logoInput.files.length > 0) {
         const file = logoInput.files[0];
         logoBase64 = await fileToBase64(file);
+        
     }
 
     const data = { nome, cnpj, endereco, telefone,razaoSocial, instagram, logo: logoBase64 };
@@ -46,6 +58,13 @@ async function submitForm(userId) {
     const docRef = doc(db, "empresas", userId); // Salva pelo UID do usuário
     await setDoc(docRef, data);
 
+    Swal.fire({
+        position: "center",
+        icon: "success",
+        title: "Empresa atualizada com sucesso!",
+        showConfirmButton: false,
+        timer: 1500
+      });
     loadCompanyData(userId);
 }
 

@@ -219,6 +219,7 @@
             const amount = parseFloat(document.getElementById('amount').value);
             const type = document.getElementById('type').value;
 
+    
             if (description && !isNaN(amount)) {
                 const row = document.createElement('tr');
                 const typeText = type === 'income' ? 'Entrada' : 'Saída';

@@ -89,6 +89,14 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebas
       if (!user) {
         alert("Por favor, faça login para adicionar um produto.");
         return;
+      }if (!nomeProduto || !quantidade || !categoria || !validade) {
+        Swal.fire({
+          position: "center",
+          icon: "info",
+          title: "Preencha todos os campos",
+          showConfirmButton: false,
+          timer: 1500
+        });
       }
 
       try {
@@ -100,7 +108,13 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebas
           userId: user.uid, 
           createdAt: serverTimestamp()
         });
-        alert("Produto adicionado com sucesso!");
+        Swal.fire({
+          position: "center",
+          icon: "success",
+          title: "Produto adicionado com sucesso",
+          showConfirmButton: false,
+          timer: 1500
+        });
         document.getElementById("add-product-form").reset();
         carregarProdutos(); // Atualiza a lista de produtos após adicionar um novo
       } catch (error) {
@@ -164,7 +178,13 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebas
           validade,
           updatedAt: serverTimestamp()
         });
-        alert("Produto atualizado com sucesso!");
+        Swal.fire({
+          position: "center",
+          icon: "success",
+          title: "Produto atualizado com sucesso!",
+          showConfirmButton: false,
+          timer: 1500
+        });
         document.getElementById("edit-modal").style.display = "none";
         carregarProdutos();
       } catch (error) {
@@ -178,7 +198,41 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebas
       const row = event.target.closest("tr");
       const produtoId = row.dataset.id;
 
-      document.getElementById("delete-modal").style.display = "block";
+      const swalWithBootstrapButtons = Swal.mixin({
+        customClass: {
+          confirmButton: "btn btn-success",
+          cancelButton: "btn btn-danger"
+        },
+        buttonsStyling: false
+      });
+      swalWithBootstrapButtons.fire({
+        title: "Você tem certeza?",
+        text: "Não será possivel recuperar o produto!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Sim, deletar!",
+        cancelButtonText: "Não, cancelar!",
+        reverseButtons: true
+      }).then((result) => {
+        if (result.isConfirmed) {
+          deletarProduto(produtoId);
+          carregarProdutos();
+          swalWithBootstrapButtons.fire({
+            title: "Deletado!",
+            text: "O produto foi deletado com sucesso.",
+            icon: "success"
+          });
+        } else if (
+          /* Read more about handling dismissals below */
+          result.dismiss === Swal.DismissReason.cancel
+        ) {
+          swalWithBootstrapButtons.fire({
+            title: "Cancelado",
+            text: "O produto foi preservado :)",
+            icon: "error"
+          });
+        }
+      });
 
       document.getElementById("confirm-delete").onclick = () => {
         deletarProduto(produtoId);
@@ -189,7 +243,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebas
     async function deletarProduto(produtoId) {
       try {
         await deleteDoc(doc(db, "produtos", produtoId));
-        alert("Produto excluído com sucesso!");
         document.getElementById("delete-modal").style.display = "none";
         carregarProdutos();
       } catch (error) {

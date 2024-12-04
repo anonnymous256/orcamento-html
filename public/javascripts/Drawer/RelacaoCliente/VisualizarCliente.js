@@ -99,12 +99,24 @@ async function atualizarCliente(clienteId) {
             endereco,
             updatedAt: serverTimestamp()
         });
-        alert("Cliente atualizado com sucesso!");
+        Swal.fire({
+            position: "center",
+            icon: "success",
+            title: "Cliente atualizado com sucesso!",
+            showConfirmButton: false,
+            timer: 1500
+          });
         fecharModal(); 
         carregarClientes(); 
     } catch (error) {
         console.error("Erro ao atualizar o cliente:", error);
-        alert("Ocorreu um erro ao atualizar o cliente.");
+        Swal.fire({
+            position: "center",
+            icon: "error",
+            title: "Erro ao atualizar o cliente.",
+            showConfirmButton: false,
+            timer: 1500
+          });
     }
 }
 

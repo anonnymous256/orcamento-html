@@ -44,7 +44,13 @@
    const password = document.getElementById('login-password').value;
 
    if (!email || !password) {
-     alert('Por favor, preencha todos os campos.');
+    Swal.fire({
+      position: "center",
+      icon: "info",
+      title: "Preencha todos os campos",
+      showConfirmButton: false,
+      timer: 1500
+    });
      return;
    }
 
@@ -57,7 +63,13 @@
      })
      .catch((error) => {
        const errorMessage = error.message;
-       alert(`Erro ao fazer login: ${errorMessage}`);
+       Swal.fire({
+        position: "center",
+        icon: "info",
+        title: `Erro ao fazer login: ${errorMessage}`,
+        showConfirmButton: false,
+        timer: 1500
+      });
      });
  }
 
