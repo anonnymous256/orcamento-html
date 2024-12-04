@@ -1,0 +1,286 @@
+/* Estilos principais */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f9f9f9;
+  margin: 0;
+  padding: 0;
+}
+
+/* Estilos do header */
+header {
+  background-color: #2e7d32; 
+  color: white;
+  text-align: center;
+  position: relative;
+  padding: 15px;
+  font-size: 24px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center; 
+}
+
+#seta {
+  position: absolute;
+  left: 10px; 
+  top: 50%; 
+  transform: translateY(-50%);
+  color: white;
+  background-color: transparent;
+  border: none;
+  font-size: 24px; 
+  cursor: pointer;
+  width: 40px; 
+  height: 40px; 
+  display: flex;
+  justify-content: center; 
+  align-items: center; 
+  padding: 0; 
+  transition: color 0.3s ease, transform 0.3s ease;
+}
+
+
+
+#seta:hover {
+  color: #c8e6c9; 
+  transform: translateY(-50%) scale(1.1); 
+}
+
+
+  .container {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+  
+  h1,
+  h2 {
+    text-align: center;
+    color: #333;
+  }
+  
+  form {
+    margin-bottom: 20px;
+  }
+  
+  label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #555;
+  }
+  
+  input,
+  select {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+  }
+  
+  button {
+    width: 100%;
+    padding: 10px;
+    background-color: #4CAF50;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  
+  button:hover {
+    background-color: #45a049;
+  }
+  
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  table th,
+  table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+  }
+  
+  table th {
+    background-color: #4CAF50;
+    color: white;
+  }
+  
+  table tr:nth-child(even) {
+    background-color: #f2f2f2;
+  }
+  
+  table tr:hover {
+    background-color: #ddd;
+  }
+  
+  .action-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+  }
+  
+  .action-buttons button {
+    padding: 5px 10px;
+    font-size: 14px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .action-buttons .edit {
+    background-color: #ffa500;
+    color: white;
+  }
+  
+  .action-buttons .delete {
+    background-color: #f44336;
+    color: white;
+  }
+  
+  /* Modais */
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .modal-content {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+  }
+  
+  .modal-content .close {
+    float: right;
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #333;
+  }
+  
+  .modal-content .close:hover {
+    color: #f44336;
+  }
+  
+  /* Responsividade para telas médias e pequenas */
+  @media (max-width: 768px) {
+    .container {
+      padding: 15px;
+      width: 90%;
+    }
+  
+    table th,
+    table td {
+      font-size: 14px;
+      padding: 6px;
+    }
+  
+    .action-buttons {
+      flex-direction: column;
+      gap: 8px;
+      justify-content: flex-start;
+      width: 100%;
+    }
+  
+    button {
+      font-size: 14px;
+      padding: 12px;
+    }
+  
+    /* Modais Responsivos */
+    .modal-content {
+      padding: 15px;
+      max-width: 80%;
+    }
+  
+    .modal-content .close {
+      font-size: 20px;
+    }
+  
+    /* Ajustes na tabela para telas médias */
+    table th,
+    table td {
+      font-size: 13px;
+      padding: 6px;
+    }
+  
+    .action-buttons button {
+      font-size: 12px;
+      padding: 8px;
+    }
+  }
+  
+  /* Responsividade para telas pequenas */
+  @media (max-width: 480px) {
+    .container {
+      padding: 10px;
+      width: 100%;
+    }
+  
+    h1 {
+      font-size: 22px;
+    }
+  
+    h2 {
+      font-size: 18px;
+    }
+  
+    table th,
+    table td {
+      font-size: 12px;
+      padding: 5px;
+    }
+  
+    .action-buttons button {
+      font-size: 12px;
+      padding: 8px;
+    }
+  
+    button {
+      font-size: 14px;
+      padding: 10px;
+    }
+  
+    /* Modais Responsivos */
+    .modal-content {
+      padding: 10px;
+      max-width: 90%;
+    }
+  
+    .modal-content .close {
+      font-size: 18px;
+    }
+  
+    /* Ajustes na tabela para telas muito pequenas */
+    table th,
+    table td {
+      font-size: 11px;
+      padding: 4px;
+    }
+  }
+  

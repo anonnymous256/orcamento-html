@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fluxo de Caixa</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #eaf8e6;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+  background-color: #2e7d32; 
+  color: white;
+  text-align: center;
+  position: relative;
+  padding: 15px;
+  font-size: 24px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center; 
+}
+
+#seta {
+  position: absolute;
+  left: 10px; 
+  top: 50%; 
+  transform: translateY(-50%);
+  color: white;
+  background-color: transparent;
+  border: none;
+  font-size: 24px; 
+  cursor: pointer;
+  width: 40px; 
+  height: 40px; 
+  display: flex;
+  justify-content: center; 
+  align-items: center; 
+  padding: 0; 
+  transition: color 0.3s ease, transform 0.3s ease;
+}
+
+
+
+#seta:hover {
+  color: #c8e6c9; 
+  transform: translateY(-50%) scale(1.1); 
+}
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #2a8c44;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .form-row .form-group {
+            flex: 1 1 calc(50% - 10px);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+
+        input[type="text"], input[type="number"], select {
+            width: 100%;
+            padding: 0.8rem;
+            margin-bottom: 0.5rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #2a8c44;
+            color: white;
+            padding: 0.8rem 1.2rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            width: 100%;
+        }
+
+        button:hover {
+            background-color: #23823d;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border: 1px solid #ccc;
+        }
+
+        th {
+            background-color: #d7f3db;
+            color: #2a8c44;
+        }
+
+        tfoot td {
+            font-weight: bold;
+        }
+
+        .income {
+            color: #2a8c44;
+        }
+
+        .expense {
+            color: #d14343;
+        }
+
+        /* Responsividade */
+        @media (max-width: 600px) {
+            .form-row .form-group {
+                flex: 1 1 100%;
+            }
+
+            input[type="text"], input[type="number"], select {
+                padding: 0.6rem;
+            }
+
+            button {
+                padding: 0.6rem;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class = "header">
+        <button class="fas fa-arrow-left" id="seta" onclick="window.location.replace('/inicio') "></button>Fluxo de Caixa
+    </header>
+
+    <div class="container">
+        <form id="cashflow-form">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="description">Descrição:</label>
+                    <input type="text" id="description" placeholder="Ex: Venda de produto" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="amount">Valor (R$):</label>
+                    <input type="number" id="amount" placeholder="Ex: 100.00" step="0.01" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="type">Tipo:</label>
+                <select id="type">
+                    <option value="income">Entrada</option>
+                    <option value="expense">Saída</option>
+                </select>
+            </div>
+
+            <button type="submit">Adicionar</button>
+        </form>
+
+        <table id="cashflow-table">
+            <thead>
+                <tr>
+                    <th>Descrição</th>
+                    <th>Tipo</th>
+                    <th>Valor</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Linhas serão adicionadas dinamicamente -->
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="2">Saldo Total:</td>
+                    <td id="total-balance">R$ 0.00</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <script>
+        const form = document.getElementById('cashflow-form');
+        const tableBody = document.querySelector('#cashflow-table tbody');
+        const totalBalance = document.getElementById('total-balance');
+        let balance = 0;
+
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const description = document.getElementById('description').value;
+            const amount = parseFloat(document.getElementById('amount').value);
+            const type = document.getElementById('type').value;
+
+            if (description && !isNaN(amount)) {
+                const row = document.createElement('tr');
+                const typeText = type === 'income' ? 'Entrada' : 'Saída';
+
+                row.innerHTML = `
+                    <td>${description}</td>
+                    <td class="${type}">${typeText}</td>
+                    <td class="${type}">R$ ${amount.toFixed(2)}</td>
+                `;
+
+                tableBody.appendChild(row);
+
+                balance += type === 'income' ? amount : -amount;
+                totalBalance.textContent = `R$ ${balance.toFixed(2)}`;
+                totalBalance.style.color = balance >= 0 ? '#2a8c44' : '#d14343';
+
+                form.reset();
+            }
+        });
+    </script>
+</body>
+</html>

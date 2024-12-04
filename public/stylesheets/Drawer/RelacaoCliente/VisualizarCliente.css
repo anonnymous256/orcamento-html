@@ -2,18 +2,32 @@ body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #f5f5f5;
+    background-color: #e8f5e9; /* Fundo verde claro */
 }
 
 header {
-    background-color: #1976d2;
+    background-color: #2e7d32; /* Verde escuro */
     color: white;
     position: relative;
     text-align: center;
     padding: 15px;
     font-size: 24px;
     font-weight: bold;
+}
 
+.btn-editar{
+    background-color: #2e7d32; /* Verde escuro */
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    padding: 12px;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
 }
 
 .caixa {
@@ -25,33 +39,31 @@ header {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-header button {
+#seta {
     position: absolute;
     left: 10px; 
-    color:black;
-    top: 30%; 
+    top: 50%; 
+    transform: translateY(-50%);
+    color: white;
     background-color: transparent;
     border: none;
-    
-    font-size: 24px;
+    font-size: 24px; 
     cursor: pointer;
-    transition: all 0.3s ease;
+    width: 40px; 
+    height: 40px; 
+    display: flex;
+    justify-content: center; 
+    align-items: center; 
+    padding: 0; 
+    transition: color 0.3s ease, transform 0.3s ease;
   }
   
-  button:hover {
-    color: white; 
-    background-color: rgba(0, 0, 0, 0.1); 
-    transform: scale(1.1); 
-  }
   
-  button:focus {
-    outline: none; 
-  }
   
-  button:active {
-    transform: scale(0.95); 
+  #seta:hover {
+    color: #c8e6c9; 
+    transform: translateY(-50%) scale(1.1); 
   }
-  
 
 table {
     width: 100%;
@@ -59,7 +71,7 @@ table {
 }
 
 table thead {
-    background-color: #1976d2;
+    background-color: #2e7d32; /* Verde escuro */
     color: white;
 }
 
@@ -67,7 +79,7 @@ table th,
 table td {
     text-align: left;
     padding: 10px;
-    border: 1px solid #ddd;
+    border: 1px solid #ffffff;
 }
 
 table th {
@@ -75,11 +87,11 @@ table th {
 }
 
 table tr:nth-child(even) {
-    background-color: #f9f9f9;
+    background-color: #f1f8e9; /* Verde muito claro */
 }
 
 table tr:hover {
-    background-color: #4d96df;
+    background-color: #66bb6a; /* Verde médio */
 }
 
 .loading {
@@ -90,7 +102,7 @@ table tr:hover {
 
 .botao {
     width: 100%;
-    background-color: #1976d2;
+    background-color: #2e7d32; /* Verde escuro */
     color: white;
     border: none;
     cursor: pointer;
@@ -105,7 +117,7 @@ table tr:hover {
 }
 
 .botao:hover {
-    background-color: #155a9e;
+    background-color: #1b5e20; 
 }
 
 .botao i {
@@ -113,7 +125,79 @@ table tr:hover {
     font-size: 18px;
 }
 
-/* Responsividade */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.5);
+    justify-content: center; 
+    align-items: center; 
+}
+
+.modal-content {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+}
+
+.modal-content .close {
+    float: right;
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #333;
+}
+
+.modal-content .close:hover {
+    color: #f44336; /* Vermelho */
+}
+
+.modal-content form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.modal-content label {
+    font-weight: bold;
+    color: #333;
+    text-align: left;
+}
+
+.modal-content input, 
+.modal-content select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 16px;
+    box-sizing: border-box;
+}
+
+.modal-content button[type="submit"] {
+    background-color: #2e7d32; /* Verde escuro */
+    color: white;
+    padding: 12px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.modal-content button[type="submit"]:hover {
+    background-color: #1b5e20; /* Verde mais escuro */
+}
 
 /* Exibir rótulos ao lado dos valores em dispositivos menores */
 @media (max-width: 768px) {
@@ -144,8 +228,18 @@ table tr:hover {
     table td:before {
         content: attr(data-label); /* Usa os cabeçalhos como rótulos */
         font-weight: bold;
-        color: #1976d2;
+        color: #2e7d32; /* Verde escuro */
         margin-right: 10px;
         text-transform: capitalize;
+    }
+
+    /* Modais Responsivos */
+    .modal-content {
+        padding: 15px;
+        max-width: 80%;
+    }
+
+    .modal-content .close {
+        font-size: 20px;
     }
 }

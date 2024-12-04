@@ -6,7 +6,7 @@ body {
 }
 
 header {
-    background-color: #1976d2;
+    background-color: #2e7d32;
     color: white;
     text-align: center;
     position: relative;
@@ -15,31 +15,28 @@ header {
     font-weight: bold;
 }
 
-header button {
+#seta {
     position: absolute;
-    left: 10px; /* Botão posicionado no canto esquerdo */
-    color: black;
-    top: 50%; /* Centralizado verticalmente */
+    left: 10px; 
+    top: 50%; 
     transform: translateY(-50%);
+    color: white;
     background-color: transparent;
     border: none;
-    font-size: 24px;
+    font-size: 24px; 
     cursor: pointer;
-    transition: all 0.3s ease;
+    width: 40px; 
+    height: 40px; 
+    display: flex;
+    justify-content: center; 
+    align-items: center; 
+    padding: 0; 
+    transition: color 0.3s ease, transform 0.3s ease;
 }
 
-header button:hover {
-    color: white;
-    background-color: rgba(0, 0, 0, 0.1);
-    transform: scale(1.1);
-}
-
-header button:focus {
-    outline: none;
-}
-
-header button:active {
-    transform: scale(0.95);
+#seta:hover {
+    color: #c8e6c9; 
+    transform: translateY(-50%) scale(1.1); 
 }
 
 .container {
@@ -72,7 +69,7 @@ header button:active {
 
 #botao {
     width: 100%;
-    background-color: #1976d2;
+    background-color: #2e7d32;
     color: white;
     border: none;
     cursor: pointer;
@@ -86,7 +83,7 @@ header button:active {
 }
 
 #botao:hover {
-    background-color: #155a9e;
+    background-color: #1b5e20;
 }
 
 #botao i {
@@ -101,19 +98,18 @@ header button:active {
 
 .company-info .logo-container {
     margin-top: 15px;
-    width: 150px; /* Largura fixa do container */
-    height: 150px; /* Altura fixa do container */
-    overflow: hidden; /* Oculta qualquer parte da imagem que ultrapasse o container */
-    border-radius: 50%; /* Faz o container ser circular */
+    width: 150px; 
+    height: 150px; 
+    overflow: hidden; 
+    border-radius: 50%; 
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: #f0f0f0; /* Cor de fundo para visualização */
+    background-color: #f0f0f0;
 }
 
 .company-info .logo-container img {
     max-width: 100%;
     max-height: 100%;
-    object-fit: cover; /* Garante que a imagem preencha o container */
+    object-fit: cover; 
 }
-

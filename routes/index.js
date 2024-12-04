@@ -31,7 +31,15 @@ router.get('/Deslogar', function(req, res) {
 });
 
 router.get('/Cabecalho', function(req, res) {
-  res.render('Drawer/Cabecalho/Cabecalho.ejs', { title: 'Express' });
+  res.render('Drawer/Cabecalho/Cabecalho', { title: 'Express' });
+});
+
+router.get('/Estoque', function(req, res) {
+  res.render('Drawer/Sistema de Estoque/Estoque', { title: 'Express' });
+});
+
+router.get('/Fluxo', function(req, res) {
+  res.render('Drawer/FluxoDeCaixa/Fluxo', { title: 'Express' });
 });
 
 module.exports = router;
