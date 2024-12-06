@@ -93,7 +93,7 @@ header {
 
 .company-info {
     margin-top: 30px;
-    text-align: center;
+    text-align: start;
 }
 
 .company-info .logo-container {

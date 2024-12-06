@@ -135,7 +135,6 @@ body {
     font-family: poppins, sans-serif;
     font-size: 0.88rem;
     background: var(--color-background);
-    user-select: none;
     overflow-x: hidden;
     color: var(--color-dark);
 }
@@ -599,6 +598,31 @@ main .recent-orders a {
 
 .right .sales-analytics .add-product div h3 {
     font-weight: 600;
+}
+
+.whatsapp-button {
+    background-color: #25D366;
+    padding: 10px;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    position: fixed;
+    bottom: 20px;
+    right:20px;
+}
+
+.whatsapp-button img {
+    width: 30px;
+    height: 30px;
+}
+
+.whatsapp-button:hover {
+    background-color: #128C7E;
 }
 
 /* Media Queries */

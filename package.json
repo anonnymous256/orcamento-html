@@ -8,9 +8,11 @@
   "dependencies": {
     "cookie-parser": "^1.4.7",
     "ejs": "^3.1.10",
+    "err": "^2.1.12",
     "express": "^4.21.1",
     "http-errors": "^2.0.0",
     "morgan": "^1.10.0",
-    "orcafacil": "file:"
+    "orcafacil": "file:",
+    "throw": "^1.1.1"
   }
 }

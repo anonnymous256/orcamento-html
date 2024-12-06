@@ -1,0 +1,149 @@
+body {
+            font-family: Arial, sans-serif;
+            background-color: #eaf8e6;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+  background-color: #2e7d32; 
+  color: white;
+  text-align: center;
+  position: relative;
+  padding: 15px;
+  font-size: 24px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center; 
+}
+
+#seta {
+  position: absolute;
+  left: 10px; 
+  top: 50%; 
+  transform: translateY(-50%);
+  color: white;
+  background-color: transparent;
+  border: none;
+  font-size: 24px; 
+  cursor: pointer;
+  width: 40px; 
+  height: 40px; 
+  display: flex;
+  justify-content: center; 
+  align-items: center; 
+  padding: 0; 
+  transition: color 0.3s ease, transform 0.3s ease;
+}
+
+
+
+#seta:hover {
+  color: #c8e6c9; 
+  transform: translateY(-50%) scale(1.1); 
+}
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #2a8c44;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .form-row .form-group {
+            flex: 1 1 calc(50% - 10px);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+
+        input[type="text"], input[type="number"], select {
+            width: 100%;
+            padding: 0.8rem;
+            margin-bottom: 0.5rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #2a8c44;
+            color: white;
+            padding: 0.8rem 1.2rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            width: 100%;
+        }
+
+        button:hover {
+            background-color: #23823d;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border: 1px solid #ccc;
+        }
+
+        th {
+            background-color: #d7f3db;
+            color: #2a8c44;
+        }
+
+        tfoot td {
+            font-weight: bold;
+        }
+
+        .income {
+            color: #2a8c44;
+        }
+
+        .expense {
+            color: #d14343;
+        }
+
+        /* Responsividade */
+        @media (max-width: 600px) {
+            .form-row .form-group {
+                flex: 1 1 100%;
+            }
+
+            input[type="text"], input[type="number"], select {
+                padding: 0.6rem;
+            }
+
+            button {
+                padding: 0.6rem;
+                font-size: 0.9rem;
+            }
+        }
+    
