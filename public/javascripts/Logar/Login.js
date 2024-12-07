@@ -31,7 +31,7 @@
     console.log("Usuário já está autenticado:", user);
     window.location.replace('/Inicio');
   } else {
-    if (!isLogoutPage && window.location.pathname !== "/login") {
+    if (!isLogoutPage && window.location.pathname !== "/Deslogar") {
       console.log("Redirecionando usuário deslogado para a tela de login.");
       window.location.replace("/Deslogar");
     }

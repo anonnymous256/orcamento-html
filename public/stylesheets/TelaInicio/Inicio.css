@@ -122,6 +122,55 @@ html {
 
 }
 
+/* Estilo para a área de filtros */
+.filters {
+    display: flex;
+    gap: 10px;
+    margin: 20px 0;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+/* Estilo para os selects */
+.filters select {
+    padding: 8px 12px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #f9f9f9;
+    transition: all 0.3s ease-in-out;
+    cursor: pointer;
+}
+
+/* Hover no dropdown */
+.filters select:hover {
+    border-color: #007bff;
+}
+
+/* Estilo para o botão */
+.filters button {
+    padding: 10px 16px;
+    font-size: 16px;
+    color: white;
+    background-color: #2a8c44;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+}
+
+/* Hover no botão */
+.filters button:hover {
+    background-color: #17612b;
+}
+
+/* Foco no botão */
+.filters button:focus {
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+
 .container {
     display: grid;
     width: 96%;
@@ -700,6 +749,20 @@ main .recent-orders a {
         animation: showMenu 200ms ease forwards;
     }
 
+    .filters {
+        justify-content: center;
+        gap: 5px; 
+    }
+
+    .filters select,
+    .filters button {
+        flex: none;
+        width: auto; 
+        min-width: 100px; 
+    }
+
+
+
     @keyframes showMenu {
         to{
             left:0;
@@ -789,6 +852,15 @@ main .recent-orders a {
     
     .right .top button span {
         font-size: 2rem;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .filters select,
+    .filters button {
+        font-size: 12px; 
+        padding: 6px 8px; 
+        min-width: 90px; 
     }
 }
 

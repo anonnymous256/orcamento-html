@@ -1,19 +1,47 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fluxo de Caixa</title>
-    <link rel = "stylesheet" href = "stylesheets/Drawer/FluxoDeCaixa/Fluxo.css">
+    <link rel="stylesheet" href="stylesheets/Drawer/FluxoDeCaixa/Fluxo.css">
 </head>
+
 <body>
-    <header class = "header">
-        <button class="fas fa-arrow-left" id="seta" onclick="window.location.replace('/inicio') "></button>Fluxo de Caixa
+    <header class="header">
+        <button class="fas fa-arrow-left" id="seta" onclick="window.location.replace('/inicio') "></button>Fluxo de
+        Caixa
     </header>
 
     <div class="container">
-        <form id="cashflow-form">
+        <!-- Filtros -->
+        <div class="filters">
+            <label for="filter-year">Ano:</label>
+            <select id="filter-year"></select>
+
+            <label for="filter-month">Mês:</label>
+            <select id="filter-month">
+                <option value="">Todos</option>
+                <option value="1">Janeiro</option>
+                <option value="2">Fevereiro</option>
+                <option value="3">Março</option>
+                <option value="4">Abril</option>
+                <option value="5">Maio</option>
+                <option value="6">Junho</option>
+                <option value="7">Julho</option>
+                <option value="8">Agosto</option>
+                <option value="9">Setembro</option>
+                <option value="10">Outubro</option>
+                <option value="11">Novembro</option>
+                <option value="12">Dezembro</option>
+            </select>
+
+            <button id="filter-button">Filtrar</button>
+        </div>
+            <hr>
+        <form id="Fluxo-form">
             <div class="form-row">
                 <div class="form-group">
                     <label for="description">Descrição:</label>
@@ -37,12 +65,13 @@
             <button type="submit">Adicionar</button>
         </form>
 
-        <table id="cashflow-table">
+        <table id="Fluxo-table">
             <thead>
                 <tr>
                     <th>Descrição</th>
                     <th>Tipo</th>
                     <th>Valor</th>
+                    <th>Ações</th>
                 </tr>
             </thead>
             <tbody>
@@ -56,7 +85,8 @@
             </tfoot>
         </table>
     </div>
-
-    <script src = "javascripts/Drawer/FluxoDeCaixa/Fluxo.js" type=" module"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src ="javascripts/Drawer/FluxoDeCaixa/Fluxo.js" type="module"></script>
 </body>
+
 </html>
