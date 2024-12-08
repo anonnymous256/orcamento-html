@@ -32,9 +32,31 @@ let clienteNome = '';
 
 // OBTER ID DO USER AUTHENTICADO
 
-function obterUserId() {
-    return auth.currentUser.uid;
+const logoImg = document.getElementById('user-logo');
+
+// Função para obter a logo da empresa
+async function obterLogoEmpresa(uid) {
+    try {
+        // Obter o documento do Firestore na coleção de empresas
+        const empresaDoc = await db.collection('empresas').doc(uid).get();
+
+        if (empresaDoc.exists) {
+            const empresaData = empresaDoc.data();
+            // Retornar o valor do campo `logo`
+            return empresaData.logo || null;
+        } else {
+            console.error('Empresa não encontrada no Firestore.');
+            return null;
+        }
+    } catch (error) {
+        console.error('Erro ao obter a logo da empresa:', error);
+        return null;
+    }
 }
+
+// Detectar usuário autenticado e carregar a logo
+
+
 // CARREGAR CLIENTES NO SELECT 
 
 async function carregarClientes() {
@@ -590,7 +612,8 @@ async function converterPDF() {
 
 async function dadosEmpresa() {
     
-    const empresas = await db.collection('empresas').where('cnpj', '==', '14.793.365/0001-25').get(); // Mude isso dps na sua logica
+    const empresas = await db.collection('empresas') 
+    .get();
     const empresa = empresas.docs[0].data();
 
     return empresa;
@@ -617,9 +640,27 @@ async function gerarPdf() {
     doc.addFont("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/fonts/fontawesome-webfont.ttf", "Roboto", "normal");
     doc.setFont("Roboto", "normal", 12);
 
-    // Adicionando logo (ajustado conforme o arquivo de imagem)
-    const logoUrl = "colorful-company-email-header-design-template-0e8615587b7e1fdffc46aee2d681482e_screen.jpg"; // Caminho para o logo enviado
-    doc.addImage(logoUrl, "PNG", 10, 10, 190, 30); // Ajuste de logo
+    try {
+        // Obter o usuário autenticado
+        const user = auth.currentUser;
+        if (!user) {
+            console.error('Nenhum usuário autenticado.');
+            return;
+        }
+
+          // Obter a logo do Firestore
+          const logoDoc = await db.collection('empresas').doc(user.uid).get();
+          const logoBase64 = logoDoc.exists ? logoDoc.data().logo : null;
+  
+          if (logoBase64) {
+              // Adicionar a logo ao PDF
+              doc.addImage(logoBase64, "PNG", 10, 10, 50, 20); // Ajuste a posição e o tamanho conforme necessário
+          } else {
+              console.error('Logo não encontrada no Firestore.');
+          }
+      } catch (error) {
+          console.error('Erro ao obter a logo da empresa:', error);
+      }
 
     // Informações da empresa
     doc.setFont("Roboto", "bold", 14);
