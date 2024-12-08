@@ -123,13 +123,13 @@ btnModelos.addEventListener('click', async () => {
     ) {
         try {
             // Consumir as rotas para obter os modelos
-            const responseClientes = await fetch('/modelos');
+            const responseClientes = await fetch('/listarModelos');
             if (!responseClientes.ok) {
                 throw new Error(`Erro ao carregar modelos dos clientes: ${responseClientes.statusText}`);
             }
             const imagensClientes = await responseClientes.json();
 
-            const responseFixos = await fetch('/modelosFixos');
+            const responseFixos = await fetch('/listarModelosFixos');
             if (!responseFixos.ok) {
                 throw new Error(`Erro ao carregar modelos fixos: ${responseFixos.statusText}`);
             }

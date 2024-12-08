@@ -46,36 +46,4 @@ router.get('/ComMedida', function(req, res) {
   res.render('Drawer/Orcamentos/ComMedida', { title: 'Express' });
 });
 
-app.use(express.static(path.join(__dirname)));
-
-app.use('/clientesMandam', express.static(path.join(__dirname, 'public', 'images', 'clientesMandam')));
-
-app.use('/modelosFixos', express.static(path.join(__dirname, 'public', 'images', 'modelosFixos')));
-
-app.get('/modelos', (req, res) => {
-  const dirPath = path.join(__dirname, 'public','images','clientesMandam');
-  console.log('Path:', dirPath); 
-  fs.readdir(dirPath, (err, files) => {
-    if (err) {
-      console.error('Erro ao ler a pasta:', err); 
-      return res.status(500).send('Erro ao ler a pasta.');
-    }
-    console.log('Arquivos encontrados:', files); 
-    const images = files.map(file => `/clientesMandam/${file}`);
-    res.json(images);
-  });
-});
-
-
-app.get('/modelosFixos', (req, res) => {
-  const dirPath = path.join(__dirname, 'public','images','modelosFixos');
-    fs.readdir(dirPath, (err, files) => {
-        if (err) {
-            return res.status(500).send('Erro ao ler a pasta.');
-        }
-        const images = files.map(file => `/modelosFixos/${file}`); 
-        res.json(images);
-    });
-});
-
 module.exports = router;
