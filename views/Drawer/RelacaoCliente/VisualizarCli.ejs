@@ -18,6 +18,8 @@
     </header>
     <div class="caixa">
         <h2>Lista de Clientes</h2>
+        <button type="button" class="botao" onclick="window.location.href = '/CriarCli'">Criar Cliente</button>
+        <hr>
         <div id="carregando" class="loading">
             <i class="fas fa-spinner fa-spin"></i> Carregando clientes...
         </div>
@@ -36,7 +38,6 @@
                 <!-- Os dados dos clientes serão inseridos dinamicamente aqui -->
             </tbody>
         </table>
-        <button type="button" class="botao" onclick="window.location.href = '/CriarCli'">Criar Cliente</button>
     </div>
 
     <!-- Modal de Edição -->
@@ -65,6 +66,7 @@
    
     <script src="/javascripts/Drawer/RelacaoCliente/VisualizarCliente.js" type="module"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
 </body>
 
 

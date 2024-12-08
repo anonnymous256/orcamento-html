@@ -1,0 +1,78 @@
+/* Estilo para o formulário */
+.swal-modal-edicao {
+    background-color: #f4f4f4;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 500px;
+    margin: auto;
+}
+
+/* Estilo para os rótulos (labels) */
+.swal-modal-edicao label {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #383535;
+    margin-bottom: 5px;
+    text-align: left;
+}
+
+/* Estilo para os campos de entrada (inputs) e select */
+.swal-modal-edicao input,
+.swal-modal-edicao select {
+    padding: 12px;
+    font-size: 1rem;
+    border: 2px solid #8e1a0d;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    background-color: #fff;
+    color: #383535;
+}
+
+/* Adicionando foco e efeitos para os campos */
+.swal-modal-edicao input:focus,
+.swal-modal-edicao select:focus {
+    outline: none;
+    border-color: #146eb4;
+    box-shadow: 0 0 5px rgba(20, 110, 180, 0.4);
+}
+
+/* Estilo para o primeiro campo de select */
+.swal-modal-edicao select {
+    color: #383535;
+}
+
+/* Estilo para placeholders */
+.swal-modal-edicao input::placeholder {
+    color: #8e1a0d;
+    font-style: italic;
+}
+
+/* Ajustando o espaçamento entre os elementos */
+.swal-modal-edicao {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Ajustando a margem e o padding do form */
+form {
+    margin: 0;
+    padding: 0;
+}
+
+/* Estilo para o botão de submit, caso exista */
+.swal-modal-edicao button {
+    background-color: #146eb4;
+    color: #f2f2f2;
+    border: none;
+    padding: 12px;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+.swal-modal-edicao button:hover {
+    background-color: #1035dce8;
+}

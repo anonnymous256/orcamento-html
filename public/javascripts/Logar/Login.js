@@ -54,9 +54,10 @@
      return;
    }
 
+   
+
    signInWithEmailAndPassword(auth, email, password)
      .then((userCredential) => {
-       
        const user = userCredential.user;
        console.log("Login bem-sucedido:", user);
        window.location.replace('/Inicio'); 

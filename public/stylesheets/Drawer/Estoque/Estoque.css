@@ -4,6 +4,7 @@ body {
   background-color: #f9f9f9;
   margin: 0;
   padding: 0;
+  box-sizing: border-box;
 }
 
 /* Estilos do header */
@@ -76,7 +77,8 @@ header {
   }
   
   input,
-  select {
+  select,
+  button {
     width: 100%;
     padding: 8px;
     margin-bottom: 15px;
@@ -99,10 +101,16 @@ header {
   button:hover {
     background-color: #45a049;
   }
+
+  .table-container {
+    overflow-x: auto;
+    margin-top: 20px;
+  }
   
   table {
     width: 100%;
     border-collapse: collapse;
+    table-layout: fixed;
   }
   
   table th,
@@ -110,11 +118,18 @@ header {
     border: 1px solid #ddd;
     padding: 8px;
     text-align: center;
+    word-wrap: break-word; /* Quebra palavras longas */
+    overflow-wrap: break-word;
+    white-space: pre-wrap;
   }
   
   table th {
     background-color: #4CAF50;
     color: white;
+  }
+
+  table td:first-child {
+    max-width: 150px; /* Limita o tamanho da célula de descrição */
   }
   
   table tr:nth-child(even) {
@@ -191,20 +206,17 @@ header {
   @media (max-width: 768px) {
     .container {
       padding: 15px;
-      width: 90%;
     }
   
     table th,
     table td {
       font-size: 14px;
-      padding: 6px;
     }
   
     .action-buttons {
       flex-direction: column;
-      gap: 8px;
-      justify-content: flex-start;
-      width: 100%;
+      gap: 5px;
+      
     }
   
     button {
@@ -238,8 +250,8 @@ header {
   /* Responsividade para telas pequenas */
   @media (max-width: 480px) {
     .container {
-      padding: 10px;
-      width: 100%;
+      padding: 15px;
+      
     }
   
     h1 {
@@ -252,18 +264,18 @@ header {
   
     table th,
     table td {
-      font-size: 12px;
+      font-size: 14px;
       padding: 5px;
+
     }
   
     .action-buttons button {
-      font-size: 12px;
-      padding: 8px;
+      flex-direction: column;
+    gap: 5px;
     }
   
     button {
       font-size: 14px;
-      padding: 10px;
     }
   
     /* Modais Responsivos */
