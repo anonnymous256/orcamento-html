@@ -493,10 +493,10 @@ async function abrirModalEdicaoFoto(produto, li) {
 }
 async function carregarModelos(produtoAtual = null, callback) {
     try {
-        const responseClientes = await fetch('public/images/clientesMandam');
+        const responseClientes = await fetch('/listarModelos');
         const imagensClientes = await responseClientes.json();
 
-        const responseFixos = await fetch('public/images/modelosFixos');
+        const responseFixos = await fetch('/listarModelosFixos');
         const imagensFixos = await responseFixos.json();
 
         // Função para criar a grid de imagens
@@ -708,7 +708,8 @@ async function gerarPdf() {
     let currentY = 140;
     const produtos = document.getElementById("produtos-escolhidos").querySelectorAll("li");
 
-    produtos.forEach((produto, index) => {
+    const baseURL = 'https://orcamento-html.onrender.com'
+    produtos.forEach(async (produto, index) => {
         if (currentY > 250) {
             doc.addPage();
             currentY = 10;
@@ -722,9 +723,22 @@ async function gerarPdf() {
         const vidro = produto.querySelector(".vidro") ? produto.querySelector(".vidro").innerText : null;
         const ferragem = produto.querySelector(".ferragem") ? produto.querySelector(".ferragem").innerText : null;
     
-        console.log('Valor total:', valorTotal);
-        const imagem = produto.querySelector("img").src;
+        const caminhoRelativo = produto.querySelector("img").alt;
 
+        // Construir a URL completa
+        const imagemURL = baseURL + caminhoRelativo;
+    
+        console.log("URL da imagem completa:", imagemURL);
+    
+        // Busca a imagem como base64
+        const imagemResponse = await fetch(imagemURL);
+        const imagemBlob = await imagemResponse.blob();
+        const imagemBase64 = await new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.readAsDataURL(imagemBlob);
+        });
+        
         console.log(modelo, descricao, dimensoes, quantidade, valorTotal);
 
         const valorNumerico = parseFloat(
@@ -802,7 +816,7 @@ async function gerarPdf() {
        
         doc.setTextColor(0, 0, 0);
         // Adicionando a imagem à esquerda do card com padding
-        doc.addImage(imagem, "JPEG", 15, cardY + 5, 30, 30);
+        doc.addImage(imagemBase64, "JPEG", 15, cardY + 5, 30, 30);
     
         // Atualizando a posição para o próximo card
         currentY += totalCardHeight + 5;
