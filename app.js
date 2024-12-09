@@ -4,13 +4,9 @@ const fs = require('fs');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 var indexRoute = require('./routes/index');
-const cors = require('cors');
 var usersRoute = require('./routes/users');
-
-
 const app = express();
 
-app.use(cors());
 // Configurações de views
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
