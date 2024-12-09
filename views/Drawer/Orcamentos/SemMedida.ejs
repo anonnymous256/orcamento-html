@@ -3,334 +3,52 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Serviços Page</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #121212;
-      color: #e0e0e0;
-      margin: 0;
-      padding: 0;
-    }
-
-    .container {
-      max-width: 800px;
-      margin: 50px auto;
-      padding: 20px;
-      background-color: #1c1c1c;
-      border-radius: 8px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-    }
-
-    h1, h2 {
-      text-align: center;
-      color: #4caf50;
-    }
-
-    .form-group {
-      margin-bottom: 15px;
-    }
-
-    label {
-      display: block;
-      font-weight: bold;
-      margin-bottom: 5px;
-      color: #a5d6a7;
-    }
-
-    .form-control, select, button {
-      width: 100%;
-      padding: 10px;
-      margin: 5px 0;
-      border: 1px solid #4caf50;
-      border-radius: 4px;
-      background-color: #2e2e2e;
-      color: #e0e0e0;
-    }
-
-    .form-control:focus {
-      outline: none;
-      border-color: #81c784;
-    }
-
-    .btn {
-      padding: 10px;
-      cursor: pointer;
-      border: none;
-      border-radius: 4px;
-      font-weight: bold;
-    }
-
-    .btn.primary {
-      background-color: #388e3c;
-      color: #ffffff;
-    }
-
-    .btn.success {
-      background-color: #4caf50;
-      color: #ffffff;
-    }
-
-    .btn.danger {
-      background-color: #d32f2f;
-      color: #ffffff;
-    }
-
-    #servicosTempList {
-      margin-top: 20px;
-    }
-
-    .servico-item {
-      padding: 10px;
-      background-color: #2e2e2e;
-      border-radius: 5px;
-      margin-bottom: 10px;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-    }
-
-    .modal {
-      display: none;
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background-color: #1c1c1c;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-      z-index: 1000;
-      text-align: center;
-    }
-
-    .modal.active {
-      display: block;
-    }
-
-    .modal button {
-      margin-top: 10px;
-    }
-
-    .overlay {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.7);
-      z-index: 999;
-    }
-
-    .overlay.active {
-      display: block;
-    }
-  </style>
+  <title>Gerenciar Serviços</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="stylesheets/Drawer/Orcamentos/SemMedida.css">
 </head>
 <body>
-  <div class="container">
-    <h1>Criar Orçamento</h1>
-    <div class="form-group">
-      <label for="clienteSelect">Selecione o Cliente</label>
-      <select id="clienteSelect" class="form-control"></select>
-    </div>
+  <header>
+    <i class="fa-solid fa-arrow-left" onclick="window.history.back()"></i>
+    <p>Converter para PDF</p>
+    <i id="btn-converter"></i>
+  </header>
 
-    <div class="form-group">
-      <label for="descricao">Descrição do Serviço</label>
-      <input type="text" id="descricao" class="form-control" placeholder="Descrição">
-    </div>
+  <h2>Gerenciar Serviços</h2>
 
-    <div class="form-group">
-      <label for="unidade">Preço Unidade</label>
-      <input type="number" id="unidade" class="form-control" placeholder="Preço Unidade">
-    </div>
-
-    <div class="form-group">
-      <label for="quantidade">Quantidade</label>
-      <input type="number" id="quantidade" class="form-control" placeholder="Quantidade">
-    </div>
-
-    <div class="form-group">
-      <label for="valor">Valor Total</label>
-      <div class="input-group">
-        <input type="text" id="valor" class="form-control" readonly>
-        <button class="btn primary" onclick="calcularValor()">Calcular</button>
-      </div>
-    </div>
-
-    <button class="btn primary" onclick="adicionarServicoTemp()">Adicionar Serviço Temporário</button>
-
-    <h2>Serviços Temporários</h2>
-    <div id="servicosTempList"></div>
-
-    <button class="btn success" onclick="abrirModal()">Confirmar e Salvar Serviços</button>
+  <div class="form-group">
+    <label for="descricao">Descrição do Serviço:</label>
+    <input type="text" id="descricao" placeholder="Digite a descrição" required>
   </div>
 
-  <!-- Modal -->
-  <div class="overlay" id="overlay"></div>
-  <div class="modal" id="confirmModal">
-    <p>Tem certeza de que deseja salvar os serviços?</p>
-    <button class="btn success" onclick="confirmarESalvarServicos()">Sim</button>
-    <button class="btn danger" onclick="fecharModal()">Não</button>
+  <div class="form-group">
+    <label for="unidade">Preço por Unidade:</label>
+    <input type="number" id="unidade" step="0.01" placeholder="Digite o preço por unidade" required>
+  </div>
+
+  <div class="form-group">
+    <label for="quantidade">Quantidade:</label>
+    <input type="number" id="quantidade" placeholder="Digite a quantidade" required>
+  </div>
+
+  <div class="form-group">
+    <label for="observacao">Observação:</label>
+    <textarea id="observacao" rows="3" placeholder="Digite uma observação (opcional)"></textarea>
+  </div>
+
+  <div class="form-group">
+    <button id="addServico">Adicionar Serviço</button>
+  </div>
+
+  <h2>Serviços em Andamento</h2>
+  <div class="services-list" id="servicesList"></div>
+
+  <div class="form-group">
+    <button id="generatePdf">Gerar PDF</button>
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
-
-  <script>
-    let servicosTemp = [];
-    const overlay = document.getElementById('overlay');
-    const confirmModal = document.getElementById('confirmModal');
-
-    function abrirModal() {
-      overlay.classList.add('active');
-      confirmModal.classList.add('active');
-    }
-
-    function fecharModal() {
-      overlay.classList.remove('active');
-      confirmModal.classList.remove('active');
-    }
-
-    function confirmarESalvarServicos() {
-      console.log('Serviços confirmados:', servicosTemp);
-      servicosTemp = [];
-      atualizarListaServicos();
-      fecharModal();
-      alert('Serviços salvos com sucesso!');
-    }
-
-    let clientes = [
-  { id: '1', nome: 'Cliente 1' },
-  { id: '2', nome: 'Cliente 2' },
-];
-
-
-document.addEventListener('DOMContentLoaded', () => {
-  carregarClientes();
-});
-
-function carregarClientes() {
-  const clienteSelect = document.getElementById('clienteSelect');
-  clientes.forEach(cliente => {
-    const option = document.createElement('option');
-    option.value = cliente.id;
-    option.textContent = cliente.nome;
-    clienteSelect.appendChild(option);
-  });
-}
-
-function calcularValor() {
-  const unidade = parseFloat(document.getElementById('unidade').value) || 0;
-  const quantidade = parseInt(document.getElementById('quantidade').value) || 0;
-  const valor = unidade * quantidade;
-  document.getElementById('valor').value = valor.toFixed(2);
-}
-
-function adicionarServicoTemp() {
-  const clienteId = document.getElementById('clienteSelect').value;
-  const descricao = document.getElementById('descricao').value.trim();
-  const unidade = parseFloat(document.getElementById('unidade').value) || 0;
-  const quantidade = parseInt(document.getElementById('quantidade').value) || 0;
-  const valor = unidade * quantidade;
-
-  if (descricao && clienteId) {
-    servicosTemp.push({
-      clienteId,
-      descricao,
-      unidade,
-      quantidade,
-      valor,
-    });
-
-    document.getElementById('descricao').value = '';
-    document.getElementById('unidade').value = '';
-    document.getElementById('quantidade').value = '';
-    document.getElementById('valor').value = '';
-
-    atualizarListaServicos();
-  }
-}
-
-function atualizarListaServicos() {
-  const lista = document.getElementById('servicosTempList');
-  lista.innerHTML = '';
-
-  servicosTemp.forEach((servico, index) => {
-    const item = document.createElement('div');
-    item.className = 'servico-item';
-    item.innerHTML = `
-      <p><strong>Descrição:</strong> ${servico.descricao}</p>
-      <p><strong>Quantidade:</strong> ${servico.quantidade}</p>
-      <p><strong>Unidade:</strong> ${servico.unidade.toFixed(2)}</p>
-      <p><strong>Valor:</strong> ${servico.valor.toFixed(2)}</p>
-      <button class="btn danger" onclick="removerServico(${index})">Remover</button>
-    `;
-    lista.appendChild(item);
-  });
-}
-
-function removerServico(index) {
-  servicosTemp.splice(index, 1);
-  atualizarListaServicos();
-}
-
-function confirmarESalvarServicos() {
-  console.log('Serviços confirmados:', servicosTemp);
-  servicosTemp = [];
-  atualizarListaServicos();
-  alert('Serviços salvos com sucesso!');
-}
-
-
-function gerarPDF() {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-  
-    // Título do PDF
-    doc.setFontSize(18);
-    doc.text('Serviços Temporários', 10, 10);
-    doc.setFontSize(12);
-  
-    // Cabeçalho da tabela
-    let posY = 20;
-    doc.text('Descrição', 10, posY);
-    doc.text('Preço Unidade', 70, posY);
-    doc.text('Quantidade', 110, posY);
-    doc.text('Valor Final', 150, posY);
-    doc.line(10, posY + 2, 200, posY + 2); // Linha separadora
-  
-    // Adicionar dados dos serviços temporários
-    servicosTemp.forEach(servico => {
-      posY += 10;
-      doc.text(servico.descricao, 10, posY);
-      doc.text(servico.unidade.toFixed(2), 70, posY, { align: 'right' });
-      doc.text(servico.quantidade.toString(), 110, posY, { align: 'right' });
-      doc.text(servico.valor.toFixed(2), 150, posY, { align: 'right' });
-    });
-  
-    // Total geral
-    const total = servicosTemp.reduce((acc, curr) => acc + curr.valor, 0);
-    posY += 10;
-    doc.setFontSize(14);
-    doc.text(`Total: R$ ${total.toFixed(2)}`, 10, posY);
-  
-    // Baixar o PDF
-    doc.save('servicos_temp.pdf');
-  }
-  
-  // Botão para gerar PDF
-  function criarBotaoGerarPDF() {
-    const btn = document.createElement('button');
-    btn.className = 'btn primary';
-    btn.textContent = 'Gerar PDF';
-    btn.onclick = gerarPDF;
-    document.querySelector('.container').appendChild(btn);
-  }
-  
-  // Adicionar botão na inicialização
-  document.addEventListener('DOMContentLoaded', () => {
-    carregarClientes();
-    criarBotaoGerarPDF();
-  });
-  </script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="javascripts/Drawer/Orcamentos/SemMedida.js"> </script>
 </body>
 </html>

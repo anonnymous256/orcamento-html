@@ -58,7 +58,13 @@ window.login = async function () {
     const password = document.getElementById('login-password').value;
 
     if (!email || !password) {
-        alert('Por favor, preencha todos os campos.');
+      Swal.fire({
+        position: "center",
+        icon: "info",
+        title: "Preencha todos os campos!",
+        showConfirmButton: false,
+        timer: 1500
+    })
         return;
     }
 
@@ -75,7 +81,13 @@ window.login = async function () {
         window.location.replace('/Inicio');
     } catch (error) {
         console.error("Erro ao fazer login:", error.message);
-        alert(`Erro ao fazer login: ${error.message}`);
+        Swal.fire({
+          position: "center",
+          icon: "error",
+          title: "Email ou senha incorretos!",
+          showConfirmButton: false,
+          timer: 1500
+      })
     }
 };
 

@@ -64,9 +64,6 @@ async function obterLogoEmpresa(uid) {
     }
 }
 
-// Detectar usuário autenticado e carregar a logo
-
-
 // CARREGAR CLIENTES NO SELECT 
 
 async function carregarClientes() {
@@ -82,11 +79,10 @@ async function carregarClientes() {
     noOpt.setAttribute('disabled', true);
     noOpt.setAttribute('selected', true);
     noOpt.textContent = 'Selecione um cliente';
-    clientesSelect.innerHTML = ''; // Limpa as opções anteriores
+    clientesSelect.innerHTML = ''; 
     clientesSelect.appendChild(noOpt);
 
     try {
-        // Alterar o filtro para usar "userId"
         const snapshot = await db.collection('clientes').where('userId', '==', user.uid).get();
 
         if (snapshot.empty) {
@@ -149,8 +145,7 @@ btnprctmat.addEventListener('click', () => {
 // FUNCIONALIDADE DO BOTAO DE MODELOS
 btnModelos.addEventListener('click', async () => {
     const clienteSelectElement = document.getElementById('clientes');
-    const clienteSelecionado = clienteSelectElement.value; // Capturar o cliente selecionado
-
+    const clienteSelecionado = clienteSelectElement.value;
     const descricao = document.getElementById('descricao-servico').value.trim();
     const altura = document.getElementById('altura').value;
     const largura = document.getElementById('largura').value;
@@ -213,8 +208,8 @@ btnModelos.addEventListener('click', async () => {
                         adicionarProduto(produto);
                         Swal.close();
 
-                        form.reset(); // Limpar o formulário
-                        clienteSelectElement.value = clienteSelecionado; // Restaurar o cliente selecionado
+                        form.reset(); 
+                        clienteSelectElement.value = clienteSelecionado; 
                     });
                 });
             };
@@ -724,10 +719,10 @@ async function gerarPdf() {
 
     // Informações da empresa
     doc.setFont("Roboto", "bold", 14);
-    doc.setTextColor(0, 51, 102); // Cor para o título da empresa
+    doc.setTextColor(0, 51, 102); 
     doc.text(`${empresaData.nome}`, 10, 50);
     doc.setFont("Roboto", "normal", 10);
-    doc.setTextColor(0, 0, 0); // Cor do texto padrão
+    doc.setTextColor(0, 0, 0); 
     doc.text(`CNPJ: ${empresaData.cnpj}`, 10, 60);
     doc.text(`Endereço: ${empresaData.endereco}`, 10, 70);
     doc.text(`Telefone: ${empresaData.telefone}`, 10, 80);
@@ -739,10 +734,10 @@ async function gerarPdf() {
 
     // Informações do cliente
     doc.setFont("Roboto", "bold", 12);
-    doc.setTextColor(0, 51, 102); // Cor para o título
+    doc.setTextColor(0, 51, 102); 
     doc.text("Dados do Cliente", 10, 95);
     doc.setFont("Roboto", "normal", 10);
-    doc.setTextColor(0, 0, 0); // Cor do texto
+    doc.setTextColor(0, 0, 0); 
     doc.text(`Nome: ${clienteData.nome}`, 10, 105);
     doc.text(`Endereço: ${clienteData.endereco}`, 10, 115);
     doc.text(`Telefone: ${clienteData.telefone}`, 10, 125);
@@ -751,15 +746,13 @@ async function gerarPdf() {
     doc.setDrawColor(0);
     doc.line(10, 130, 200, 130);
 
-    // Função para calcular o tamanho do texto
-    // Função para calcular o tamanho do texto com base na largura máxima
+    
     function getTextDimensions(text, fontSize = 12, maxWidth = 130) {
         doc.setFont("Roboto", "normal", fontSize);
 
-        // Dividir o texto com base na largura máxima
+        
         const lines = doc.splitTextToSize(text, maxWidth);
 
-        // A altura total será a altura de uma linha multiplicada pelo número de linhas
         const textHeight = lines.length * fontSize;
         return { width: maxWidth, height: textHeight };
     }
@@ -809,14 +802,10 @@ async function gerarPdf() {
 
         const currentColor = cardColors[0];
 
-        // Calcular o tamanho da descrição
         const descricaoDims = getTextDimensions(descricao, 9);
         const descricaoHeight = descricaoDims.height;
 
-        // Calcular altura total do card com base na descrição
-        const totalCardHeight = 45 + descricaoHeight + 5; // 60px é o espaço inicial do card
-
-        // Desenhando o Card com bordas arredondadas
+        const totalCardHeight = 45 + descricaoHeight + 5; 
         const cardY = currentY;
         doc.setDrawColor(0);
         doc.setFillColor(...currentColor); // Usando a cor definida para o card
@@ -834,18 +823,13 @@ async function gerarPdf() {
         const descricaoY = modeloY + 7;
         doc.setFont("Roboto", "normal", 7);
         doc.text(`Descrição: ${descricao}`, 50, descricaoY, { maxWidth: 130 });
-
-        // Ajustar a posição das dimensões para ficar mais próximo da descrição
-        const dimensoesY = descricaoY + 2 + descricaoHeight / 2;  // Ajustar o espaço de 5 para 3
+        const dimensoesY = descricaoY + 2 + descricaoHeight / 2;  
         doc.text(`Dimensões (A x L): ${dimensoes}`, 50, dimensoesY);
-
-        // Ajustar a posição da quantidade para seguir após as dimensões
-        const quantidadeY = dimensoesY + 7;  // Distância entre dimensões e quantidade
+        const quantidadeY = dimensoesY + 7; 
         doc.text(`Quantidade: ${quantidade}`, 50, quantidadeY);
 
         let vidroY = quantidadeY;
         if (vidro != null) {
-            // Distância entre quantidade e vidro
             vidroY = quantidadeY + 7;
             doc.text(`Vidro: ${vidro}`, 50, vidroY);
         }
@@ -856,16 +840,15 @@ async function gerarPdf() {
             ferragemY = vidroY + 7;
             doc.text(`Ferragem: ${ferragem}`, 50, ferragemY);
         }
-        const valorTotalY = ferragemY + 7;  // Distância entre quantidade e valor total
+        const valorTotalY = ferragemY + 7;  
         doc.setTextColor(255, 0, 0);
         doc.text(`Valor Total: ${formatarParaReal(parseFloat(valorTotal.replace("R$", "").trim()))}`, 50, valorTotalY);
 
 
         doc.setTextColor(0, 0, 0);
-        // Adicionando a imagem à esquerda do card com padding
+        
         doc.addImage(imagem, "JPEG", 15, cardY + 5, 30, 30);
 
-        // Atualizando a posição para o próximo card
         currentY += totalCardHeight + 5;
     });
     doc.setDrawColor(0);
