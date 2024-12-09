@@ -46,4 +46,8 @@ router.get('/ComMedida', function(req, res) {
   res.render('Drawer/Orcamentos/ComMedida', { title: 'Express' });
 });
 
+router.get('/Pedidos', function(req, res) {
+  res.render('Drawer/Pedidos/Pedidos', { title: 'Express' });
+});
+
 module.exports = router;

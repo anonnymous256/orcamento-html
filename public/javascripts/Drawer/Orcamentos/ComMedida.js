@@ -5,14 +5,14 @@ import 'https://www.gstatic.com/firebasejs/10.11.0/firebase-storage-compat.js';
 
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCm0bhy9OSaZ83OTO0-JQpICl9WMwPc_fk",
-  authDomain: "orcamento-html.firebaseapp.com",
-  databaseURL: "https://orcamento-html-default-rtdb.firebaseio.com",
-  projectId: "orcamento-html",
-  storageBucket: "orcamento-html.firebasestorage.app",
-  messagingSenderId: "363402110339",
-  appId: "1:363402110339:web:b7339cfc945f63a06fc2b6",
-  measurementId: "G-ZMY6CHL8QW"
+    apiKey: "AIzaSyCm0bhy9OSaZ83OTO0-JQpICl9WMwPc_fk",
+    authDomain: "orcamento-html.firebaseapp.com",
+    databaseURL: "https://orcamento-html-default-rtdb.firebaseio.com",
+    projectId: "orcamento-html",
+    storageBucket: "orcamento-html.firebasestorage.app",
+    messagingSenderId: "363402110339",
+    appId: "1:363402110339:web:b7339cfc945f63a06fc2b6",
+    measurementId: "G-ZMY6CHL8QW"
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -31,6 +31,16 @@ const btnSalvar = document.getElementById('btn-salvar');
 let clienteNome = '';
 
 // OBTER ID DO USER AUTHENTICADO
+
+auth.onAuthStateChanged(async (user) => {
+    if (user) {
+        console.log("Usuário autenticado:", user.uid);
+        await carregarClientes(user.uid);
+    } else {
+        console.error("Nenhum usuário autenticado.");
+        Swal.fire('Erro!', 'Usuário não autenticado.', 'error');
+    }
+});
 
 const logoImg = document.getElementById('user-logo');
 
@@ -60,15 +70,31 @@ async function obterLogoEmpresa(uid) {
 // CARREGAR CLIENTES NO SELECT 
 
 async function carregarClientes() {
+    const user = auth.currentUser;
+    if (!user) {
+        console.error('Usuário não autenticado.');
+        return;
+    }
+
+    console.log("Usuário autenticado:", user.uid);
 
     const noOpt = document.createElement('option');
     noOpt.setAttribute('disabled', true);
     noOpt.setAttribute('selected', true);
     noOpt.textContent = 'Selecione um cliente';
+    clientesSelect.innerHTML = ''; // Limpa as opções anteriores
     clientesSelect.appendChild(noOpt);
 
     try {
-        const snapshot = await db.collection('clientes').get();
+        // Alterar o filtro para usar "userId"
+        const snapshot = await db.collection('clientes').where('userId', '==', user.uid).get();
+
+        if (snapshot.empty) {
+            console.warn("Nenhum cliente encontrado para este usuário.");
+            Swal.fire('Aviso!', 'Nenhum cliente encontrado.', 'info');
+            return;
+        }
+
         snapshot.forEach((doc) => {
             const cliente = doc.data();
             const option = document.createElement('option');
@@ -77,15 +103,17 @@ async function carregarClientes() {
             clientesSelect.appendChild(option);
         });
     } catch (error) {
-        console.error('Erro ao carregar os clientes:', error);
+        console.error("Erro ao carregar os clientes:", error);
         Swal.fire('Erro!', 'Erro ao carregar os clientes.', 'error');
     }
 }
 
+
+
 // FUNCIONALIDADE DO BOTAO DE PORCENTAGEM MATERIAL
 
 
-btnprctmat.addEventListener('click', () =>  {
+btnprctmat.addEventListener('click', () => {
     Swal.fire({
         title: 'Porcentagem Material',
         input: 'number',
@@ -103,16 +131,16 @@ btnprctmat.addEventListener('click', () =>  {
                 return;
             }
             return porcentagemMaterial;
-        },        
+        },
     }).then((result) => {
         if (result.isConfirmed) {
 
-            const porcentagemMaterial = parseFloat(result.value); 
+            const porcentagemMaterial = parseFloat(result.value);
             const material = document.getElementById('material');
-            const material_value = parseFloat(material.value); 
+            const material_value = parseFloat(material.value);
             const material_mais_porcentagem = material_value + (material_value * (porcentagemMaterial / 100));
             material.value = material_mais_porcentagem.toFixed(2);
-    
+
         }
     });
 });
@@ -120,8 +148,9 @@ btnprctmat.addEventListener('click', () =>  {
 
 // FUNCIONALIDADE DO BOTAO DE MODELOS
 btnModelos.addEventListener('click', async () => {
+    const clienteSelectElement = document.getElementById('clientes');
+    const clienteSelecionado = clienteSelectElement.value; // Capturar o cliente selecionado
 
-    const cliente = document.getElementById('clientes').value;
     const descricao = document.getElementById('descricao-servico').value.trim();
     const altura = document.getElementById('altura').value;
     const largura = document.getElementById('largura').value;
@@ -132,10 +161,10 @@ btnModelos.addEventListener('click', async () => {
     const corVidro = document.getElementById('cor-vidro').value;
     const corFerragem = document.getElementById('cor-ferragem').value;
 
-    clienteNome = cliente;
+    clienteNome = clienteSelecionado;
 
     if (
-        cliente !== "0" &&
+        clienteSelecionado !== "0" &&
         descricao &&
         altura &&
         largura &&
@@ -167,7 +196,7 @@ btnModelos.addEventListener('click', async () => {
                     el.addEventListener("click", () => {
                         const index = el.getAttribute("data-index");
                         const produto = criarProduto(
-                            cliente,
+                            clienteSelecionado,
                             descricao,
                             altura,
                             largura,
@@ -180,10 +209,12 @@ btnModelos.addEventListener('click', async () => {
                             corVidro,
                             corFerragem
                         );
-            
+
                         adicionarProduto(produto);
                         Swal.close();
-                        form.reset();
+
+                        form.reset(); // Limpar o formulário
+                        clienteSelectElement.value = clienteSelecionado; // Restaurar o cliente selecionado
                     });
                 });
             };
@@ -203,12 +234,13 @@ btnModelos.addEventListener('click', async () => {
                         nome: `Modelo ${parseInt(index) + 1}`,
                     },
                 };
-            
+
                 if (corVidro) produto.corVidro = corVidro;
                 if (corFerragem) produto.corFerragem = corFerragem;
-            
+
                 return produto;
-            };       
+            };
+
             // Função para criar o grid de imagens
             const criarGridImagens = (imagens) => {
                 let gridHTML = `<div style="display: flex; justify-content: space-around; flex-wrap: wrap;">`;
@@ -274,9 +306,10 @@ btnModelos.addEventListener('click', async () => {
 });
 
 
+
 // FUNCIONALIDADE DO BOTAO DE CALCULAR TOTAL
 btnTotal.addEventListener('click', () => {
-    
+
     const material = document.getElementById('material');
     const porcentagemGeralEl = document.getElementById('porcentagem-geral');
     const quantidadeEl = document.getElementById('quantidade');
@@ -285,11 +318,11 @@ btnTotal.addEventListener('click', () => {
     const alturaEl = document.getElementById('altura');
 
     if (
-        !material || 
-        !porcentagemGeralEl || 
-        !quantidadeEl || 
-        !valorMetroEl || 
-        !larguraEl || 
+        !material ||
+        !porcentagemGeralEl ||
+        !quantidadeEl ||
+        !valorMetroEl ||
+        !larguraEl ||
         !alturaEl
     ) {
         Swal.fire('Erro!', 'Algum campo não foi encontrado no DOM.', 'error');
@@ -304,11 +337,11 @@ btnTotal.addEventListener('click', () => {
     const altura = parseFloat(alturaEl.value) || 0;
 
     if (
-        material.value === '' || 
-        porcentagemGeralEl.value === '' || 
-        quantidadeEl.value === '' || 
-        valorMetroEl.value === '' || 
-        larguraEl.value === '' || 
+        material.value === '' ||
+        porcentagemGeralEl.value === '' ||
+        quantidadeEl.value === '' ||
+        valorMetroEl.value === '' ||
+        larguraEl.value === '' ||
         alturaEl.value === ''
     ) {
         Swal.fire('Erro!', 'Preencha todos os campos antes de calcular o total.', 'error');
@@ -471,7 +504,7 @@ async function abrirModalEdicao(produto, li) {
 
             if (vidroElement) vidroElement.innerHTML = vidro ? `${vidro}` : '';
             if (ferragemElement) ferragemElement.innerHTML = ferragem ? `${ferragem}` : '';
-            
+
             li.querySelector('.total').innerHTML = `${total}`;
         }
     });
@@ -479,7 +512,7 @@ async function abrirModalEdicao(produto, li) {
 
 
 async function abrirModalEdicaoFoto(produto, li) {
-    
+
     await carregarModelos(produto, (modeloSelecionado) => {
         produto.modelo = modeloSelecionado;
 
@@ -585,13 +618,13 @@ async function carregarModelos(produtoAtual = null, callback) {
 async function converterPDF() {
 
     //Confirmar se quer converter
-    if(document.getElementById("produtos-escolhidos").children.length == 0){
+    if (document.getElementById("produtos-escolhidos").children.length == 0) {
         Swal.fire({
             icon: 'warning',
             title: 'Nenhum produto selecionado',
             text: 'Selecione ao menos um produto para converter para PDF.',
-          });
-          return;
+        });
+        return;
     }
     await Swal.fire({
         title: 'Tem certeza?',
@@ -605,32 +638,55 @@ async function converterPDF() {
         if (result.isConfirmed) {
             gerarPdf();
         }
-        
+
     })
-   
+
 }
 
 async function dadosEmpresa() {
-    
-    const empresas = await db.collection('empresas') 
-    .get();
-    const empresa = empresas.docs[0].data();
+    try {
+        const user = auth.currentUser;
+        if (!user) {
+            console.error("Nenhum usuário autenticado.");
+            return null;
+        }
 
-    return empresa;
+        // Obter o documento da empresa correspondente ao usuário
+        const empresaDoc = await db.collection('empresas').doc(user.uid).get();
+        if (empresaDoc.exists) {
+            return empresaDoc.data();
+        } else {
+            console.error("Dados da empresa não encontrados para o usuário autenticado.");
+            return null;
+        }
+    } catch (error) {
+        console.error("Erro ao buscar dados da empresa:", error);
+        return null;
+    }
 }
+
 
 async function carregarClientesId(nome) {
-
-    console.log("nome: " + nome);
-    const clientes = await db.collection('clientes').where('nome', '==', nome).get(); 
-    const cliente = clientes.docs[0].data();
-    return cliente;
-
+    try {
+        const snapshot = await db.collection('clientes').where('nome', '==', nome).get();
+        if (!snapshot.empty) {
+            return snapshot.docs[0].data();
+        } else {
+            console.error("Cliente não encontrado.");
+            return null;
+        }
+    } catch (error) {
+        console.error("Erro ao buscar cliente:", error);
+        return null;
+    }
 }
+
 
 async function gerarPdf() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
+
+    
 
     const empresaData = await dadosEmpresa();
     const clienteData = await carregarClientesId(clienteNome);
@@ -648,19 +704,23 @@ async function gerarPdf() {
             return;
         }
 
-          // Obter a logo do Firestore
-          const logoDoc = await db.collection('empresas').doc(user.uid).get();
-          const logoBase64 = logoDoc.exists ? logoDoc.data().logo : null;
-  
-          if (logoBase64) {
-              // Adicionar a logo ao PDF
-              doc.addImage(logoBase64, "PNG", 10, 10, 50, 20); // Ajuste a posição e o tamanho conforme necessário
-          } else {
-              console.error('Logo não encontrada no Firestore.');
-          }
-      } catch (error) {
-          console.error('Erro ao obter a logo da empresa:', error);
-      }
+        // Obter a logo do Firestore
+        const logoDoc = await db.collection('empresas').doc(user.uid).get();
+        const logoBase64 = logoDoc.exists ? logoDoc.data().logo : null;
+
+        if (logoBase64) {
+            const logoWidth = 90; // Largura da logo
+            const logoHeight = 30; // Altura da logo
+            const centerX = (doc.internal.pageSize.getWidth() - logoWidth) / 2; // Centraliza horizontalmente
+            const topMargin = 10; // Margem superior
+            doc.addImage(logoBase64, "PNG", centerX, topMargin, logoWidth, logoHeight); // Posiciona no topo centralizado
+        } else {
+            console.error('Logo não encontrada no Firestore.');
+        }
+
+    } catch (error) {
+        console.error('Erro ao obter a logo da empresa:', error);
+    }
 
     // Informações da empresa
     doc.setFont("Roboto", "bold", 14);
@@ -671,6 +731,7 @@ async function gerarPdf() {
     doc.text(`CNPJ: ${empresaData.cnpj}`, 10, 60);
     doc.text(`Endereço: ${empresaData.endereco}`, 10, 70);
     doc.text(`Telefone: ${empresaData.telefone}`, 10, 80);
+    
 
     // Linha separadora
     doc.setDrawColor(0);
@@ -694,12 +755,12 @@ async function gerarPdf() {
     // Função para calcular o tamanho do texto com base na largura máxima
     function getTextDimensions(text, fontSize = 12, maxWidth = 130) {
         doc.setFont("Roboto", "normal", fontSize);
-        
+
         // Dividir o texto com base na largura máxima
         const lines = doc.splitTextToSize(text, maxWidth);
 
         // A altura total será a altura de uma linha multiplicada pelo número de linhas
-        const textHeight = lines.length * fontSize;  
+        const textHeight = lines.length * fontSize;
         return { width: maxWidth, height: textHeight };
     }
 
@@ -713,7 +774,7 @@ async function gerarPdf() {
             doc.addPage();
             currentY = 10;
         }
-    
+
         const modelo = produto.querySelector("h3").innerText;
         const descricao = produto.querySelector(".descricao").innerText;
         const dimensoes = produto.querySelector(".dimensoes").innerText;
@@ -721,18 +782,18 @@ async function gerarPdf() {
         const valorTotal = produto.querySelector(".total").innerText;
         const vidro = produto.querySelector(".vidro") ? produto.querySelector(".vidro").innerText : null;
         const ferragem = produto.querySelector(".ferragem") ? produto.querySelector(".ferragem").innerText : null;
-    
+
         console.log('Valor total:', valorTotal);
         const imagem = produto.querySelector("img").src;
-        
+
         console.log(modelo, descricao, dimensoes, quantidade, valorTotal);
 
         const valorNumerico = parseFloat(
             valorTotal
-                .replace("R$", "") 
+                .replace("R$", "")
                 .trim()
         );
-    
+
         if (!isNaN(valorNumerico)) {
             console.log(`Valor numérico: ${valorNumerico}`);
             valorTotalFinal += valorNumerico;
@@ -740,33 +801,33 @@ async function gerarPdf() {
             console.error(`Valor inválido encontrado: "${valorTotal}"`);
         }
 
-    
+
         // Definindo cores alternadas para os cards
         const cardColors = [
             [240, 240, 240]
         ];
-    
+
         const currentColor = cardColors[0];
-    
+
         // Calcular o tamanho da descrição
         const descricaoDims = getTextDimensions(descricao, 9);
         const descricaoHeight = descricaoDims.height;
-    
+
         // Calcular altura total do card com base na descrição
         const totalCardHeight = 45 + descricaoHeight + 5; // 60px é o espaço inicial do card
-    
+
         // Desenhando o Card com bordas arredondadas
         const cardY = currentY;
         doc.setDrawColor(0);
         doc.setFillColor(...currentColor); // Usando a cor definida para o card
         doc.roundedRect(10, cardY, 190, totalCardHeight, 5, 5, 'F'); // Card com bordas arredondadas
-    
+
         const modeloY = cardY + 10;
         doc.setFont("Roboto", "bold", 7);
-         // Cor do texto padrão
+        // Cor do texto padrão
         doc.setTextColor(0, 51, 102);
         doc.text(`Modelo: ${modelo}`, 50, modeloY);
-    
+
         doc.setTextColor(0, 0, 0);
 
         // Adicionando a descrição
@@ -775,23 +836,23 @@ async function gerarPdf() {
         doc.text(`Descrição: ${descricao}`, 50, descricaoY, { maxWidth: 130 });
 
         // Ajustar a posição das dimensões para ficar mais próximo da descrição
-        const dimensoesY = descricaoY + 2 + descricaoHeight/2;  // Ajustar o espaço de 5 para 3
+        const dimensoesY = descricaoY + 2 + descricaoHeight / 2;  // Ajustar o espaço de 5 para 3
         doc.text(`Dimensões (A x L): ${dimensoes}`, 50, dimensoesY);
-    
+
         // Ajustar a posição da quantidade para seguir após as dimensões
         const quantidadeY = dimensoesY + 7;  // Distância entre dimensões e quantidade
         doc.text(`Quantidade: ${quantidade}`, 50, quantidadeY);
-        
+
         let vidroY = quantidadeY;
-        if(vidro != null) {
-              // Distância entre quantidade e vidro
+        if (vidro != null) {
+            // Distância entre quantidade e vidro
             vidroY = quantidadeY + 7;
             doc.text(`Vidro: ${vidro}`, 50, vidroY);
         }
 
         let ferragemY = vidroY;
 
-        if(ferragem != null) {
+        if (ferragem != null) {
             ferragemY = vidroY + 7;
             doc.text(`Ferragem: ${ferragem}`, 50, ferragemY);
         }
@@ -799,11 +860,11 @@ async function gerarPdf() {
         doc.setTextColor(255, 0, 0);
         doc.text(`Valor Total: ${formatarParaReal(parseFloat(valorTotal.replace("R$", "").trim()))}`, 50, valorTotalY);
 
-       
+
         doc.setTextColor(0, 0, 0);
         // Adicionando a imagem à esquerda do card com padding
         doc.addImage(imagem, "JPEG", 15, cardY + 5, 30, 30);
-    
+
         // Atualizando a posição para o próximo card
         currentY += totalCardHeight + 5;
     });
@@ -824,7 +885,7 @@ btnSalvar.addEventListener('click', async () => {
                 const cliente = li.querySelector('.cliente').textContent;
                 const descricao = li.querySelector('.descricao').textContent;
                 const dimensoes = li.querySelector('.dimensoes').textContent;
-                const quantidade = li.querySelector('.quantidade').textContent;3
+                const quantidade = li.querySelector('.quantidade').textContent; 3
                 const valorMetro = li.querySelector('.metro').textContent;
                 const material = li.querySelector('.material').textContent;
                 const vidro = li.querySelector('.vidro').textContent ? li.querySelector('.vidro').textContent : 'Sem cor de vidro';
@@ -833,7 +894,7 @@ btnSalvar.addEventListener('click', async () => {
                 return { modelo, cliente, descricao, dimensoes, quantidade, valorMetro, material, ferragem, vidro, valorTotal };
             })
         };
-        if(data.produtos.length === 0) {
+        if (data.produtos.length === 0) {
             Swal.fire('Erro!', 'Nenhum produto foi escolhido.', 'error');
             return;
         }

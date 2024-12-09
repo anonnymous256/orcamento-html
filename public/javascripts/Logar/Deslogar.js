@@ -1,33 +1,22 @@
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.16.0/firebase-app.js';
-        import { getAuth, signOut } from 'https://www.gstatic.com/firebasejs/9.16.0/firebase-auth.js';
+/*import { getAuth, signOut } from 'https://www.gstatic.com/firebasejs/9.16.0/firebase-auth.js';
+import { auth } from './auth.js'; // Importa o auth configurado no arquivo principal
 
+// Função de logout
+window.logout = async function () {
+    try {
+        // Realiza o logout
+        await signOut(auth);
+        console.log("Logout bem-sucedido!");
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyCm0bhy9OSaZ83OTO0-JQpICl9WMwPc_fk",
-            authDomain: "orcamento-html.firebaseapp.com",
-            projectId: "orcamento-html",
-            storageBucket: "orcamento-html.appspot.com",
-            messagingSenderId: "363402110339",
-            appId: "1:363402110339:web:b7339cfc945f63a06fc2b6",
-            measurementId: "G-ZMY6CHL8QW"
-        };
+        // Limpa qualquer estado local
+        localStorage.clear();
+        sessionStorage.clear();
 
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-
-
-        window.logout = function () {
-            signOut(auth)
-                .then(() => {
-                    console.log("Logout bem-sucedido!");
-                    localStorage.clear();
-                    sessionStorage.clear();
-                    window.location.replace('/Deslogar');
-                })
-                .catch((error) => {
-                    const errorMessage = error.message;
-                    console.error('Erro ao fazer logout:', errorMessage);
-                    alert('Erro ao realizar logout. Tente novamente.');
-                });
-        }
+        // Redireciona para a página de login
+        window.location.replace('/Deslogar');
+    } catch (error) {
+        console.error("Erro ao realizar logout:", error.message);
+        alert('Erro ao realizar logout. Tente novamente.');
+    }
+};
+*/

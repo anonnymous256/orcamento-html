@@ -26,19 +26,19 @@
             </div>
 
             <div class="sidebar">
-                <a href="#">
+                <a href="#" class="active">
                     <span class="material-symbols-outlined">grid_view</span>
                     <h3>Dashboard</h3>
                 </a>
-                    <a href="/SemMedida" class="active">
+                    <a href="/SemMedida">
                         <span class="material-symbols-outlined">person</span>
                         <h3>Sem Medida</h3>
                     </a>
-                    <a href="/ComMedida" class="active">
+                    <a href="/ComMedida">
                         <span class="material-symbols-outlined">person</span>
-                        <h3>Sem Medida</h3>
+                        <h3>Orçamento Medida</h3>
                     </a>
-                <a href="#">
+                <a href="/Pedidos">
                     <span class="material-symbols-outlined"> receipt_long </span>
                     <h3>Pedidos</h3>
                 </a>
@@ -66,7 +66,7 @@
                     <span class="material-symbols-outlined">add</span>
                     <h3>Adicionar Produto</h3>
                 </a>
-                <a href="/Deslogar">
+                <a href="javascript:void(0);" onclick="logout()">
                     <span class="material-symbols-outlined">logout</span>
                     <h3>Sair</h3>
                 </a>
@@ -345,6 +345,7 @@
     <script src="javascripts/Dashboard/Inicio.js"></script>
 
     <script src="javascripts/Dashboard/Filtro-Grafico.js" type="module"></script>
+    <script src="javascripts/Logar/Login.js" type="module"></script>
 </body>
 
 </html>

@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Serviços</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore-compat.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        .card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .card:hover {
+            background-color: #eaeaea;
+        }
+
+        .card-title {
+            font-size: 18px;
+            color: #333;
+        }
+
+        .card-icon {
+            font-size: 20px;
+            color: #007bff;
+        }
+
+        .modal-content {
+            font-size: 14px;
+            color: #333;
+        }
+
+        .modal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .modal-content th, .modal-content td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .modal-content th {
+            background-color: #f4f4f4;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Serviços</h1>
+        <div id="servicos-lista"></div>
+    </div>
+
+    <script>
+        // Configuração do Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyCm0bhy9OSaZ83OTO0-JQpICl9WMwPc_fk",
+            authDomain: "orcamento-html.firebaseapp.com",
+            databaseURL: "https://orcamento-html-default-rtdb.firebaseio.com",
+            projectId: "orcamento-html",
+            storageBucket: "orcamento-html.firebasestorage.app",
+            messagingSenderId: "363402110339",
+            appId: "1:363402110339:web:b7339cfc945f63a06fc2b6",
+            measurementId: "G-ZMY6CHL8QW"
+        };
+    
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+    
+        // Carregar serviços do Firestore
+        async function carregarServicos() {
+            const listaServicos = document.getElementById('servicos-lista');
+            listaServicos.innerHTML = "<p>Carregando serviços...</p>";
+    
+            try {
+                const snapshot = await db.collection('servicos').get();
+                listaServicos.innerHTML = ""; // Limpa o carregando
+    
+                snapshot.forEach(doc => {
+                    const servico = doc.data();
+    
+                    // Verificar se o campo produtos existe e não está vazio
+                    if (servico.produtos && servico.produtos.length > 0) {
+                        const card = criarCardServico(servico, doc.id);
+                        listaServicos.appendChild(card);
+                    } else {
+                        console.warn(`Serviço ${doc.id} não possui produtos.`);
+                    }
+                });
+    
+                if (snapshot.empty) {
+                    listaServicos.innerHTML = "<p>Nenhum serviço encontrado.</p>";
+                }
+            } catch (error) {
+                console.error("Erro ao carregar serviços:", error);
+                listaServicos.innerHTML = "<p>Erro ao carregar serviços.</p>";
+            }
+        }
+    
+        // Criar card para cada serviço
+        function criarCardServico(servico, id) {
+            const card = document.createElement('div');
+            card.classList.add('card');
+            card.innerHTML = `
+                <span class="card-title">${servico.produtos[0]?.cliente || "Cliente desconhecido"}</span>
+                <span class="card-icon">&#9654;</span>
+            `;
+            card.addEventListener('click', () => exibirDetalhesServico(servico, id));
+            return card;
+        }
+    
+        // Exibir detalhes do serviço
+        function exibirDetalhesServico(servico, id) {
+            if (!servico.produtos || servico.produtos.length === 0) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erro',
+                    text: 'Este serviço não possui produtos cadastrados.',
+                });
+                return;
+            }
+    
+            const produtos = servico.produtos.map(produto => `
+                <tr>
+                    <td>${produto.modelo || "N/A"}</td>
+                    <td>${produto.descricao || "N/A"}</td>
+                    <td>${produto.dimensoes || "N/A"}</td>
+                    <td>${produto.quantidade || "N/A"}</td>
+                    <td>${produto.valorTotal || "N/A"}</td>
+                </tr>
+            `).join('');
+    
+            const modalContent = `
+                <div class="modal-content">
+                    <h3>Serviço para: ${servico.produtos[0]?.cliente || "Cliente desconhecido"}</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Modelo</th>
+                                <th>Descrição</th>
+                                <th>Dimensões</th>
+                                <th>Quantidade</th>
+                                <th>Valor Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${produtos}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+    
+            Swal.fire({
+                html: modalContent,
+                width: '80%',
+                showCloseButton: true,
+                showConfirmButton: false
+            });
+        }
+    
+        // Inicializar a lista de serviços
+        carregarServicos();
+    </script>
+    
+</body>
+</html>
