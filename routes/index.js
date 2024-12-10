@@ -50,4 +50,8 @@ router.get('/Pedidos', function(req, res) {
   res.render('Drawer/Pedidos/Pedidos', { title: 'Express' });
 });
 
+router.get('/SemPorcentagem', function(req, res) {
+  res.render('Drawer/Orcamentos/SemPorcentagem', { title: 'Express' });
+});
+
 module.exports = router;
