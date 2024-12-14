@@ -21,6 +21,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/clientesMandam', express.static(path.join(__dirname, 'public', 'images', 'clientesMandam')));
 app.use('/modelosFixos', express.static(path.join(__dirname, 'public', 'images', 'modelosFixos')));
+app.use('/NovasImages', express.static(path.join(__dirname, 'public', 'images', 'NovasImages')));
 
 // Endpoints
 
@@ -47,6 +48,18 @@ app.get('/listarModelosFixos', (req, res) => {
       return res.status(500).send('Erro ao ler a pasta.');
     }
     const images = files.map(file => `/modelosFixos/${file}`);
+    res.json(images);
+  });
+});
+
+app.get('/listarNovos', (req, res) => {
+  const dirPath = path.join(__dirname, 'public', 'images', 'NovasImages');
+  fs.readdir(dirPath, (err, files) => {
+    if (err) {
+      console.error('Erro ao ler a pasta:', err);
+      return res.status(500).send('Erro ao ler a pasta.');
+    }
+    const images = files.map(file => `/NovasImages/${file}`);
     res.json(images);
   });
 });

@@ -181,6 +181,12 @@ btnModelos.addEventListener('click', async () => {
             }
             const imagensFixos = await responseFixos.json();
 
+            const responseNovos = await fetch('/listarNovos');
+            if (!responseNovos.ok) {
+                throw new Error(`Erro ao carregar modelos novos: ${responseNovos.statusText}`);
+            }
+            const imagensNovos = await responseNovos.json();
+
             if (!imagensClientes.length && !imagensFixos.length) {
                 Swal.fire('Aviso!', 'Nenhum modelo disponível.', 'info');
                 return;
@@ -254,11 +260,13 @@ btnModelos.addEventListener('click', async () => {
             // Criar o conteúdo do modal com abas
             const gridClientes = criarGridImagens(imagensClientes);
             const gridFixos = criarGridImagens(imagensFixos);
+            const gridNovos = criarGridImagens(imagensNovos);
 
             const modalHTML = `
                 <div style="display: flex; justify-content: center; gap: 20px; margin-bottom: 20px;">
                     <button id="btnFixos" style="padding: 10px 20px; cursor: pointer; border: none; background-color: #007bff; color: white; border-radius: 5px;">Modelos Fixos</button>
-                    <button id="btnClientes" style="padding: 10px 20px; cursor: pointer; border: none; background-color: #6c757d; color: white; border-radius: 5px;">Modelos dos Clientes</button>
+                    <button id="btnClientes" style="padding: 10px 20px; cursor: pointer; border: none; background-color: #6c757d; color: white; border-radius: 5px;">Modelos dos Clientes</button> 
+                    <button id="btnNovos" style="padding: 10px 20px; cursor: pointer; border: none; background-color: #28a745; color: white; border-radius: 5px;">Modelos Novos</button>
                 </div>
                 <div id="conteudoModelos">${gridFixos}</div>
             `;
@@ -271,6 +279,7 @@ btnModelos.addEventListener('click', async () => {
                     // Alternar entre os modelos fixos e de clientes
                     const btnFixos = document.getElementById('btnFixos');
                     const btnClientes = document.getElementById('btnClientes');
+                    const btnNovos = document.getElementById('btnNovos');
                     const conteudoModelos = document.getElementById('conteudoModelos');
 
                     btnFixos.addEventListener('click', () => {
@@ -285,6 +294,13 @@ btnModelos.addEventListener('click', async () => {
                         btnClientes.style.backgroundColor = '#007bff';
                         btnFixos.style.backgroundColor = '#6c757d';
                         adicionarEventos(imagensClientes);
+                    });
+
+                    btnNovos.addEventListener('click', () => {
+                        conteudoModelos.innerHTML = gridNovos;
+                        btnNovos.style.backgroundColor = '#007bff';
+                        btnFixos.style.backgroundColor = '#6c757d';
+                        adicionarEventos(imagensNovos);
                     });
 
                     // Adicionar eventos iniciais para modelos fixos
