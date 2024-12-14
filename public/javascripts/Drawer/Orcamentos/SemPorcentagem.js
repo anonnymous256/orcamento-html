@@ -79,7 +79,7 @@ async function carregarClientes() {
     noOpt.setAttribute('disabled', true);
     noOpt.setAttribute('selected', true);
     noOpt.textContent = 'Selecione um cliente';
-    clientesSelect.innerHTML = ''; 
+    clientesSelect.innerHTML = '';
     clientesSelect.appendChild(noOpt);
 
     try {
@@ -147,6 +147,12 @@ btnModelos.addEventListener('click', async () => {
             }
             const imagensFixos = await responseFixos.json();
 
+            const responseNovos = await fetch('/listarNovos');
+            if (!responseNovos.ok) {
+                throw new Error(`Erro ao carregar modelos novos: ${responseNovos.statusText}`);
+            }
+            const imagensNovos = await responseNovos.json();
+
             if (!imagensClientes.length && !imagensFixos.length) {
                 Swal.fire('Aviso!', 'Nenhum modelo disponível.', 'info');
                 return;
@@ -173,8 +179,8 @@ btnModelos.addEventListener('click', async () => {
                         adicionarProduto(produto);
                         Swal.close();
 
-                        form.reset(); 
-                        clienteSelectElement.value = clienteSelecionado; 
+                        form.reset();
+                        clienteSelectElement.value = clienteSelecionado;
                     });
                 });
             };
@@ -218,13 +224,15 @@ btnModelos.addEventListener('click', async () => {
             // Criar o conteúdo do modal com abas
             const gridClientes = criarGridImagens(imagensClientes);
             const gridFixos = criarGridImagens(imagensFixos);
+            const gridNovos = criarGridImagens(imagensNovos);
 
             const modalHTML = `
                 <div style="display: flex; justify-content: center; gap: 20px; margin-bottom: 20px;">
-                    <button id="btnFixos" style="padding: 10px 20px; cursor: pointer; border: none; background-color: #007bff; color: white; border-radius: 5px;">Modelos Fixos</button>
-                    <button id="btnClientes" style="padding: 10px 20px; cursor: pointer; border: none; background-color: #6c757d; color: white; border-radius: 5px;">Modelos dos Clientes</button>
+                <button id="btnNovos" style="padding: 10px 20px; cursor: pointer; border: none; background-color: #28a745; color: white; border-radius: 5px;">Padrão</button>
+                    <button id="btnFixos" style="padding: 10px 20px; cursor: pointer; border: none; background-color: #007bff; color: white; border-radius: 5px;">Fixos</button>
+                    <button id="btnClientes" style="padding: 10px 20px; cursor: pointer; border: none; background-color: #6c757d; color: white; border-radius: 5px;">Clientes</button> 
                 </div>
-                <div id="conteudoModelos">${gridFixos}</div>
+                <div id="conteudoModelos">${gridNovos}</div>
             `;
 
             Swal.fire({
@@ -235,6 +243,7 @@ btnModelos.addEventListener('click', async () => {
                     // Alternar entre os modelos fixos e de clientes
                     const btnFixos = document.getElementById('btnFixos');
                     const btnClientes = document.getElementById('btnClientes');
+                    const btnNovos = document.getElementById('btnNovos');
                     const conteudoModelos = document.getElementById('conteudoModelos');
 
                     btnFixos.addEventListener('click', () => {
@@ -251,8 +260,15 @@ btnModelos.addEventListener('click', async () => {
                         adicionarEventos(imagensClientes);
                     });
 
+                    btnNovos.addEventListener('click', () => {
+                        conteudoModelos.innerHTML = gridNovos;
+                        btnNovos.style.backgroundColor = '#007bff';
+                        btnFixos.style.backgroundColor = '#6c757d';
+                        adicionarEventos(imagensNovos);
+                    });
+
                     // Adicionar eventos iniciais para modelos fixos
-                    adicionarEventos(imagensFixos);
+                    adicionarEventos(imagensNovos);
                 }
             });
         } catch (error) {
@@ -269,7 +285,7 @@ btnModelos.addEventListener('click', async () => {
 // FUNCIONALIDADE DO BOTAO DE CALCULAR TOTAL
 btnTotal.addEventListener('click', () => {
 
-   
+
     const quantidadeEl = document.getElementById('quantidade');
     const valorMetroEl = document.getElementById('metro');
     const larguraEl = document.getElementById('largura');
@@ -416,7 +432,7 @@ async function abrirModalEdicao(produto, li) {
             const altura = document.getElementById('edit-altura').value;
             const largura = document.getElementById('edit-largura').value;
             const metro = document.getElementById('edit-metro').value;
-            
+
             const quantidade = document.getElementById('edit-quantidade').value;
             const total = document.getElementById('edit-total').value;
             const vidro = produto.corVidro ? document.getElementById('edit-vidro').value : null;
@@ -444,7 +460,7 @@ async function abrirModalEdicao(produto, li) {
             li.querySelector('.dimensoes').innerHTML = `${altura}m x ${largura}m`;
             li.querySelector('.quantidade').innerHTML = `${quantidade}`;
             li.querySelector('.metro').innerHTML = `${formatarParaReal(metro)}`;
-            
+
 
             const vidroElement = li.querySelector('.vidro');
             const ferragemElement = li.querySelector('.ferragem');
@@ -479,6 +495,9 @@ async function carregarModelos(produtoAtual = null, callback) {
         const responseFixos = await fetch('/listarModelosFixos');
         const imagensFixos = await responseFixos.json();
 
+        const reponseNovos = await fetch('/listarNovos');
+        const imagensNovos = await reponseNovos.json();
+
         // Função para criar a grid de imagens
         const criarGridImagens = (imagens) => {
             let gridHTML = `<div style="display: flex; justify-content: space-around; flex-wrap: wrap;">`;
@@ -508,10 +527,11 @@ async function carregarModelos(produtoAtual = null, callback) {
         const modalHTML = `
             <div>
                 <div style="display: flex; justify-content: space-around; margin-bottom: 15px;">
-                    <button id="btnModelosFixos">Modelos Fixos</button>
-                    <button id="btnModelosCliente">Modelos Cliente</button>
+                    <button id="btnModelosNovos">Padrão</button>
+                    <button id="btnModelosFixos">Fixos</button>
+                    <button id="btnModelosCliente">Cliente</button>
                 </div>
-                <div id="modelosGrid">${exibirModelos(imagensFixos)}</div>
+                <div id="modelosGrid">${exibirModelos(imagensNovos)}</div>
             </div>
         `;
 
@@ -554,9 +574,22 @@ async function carregarModelos(produtoAtual = null, callback) {
                         });
                     });
                 });
+
+                document.getElementById('btnModelosNovos').addEventListener('click', () => {
+                    document.getElementById('modelosGrid').innerHTML = exibirModelos(imagensNovos);
+                    // Atualizar os eventos dos novos modelos exibidos
+                    document.querySelectorAll('[data-index]').forEach((el, index) => {
+                        el.addEventListener('click', () => {
+                            const imagem = el.querySelector('img').src;
+                            callback({ imagem, nome: `Modelo ${index + 1}` });
+                            Swal.close();
+                        });
+                    });
+                });
             }
         });
 
+        
     } catch (error) {
         Swal.fire('Erro!', 'Erro ao carregar os modelos.', 'error');
     }
@@ -588,20 +621,20 @@ async function converterPDF() {
         cancelButtonText: 'Cancelar'
     });
     if (descricaoServico !== undefined) {
-    await Swal.fire({
-        title: 'Tem certeza?',
-        text: ' Vocês quer converter para PDF ?',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#dc3545',
-        cancelButtonColor: '#6c757d',
-        confirmButtonText: 'Sim, converter!'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            gerarPdf(descricaoServico);
-        }
+        await Swal.fire({
+            title: 'Tem certeza?',
+            text: ' Vocês quer converter para PDF ?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Sim, converter!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                gerarPdf(descricaoServico);
+            }
 
-    });
+        });
     }
 }
 
@@ -648,7 +681,7 @@ async function gerarPdf(descricaoServico = '') {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
 
-    
+
 
     const empresaData = await dadosEmpresa();
     const clienteData = await carregarClientesId(clienteNome);
@@ -686,14 +719,14 @@ async function gerarPdf(descricaoServico = '') {
 
     // Informações da empresa
     doc.setFont("Roboto", "bold", 14);
-    doc.setTextColor(0, 51, 102); 
+    doc.setTextColor(0, 51, 102);
     doc.text(`${empresaData.nome}`, 10, 50);
     doc.setFont("Roboto", "normal", 10);
-    doc.setTextColor(0, 0, 0); 
+    doc.setTextColor(0, 0, 0);
     doc.text(`CNPJ: ${empresaData.cnpj}`, 10, 60);
     doc.text(`Endereço: ${empresaData.endereco}`, 10, 70);
     doc.text(`Telefone: ${empresaData.telefone}`, 10, 80);
-    
+
 
     // Linha separadora
     doc.setDrawColor(0);
@@ -701,10 +734,10 @@ async function gerarPdf(descricaoServico = '') {
 
     // Informações do cliente
     doc.setFont("Roboto", "bold", 12);
-    doc.setTextColor(0, 51, 102); 
+    doc.setTextColor(0, 51, 102);
     doc.text("Dados do Cliente", 10, 95);
     doc.setFont("Roboto", "normal", 10);
-    doc.setTextColor(0, 0, 0); 
+    doc.setTextColor(0, 0, 0);
     doc.text(`Nome: ${clienteData.nome}`, 10, 105);
     doc.text(`Endereço: ${clienteData.endereco}`, 10, 115);
     doc.text(`Telefone: ${clienteData.telefone}`, 10, 125);
@@ -713,11 +746,11 @@ async function gerarPdf(descricaoServico = '') {
     doc.setDrawColor(0);
     doc.line(10, 130, 200, 130);
 
-    
+
     function getTextDimensions(text, fontSize = 12, maxWidth = 130) {
         doc.setFont("Roboto", "normal", fontSize);
 
-        
+
         const lines = doc.splitTextToSize(text, maxWidth);
 
         const textHeight = lines.length * fontSize;
@@ -772,7 +805,7 @@ async function gerarPdf(descricaoServico = '') {
         const descricaoDims = getTextDimensions(descricao, 9);
         const descricaoHeight = descricaoDims.height;
 
-        const totalCardHeight = 45 + descricaoHeight + 5; 
+        const totalCardHeight = 45 + descricaoHeight + 5;
         const cardY = currentY;
         doc.setDrawColor(0);
         doc.setFillColor(...currentColor); // Usando a cor definida para o card
@@ -790,9 +823,9 @@ async function gerarPdf(descricaoServico = '') {
         const descricaoY = modeloY + 7;
         doc.setFont("Roboto", "normal", 7);
         doc.text(`Descrição: ${descricao}`, 50, descricaoY, { maxWidth: 130 });
-        const dimensoesY = descricaoY + 2 + descricaoHeight / 2;  
+        const dimensoesY = descricaoY + 2 + descricaoHeight / 2;
         doc.text(`Dimensões (A x L): ${dimensoes}`, 50, dimensoesY);
-        const quantidadeY = dimensoesY + 7; 
+        const quantidadeY = dimensoesY + 7;
         doc.text(`Quantidade: ${quantidade}`, 50, quantidadeY);
 
         let vidroY = quantidadeY;
@@ -807,13 +840,13 @@ async function gerarPdf(descricaoServico = '') {
             ferragemY = vidroY + 7;
             doc.text(`Ferragem: ${ferragem}`, 50, ferragemY);
         }
-        const valorTotalY = ferragemY + 7;  
+        const valorTotalY = ferragemY + 7;
         doc.setTextColor(255, 0, 0);
         doc.text(`Valor Total: ${formatarParaReal(parseFloat(valorTotal.replace("R$", "").trim()))}`, 50, valorTotalY);
 
 
         doc.setTextColor(0, 0, 0);
-        
+
         doc.addImage(imagem, "JPEG", 15, cardY + 5, 30, 30);
 
         currentY += totalCardHeight + 5;
@@ -849,7 +882,7 @@ btnSalvar.addEventListener('click', async () => {
                 const dimensoes = li.querySelector('.dimensoes').textContent;
                 const quantidade = li.querySelector('.quantidade').textContent; 3
                 const valorMetro = li.querySelector('.metro').textContent;
-                
+
                 const vidro = li.querySelector('.vidro').textContent ? li.querySelector('.vidro').textContent : 'Sem cor de vidro';
                 const ferragem = li.querySelector('.ferragem').textContent ? li.querySelector('.ferragem').textContent : 'Sem cor deferragem';
                 const valorTotal = li.querySelector('.total').textContent;

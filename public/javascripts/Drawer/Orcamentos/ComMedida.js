@@ -264,11 +264,11 @@ btnModelos.addEventListener('click', async () => {
 
             const modalHTML = `
                 <div style="display: flex; justify-content: center; gap: 20px; margin-bottom: 20px;">
-                    <button id="btnFixos" style="padding: 10px 20px; cursor: pointer; border: none; background-color: #007bff; color: white; border-radius: 5px;">Modelos Fixos</button>
-                    <button id="btnClientes" style="padding: 10px 20px; cursor: pointer; border: none; background-color: #6c757d; color: white; border-radius: 5px;">Modelos dos Clientes</button> 
-                    <button id="btnNovos" style="padding: 10px 20px; cursor: pointer; border: none; background-color: #28a745; color: white; border-radius: 5px;">Modelos Novos</button>
+                <button id="btnNovos" style="padding: 10px 20px; cursor: pointer; border: none; background-color: #28a745; color: white; border-radius: 5px;">Novos</button>
+                    <button id="btnFixos" style="padding: 10px 20px; cursor: pointer; border: none; background-color: #007bff; color: white; border-radius: 5px;">Fixos</button>
+                    <button id="btnClientes" style="padding: 10px 20px; cursor: pointer; border: none; background-color: #6c757d; color: white; border-radius: 5px;">Clientes</button> 
                 </div>
-                <div id="conteudoModelos">${gridFixos}</div>
+                <div id="conteudoModelos">${gridNovos}</div>
             `;
 
             Swal.fire({
@@ -304,7 +304,7 @@ btnModelos.addEventListener('click', async () => {
                     });
 
                     // Adicionar eventos iniciais para modelos fixos
-                    adicionarEventos(imagensFixos);
+                    adicionarEventos(imagensNovos);
                 }
             });
         } catch (error) {
@@ -543,6 +543,9 @@ async function carregarModelos(produtoAtual = null, callback) {
         const responseFixos = await fetch('/listarModelosFixos');
         const imagensFixos = await responseFixos.json();
 
+        const reponseNovos = await fetch('/listarNovos');
+        const imagensNovos = await reponseNovos.json();
+
         // Função para criar a grid de imagens
         const criarGridImagens = (imagens) => {
             let gridHTML = `<div style="display: flex; justify-content: space-around; flex-wrap: wrap;">`;
@@ -571,11 +574,13 @@ async function carregarModelos(produtoAtual = null, callback) {
         // Criação do conteúdo do modal
         const modalHTML = `
             <div>
-                <div style="display: flex; justify-content: space-around; margin-bottom: 15px;">
-                    <button id="btnModelosFixos">Modelos Fixos</button>
-                    <button id="btnModelosCliente">Modelos Cliente</button>
+                <div style="display: flex; justify-content: space-around; margin-bottom: 15px; gap: 20px;">
+                    <button id="btnModelosNovos">Padrão</button>
+                    <button id="btnModelosFixos">Fixos</button>
+                    <button id="btnModelosCliente">Cliente</button>
+                    
                 </div>
-                <div id="modelosGrid">${exibirModelos(imagensFixos)}</div>
+                <div id="modelosGrid">${exibirModelos(imagensNovos)}</div>
             </div>
         `;
 
@@ -609,6 +614,18 @@ async function carregarModelos(produtoAtual = null, callback) {
 
                 document.getElementById('btnModelosCliente').addEventListener('click', () => {
                     document.getElementById('modelosGrid').innerHTML = exibirModelos(imagensClientes);
+                    // Atualizar os eventos dos novos modelos exibidos
+                    document.querySelectorAll('[data-index]').forEach((el, index) => {
+                        el.addEventListener('click', () => {
+                            const imagem = el.querySelector('img').src;
+                            callback({ imagem, nome: `Modelo ${index + 1}` });
+                            Swal.close();
+                        });
+                    });
+                });
+
+                document.getElementById('btnModelosNovos').addEventListener('click', () => {
+                    document.getElementById('modelosGrid').innerHTML = exibirModelos(imagensNovos);
                     // Atualizar os eventos dos novos modelos exibidos
                     document.querySelectorAll('[data-index]').forEach((el, index) => {
                         el.addEventListener('click', () => {
