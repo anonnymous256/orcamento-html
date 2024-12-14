@@ -79,7 +79,7 @@ async function carregarClientes() {
     noOpt.setAttribute('disabled', true);
     noOpt.setAttribute('selected', true);
     noOpt.textContent = 'Selecione um cliente';
-    clientesSelect.innerHTML = ''; 
+    clientesSelect.innerHTML = '';
     clientesSelect.appendChild(noOpt);
 
     try {
@@ -208,8 +208,8 @@ btnModelos.addEventListener('click', async () => {
                         adicionarProduto(produto);
                         Swal.close();
 
-                        form.reset(); 
-                        clienteSelectElement.value = clienteSelecionado; 
+                        form.reset();
+                        clienteSelectElement.value = clienteSelecionado;
                     });
                 });
             };
@@ -621,20 +621,35 @@ async function converterPDF() {
         });
         return;
     }
-    await Swal.fire({
-        title: 'Tem certeza?',
-        text: ' Vocês quer converter para PDF ?',
-        icon: 'warning',
+    const { value: descricaoServico } = await Swal.fire({
+        title: 'Adicionar Descrição ao Serviço',
+        text: 'Caso Não quiser adicionar uma descrição ao serviço, deixe em branco.',
+        input: 'textarea',
+        inputLabel: 'Descrição',
+        inputPlaceholder: 'Digite a descrição que será exibida no PDF...',
+        inputAttributes: {
+            'aria-label': 'Digite a descrição aqui'
+        },
         showCancelButton: true,
-        confirmButtonColor: '#dc3545',
-        cancelButtonColor: '#6c757d',
-        confirmButtonText: 'Sim, converter!'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            gerarPdf();
-        }
+        confirmButtonText: 'Continuar',
+        cancelButtonText: 'Cancelar'
+    });
+    if (descricaoServico !== undefined) {
+        await Swal.fire({
+            title: 'Tem certeza?',
+            text: ' Vocês quer converter para PDF ?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Sim, converter!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                gerarPdf(descricaoServico);
+            }
 
-    })
+        });
+    }
 
 }
 
@@ -677,11 +692,11 @@ async function carregarClientesId(nome) {
 }
 
 
-async function gerarPdf() {
+async function gerarPdf(descricaoServico = '') {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
 
-    
+
 
     const empresaData = await dadosEmpresa();
     const clienteData = await carregarClientesId(clienteNome);
@@ -719,14 +734,14 @@ async function gerarPdf() {
 
     // Informações da empresa
     doc.setFont("Roboto", "bold", 14);
-    doc.setTextColor(0, 51, 102); 
+    doc.setTextColor(0, 51, 102);
     doc.text(`${empresaData.nome}`, 10, 50);
     doc.setFont("Roboto", "normal", 10);
-    doc.setTextColor(0, 0, 0); 
+    doc.setTextColor(0, 0, 0);
     doc.text(`CNPJ: ${empresaData.cnpj}`, 10, 60);
     doc.text(`Endereço: ${empresaData.endereco}`, 10, 70);
     doc.text(`Telefone: ${empresaData.telefone}`, 10, 80);
-    
+
 
     // Linha separadora
     doc.setDrawColor(0);
@@ -734,10 +749,10 @@ async function gerarPdf() {
 
     // Informações do cliente
     doc.setFont("Roboto", "bold", 12);
-    doc.setTextColor(0, 51, 102); 
+    doc.setTextColor(0, 51, 102);
     doc.text("Dados do Cliente", 10, 95);
     doc.setFont("Roboto", "normal", 10);
-    doc.setTextColor(0, 0, 0); 
+    doc.setTextColor(0, 0, 0);
     doc.text(`Nome: ${clienteData.nome}`, 10, 105);
     doc.text(`Endereço: ${clienteData.endereco}`, 10, 115);
     doc.text(`Telefone: ${clienteData.telefone}`, 10, 125);
@@ -746,11 +761,11 @@ async function gerarPdf() {
     doc.setDrawColor(0);
     doc.line(10, 130, 200, 130);
 
-    
+
     function getTextDimensions(text, fontSize = 12, maxWidth = 130) {
         doc.setFont("Roboto", "normal", fontSize);
 
-        
+
         const lines = doc.splitTextToSize(text, maxWidth);
 
         const textHeight = lines.length * fontSize;
@@ -805,7 +820,7 @@ async function gerarPdf() {
         const descricaoDims = getTextDimensions(descricao, 9);
         const descricaoHeight = descricaoDims.height;
 
-        const totalCardHeight = 45 + descricaoHeight + 5; 
+        const totalCardHeight = 45 + descricaoHeight + 5;
         const cardY = currentY;
         doc.setDrawColor(0);
         doc.setFillColor(...currentColor); // Usando a cor definida para o card
@@ -823,9 +838,9 @@ async function gerarPdf() {
         const descricaoY = modeloY + 7;
         doc.setFont("Roboto", "normal", 7);
         doc.text(`Descrição: ${descricao}`, 50, descricaoY, { maxWidth: 130 });
-        const dimensoesY = descricaoY + 2 + descricaoHeight / 2;  
+        const dimensoesY = descricaoY + 2 + descricaoHeight / 2;
         doc.text(`Dimensões (A x L): ${dimensoes}`, 50, dimensoesY);
-        const quantidadeY = dimensoesY + 7; 
+        const quantidadeY = dimensoesY + 7;
         doc.text(`Quantidade: ${quantidade}`, 50, quantidadeY);
 
         let vidroY = quantidadeY;
@@ -840,13 +855,13 @@ async function gerarPdf() {
             ferragemY = vidroY + 7;
             doc.text(`Ferragem: ${ferragem}`, 50, ferragemY);
         }
-        const valorTotalY = ferragemY + 7;  
+        const valorTotalY = ferragemY + 7;
         doc.setTextColor(255, 0, 0);
         doc.text(`Valor Total: ${formatarParaReal(parseFloat(valorTotal.replace("R$", "").trim()))}`, 50, valorTotalY);
 
 
         doc.setTextColor(0, 0, 0);
-        
+
         doc.addImage(imagem, "JPEG", 15, cardY + 5, 30, 30);
 
         currentY += totalCardHeight + 5;
@@ -854,7 +869,19 @@ async function gerarPdf() {
     doc.setDrawColor(0);
     doc.line(10, currentY, 200, currentY);
 
+    currentY += 10;
     doc.text(`Valor Total: ${formatarParaReal(valorTotalFinal)}`, 10, 280);
+    const maxWidth = 180;
+    currentY += 10;
+    const descricaoServiçoLinhas = doc.splitTextToSize(descricaoServico, maxWidth);
+
+    descricaoServiçoLinhas.forEach((linha, index) => {
+        if (currentY + (index * 10) > 280) {
+            doc.addPage();
+            currentY = 10;
+        }
+        doc.text(linha, 10, currentY + (index * 10));
+    });
     // Baixar o PDF
     doc.save("relatorio.pdf");
 }

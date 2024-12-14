@@ -573,6 +573,21 @@ async function converterPDF() {
         });
         return;
     }
+
+    const { value: descricaoServico } = await Swal.fire({
+        title: 'Adicionar Descrição ao Serviço',
+        text: 'Caso Não quiser adicionar uma descrição ao serviço, deixe em branco.',
+        input: 'textarea',
+        inputLabel: 'Descrição',
+        inputPlaceholder: 'Digite a descrição que será exibida no PDF...',
+        inputAttributes: {
+            'aria-label': 'Digite a descrição aqui'
+        },
+        showCancelButton: true,
+        confirmButtonText: 'Continuar',
+        cancelButtonText: 'Cancelar'
+    });
+    if (descricaoServico !== undefined) {
     await Swal.fire({
         title: 'Tem certeza?',
         text: ' Vocês quer converter para PDF ?',
@@ -583,11 +598,11 @@ async function converterPDF() {
         confirmButtonText: 'Sim, converter!'
     }).then((result) => {
         if (result.isConfirmed) {
-            gerarPdf();
+            gerarPdf(descricaoServico);
         }
 
-    })
-
+    });
+    }
 }
 
 async function dadosEmpresa() {
@@ -629,7 +644,7 @@ async function carregarClientesId(nome) {
 }
 
 
-async function gerarPdf() {
+async function gerarPdf(descricaoServico = '') {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
 
@@ -806,7 +821,19 @@ async function gerarPdf() {
     doc.setDrawColor(0);
     doc.line(10, currentY, 200, currentY);
 
+    currentY += 10;
     doc.text(`Valor Total: ${formatarParaReal(valorTotalFinal)}`, 10, 280);
+    const maxWidth = 180;
+    currentY += 10;
+    const descricaoServiçoLinhas = doc.splitTextToSize(descricaoServico, maxWidth);
+
+    descricaoServiçoLinhas.forEach((linha, index) => {
+        if (currentY + (index * 10) > 280) {
+            doc.addPage();
+            currentY = 10;
+        }
+        doc.text(linha, 10, currentY + (index * 10));
+    });
     // Baixar o PDF
     doc.save("relatorio.pdf");
 }
