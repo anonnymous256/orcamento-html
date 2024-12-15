@@ -54,4 +54,7 @@ router.get('/SemPorcentagem', function(req, res) {
   res.render('Drawer/Orcamentos/SemPorcentagem', { title: 'Express' });
 });
 
+router.get('/Tempera', function(req, res) {
+  res.render('Drawer/SistemaTempera/Tempera', { title: 'Express' });
+});
 module.exports = router;

@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerar PDF</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: #e0f2f1;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        header {
+            width: 100vw;
+            height: 7vh;
+            background-color: #2f7d32;
+            ;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            text-align: center;
+            font-size: 2rem;
+            padding: 0 40px;
+            color: var(--font-color);
+
+        }
+
+        h1 {
+            text-align: center;
+            color: #66bb6a;
+            margin: 20px 0;
+        }
+
+        form {
+            background-color: #263238;
+            padding: 20px;
+            margin: 20px auto;
+            width: 90%;
+            max-width: 600px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        input,
+        select,
+        button {
+            display: block;
+            margin: 10px 0;
+            padding: 10px;
+            width: 100%;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        button {
+            background-color: #66bb6a;
+            color: #121212;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #43a047;
+        }
+
+        #imageModal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 10;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #imageModal div {
+            background: #263238;
+            padding: 20px;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 600px;
+            max-height: 80%;
+            overflow-y: auto;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+        }
+
+        #imageModal h2 {
+            color: #66bb6a;
+            margin-bottom: 20px;
+        }
+
+        #imageList img {
+            margin: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        #imageList img:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 8px rgba(102, 187, 106, 0.8);
+        }
+
+        #previewSection {
+            width: 90%;
+            max-width: 600px;
+            background-color: #263238;
+            padding: 20px;
+            margin: 20px auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+        }
+
+        #previewSection h2 {
+            color: #2f7d32;
+            ;
+            margin-bottom: 10px;
+        }
+
+        #itemPreviewList li {
+            list-style: none;
+            background: #37474f;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        #itemPreviewList img {
+            width: 80px;
+            height: auto;
+            border-radius: 8px;
+            margin-right: 10px;
+        }
+
+        #itemPreviewList p {
+            margin: 5px 0;
+            color: #e0f2f1;
+        }
+
+        /* Estilos para as abas do modal */
+        #tabContainer {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+
+        .tabButton {
+            background-color: #37474f;
+            color: #e0f2f1;
+            border: none;
+            padding: 10px 20px;
+            margin: 0 5px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .tabButton:hover {
+            background-color: #66bb6a;
+        }
+
+        .tab {
+            display: none;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            text-align: center;
+        }
+
+        .tab img {
+            margin: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        @media (max-width: 600px) {
+
+            form,
+            #previewSection {
+                width: 100%;
+                margin: 10px;
+            }
+
+            #itemPreviewList img {
+                width: 60px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <i class="fa-solid fa-arrow-left" onclick="window.history.back()"></i>
+        <p>Sistema de tempera</p>
+        <i></i>
+    </header>
+    <form id="detailsForm">
+        <label for="width">Largura (cm):</label>
+        <input type="number" id="width" name="width" required>
+
+        <label for="height">Altura (cm):</label>
+        <input type="number" id="height" name="height" required>
+
+        <label for="Quantidade">Quantidade</label>
+        <input type="number" id="Quantidade" name="Quantidade" required>
+
+        <label for="glassColor">Cor do Vidro:</label>
+        <select id="glassColor" name="glassColor" required>
+            <option value="Incolor">Incolor</option>
+            <option value="Fumê">Fumê</option>
+            <option value="Verde">Verde</option>
+            <option value="Pontilhado">Pontilhado</option>
+            <option value="Bronze">Bronze</option>
+        </select>
+
+        <label for="glassThickness">Espessura do Vidro:</label>
+        <select id="glassThickness" name="glassThickness" required>
+            <option value="6mm">6mm</option>
+            <option value="8mm">8mm</option>
+            <option value="10mm">10mm</option>
+        </select>
+
+        <button type="button" onclick="openImageModal()">Escolher Imagem</button>
+        <button type="button" onclick="saveItemData()">Adicionar Item</button>
+        <button type="button" onclick="generateFinalPDF()">Gerar PDF Final</button>
+    </form>
+
+    <div id="imageModal">
+        <div>
+            <h2>Selecione uma Imagem</h2>
+            <div id="tabContainer">
+                <button class="tabButton" onclick="showTab('PortasImagens')">Porta</button>
+                <button class="tabButton" onclick="showTab('JanelasImagens')">Janela</button>
+                <button class="tabButton" onclick="showTab('BoxImagens')">Box</button>
+                <button class="tabButton" onclick="showTab('OutrosImagens')">Outros</button>
+            </div>
+            <div id="tabContent">
+                <ul id="PortasImagens" class="tab">
+                    <li><img src="images/SistemaTempera/Portas/Portas (1).png" alt="Porta 1"
+                            onclick="selectImage('images/SistemaTempera/Portas/Portas (1).png')"></li>
+                    <li><img src="images/SistemaTempera/Portas/Portas (2).png" alt="Porta 2"
+                            onclick="selectImage('images/SistemaTempera/Portas/Portas (2).png')"></li>
+                    <li><img src="images/SistemaTempera/Portas/Portas (3).png" alt="Porta 3"
+                            onclick="selectImage('images/SistemaTempera/Portas/Portas (3).png')"></li>
+                    <li><img src="images/SistemaTempera/Portas/Portas (4).png" alt="Porta 4"
+                            onclick="selectImage('images/SistemaTempera/Portas/Portas (4).png')"></li>
+                    <li><img src="images/SistemaTempera/Portas/Portas (5).png" alt="Porta 5"
+                            onclick="selectImage('images/SistemaTempera/Portas/Portas (5).png')"></li>
+                    <li><img src="images/SistemaTempera/Portas/Portas (6).png" alt="Porta 6"
+                            onclick="selectImage('images/SistemaTempera/Portas/Portas (6).png')"></li>
+                    <li><img src="images/SistemaTempera/Portas/Portas (7).png" alt="Porta 7"
+                            onclick="selectImage('images/SistemaTempera/Portas/Portas (7).png')"></li>
+                    <li><img src="images/SistemaTempera/Portas/Portas (8).png" alt="Porta 8"
+                            onclick="selectImage('images/SistemaTempera/Portas/Portas (8).png')"></li>
+                    <li><img src="images/SistemaTempera/Portas/Portas (9).png" alt="Porta 9"
+                            onclick="selectImage('images/SistemaTempera/Portas/Portas (9).png')"></li>
+                    <li><img src="images/SistemaTempera/Portas/Portas (10).png" alt="Porta 10"
+                            onclick="selectImage('images/SistemaTempera/Portas/Portas (10).png')"></li>
+                    <li><img src="images/SistemaTempera/Portas/Portas (11).png" alt="Porta 11"
+                            onclick="selectImage('images/SistemaTempera/Portas/Portas (11).png')"></li>
+                    <li><img src="images/SistemaTempera/Portas/Portas (12).png" alt="Porta 12"
+                            onclick="selectImage('images/SistemaTempera/Portas/Portas (12).png')"></li>
+                    <li><img src="images/SistemaTempera/Portas/Portas (13).png" alt="Porta 13"
+                            onclick="selectImage('images/SistemaTempera/Portas/Portas (13).png')"></li>
+                    <li><img src="images/SistemaTempera/Portas/Portas (14).png" alt="Porta 14"
+                            onclick="selectImage('images/SistemaTempera/Portas/Portas (14).png')"></li>
+                    <li><img src="images/SistemaTempera/Portas/Portas (15).png" alt="Porta 15"
+                            onclick="selectImage('images/SistemaTempera/Portas/Portas (15).png')"></li>
+                    <li><img src="images/SistemaTempera/Portas/Portas (16).png" alt="Porta 16"
+                            onclick="selectImage('images/SistemaTempera/Portas/Portas (16).png')"></li>
+                    <li><img src="images/SistemaTempera/Portas/Portas (17).png" alt="Porta 17"
+                            onclick="selectImage('images/SistemaTempera/Portas/Portas (17).png')"></li>
+                </ul>
+                <ul id="JanelasImagens" class="tab">
+                    <li><img src="images/SistemaTempera/Janelas/Janelas (1).png" alt="Janela 1"
+                            onclick="selectImage('images/SistemaTempera/Janelas/Janelas (1).png')"></li>
+                    <li><img src="images/SistemaTempera/Janelas/Janelas (2).png" alt="Janela 2"
+                            onclick="selectImage('images/SistemaTempera/Janelas/Janelas (2).png')"></li>
+                    <li><img src="images/SistemaTempera/Janelas/Janelas (3).png" alt="Janela 3"
+                            onclick="selectImage('images/SistemaTempera/Janelas/Janelas (3).png')"></li>
+                    <li><img src="images/SistemaTempera/Janelas/Janelas (4).png" alt="Janela 4"
+                            onclick="selectImage('images/SistemaTempera/Janelas/Janelas (4).png')"></li>
+                    <li><img src="images/SistemaTempera/Janelas/Janelas (5).png" alt="Janela 5"
+                            onclick="selectImage('images/SistemaTempera/Janelas/Janelas (5).png')"></li>
+                </ul>
+                <ul id="BoxImagens" class="tab">
+                    <li><img src="images/SistemaTempera/Box´s/Box (1).png" alt="Janela 1"
+                            onclick="selectImage('images/SistemaTempera/Box´s/Box (1).png')"></li>
+                    <li><img src="images/SistemaTempera/Box´s/Box (2).png" alt="Janela 2"
+                            onclick="selectImage('images/SistemaTempera/Box´s/Box (2).png')"></li>
+                    <li><img src="images/SistemaTempera/Box´s/Box (3).png" alt="Janela 3"
+                            onclick="selectImage('images/SistemaTempera/Box´s/Box (3).png')"></li>
+                    <li><img src="images/SistemaTempera/Box´s/Box (4).png" alt="Janela 4"
+                            onclick="selectImage('images/SistemaTempera/Box´s/Box (4).png')"></li>
+                    <li><img src="images/SistemaTempera/Box´s/Box (5).png" alt="Janela 5"
+                            onclick="selectImage('images/SistemaTempera/Box´s/Box (5).png')"></li>
+                    <li><img src="images/SistemaTempera/Box´s/Box (6).png" alt="Janela 6"
+                            onclick="selectImage('images/SistemaTempera/Box´s/Box (6).png')"></li>
+                </ul>
+                <ul id="OutrosImagens" class="tab">
+                    <li><img src="images/SistemaTempera/Outros/Outros (1).png" alt="Janela 1"
+                            onclick="selectImage('images/SistemaTempera/Outros/Outros (1).png')"></li>
+                    <li><img src="images/SistemaTempera/Outros/Outros (2).png" alt="Janela 2"
+                            onclick="selectImage('images/SistemaTempera/Outros/Outros (2).png')"></li>
+                    <li><img src="images/SistemaTempera/Outros/Outros (3).png" alt="Janela 3"
+                            onclick="selectImage('images/SistemaTempera/Outros/Outros (3).png')"></li>
+                    <li><img src="images/SistemaTempera/Outros/Outros (4).png" alt="Janela 4"
+                            onclick="selectImage('images/SistemaTempera/Outros/Outros (4).png')"></li>
+                    <li><img src="images/SistemaTempera/Outros/Outros (5).png" alt="Janela 5"
+                            onclick="selectImage('images/SistemaTempera/Outros/Outros (5).png')"></li>
+                    <li><img src="images/SistemaTempera/Outros/Outros (6).png" alt="Janela 6"
+                            onclick="selectImage('images/SistemaTempera/Outros/Outros (6).png')"></li>
+                    <li><img src="images/SistemaTempera/Outros/Outros (7).png" alt="Janela 7"
+                            onclick="selectImage('images/SistemaTempera/Outros/Outros (7).png')"></li>
+                    <li><img src="images/SistemaTempera/Outros/Outros (8).png" alt="Janela 8"
+                            onclick="selectImage('images/SistemaTempera/Outros/Outros (8).png')"></li>
+                    <li><img src="images/SistemaTempera/Outros/Outros (9).png" alt="Janela 9"
+                            onclick="selectImage('images/SistemaTempera/Outros/Outros (9).png')"></li>
+                </ul>
+            </div>
+            <button onclick="closeImageModal()">Fechar</button>
+        </div>
+    </div>
+
+    <div id="previewSection">
+        <h2>Itens Adicionados:</h2>
+        <ul id="itemPreviewList"></ul>
+    </div>
+
+    <script>
+        let items = [];
+        let selectedImage = null;
+
+        function openImageModal() {
+            document.getElementById('imageModal').style.display = 'flex';
+        }
+
+        function closeImageModal() {
+            document.getElementById('imageModal').style.display = 'none';
+        }
+
+        function showTab(tabId) {
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => tab.style.display = 'none');
+
+            document.getElementById(tabId).style.display = 'block';
+
+            const buttons = document.querySelectorAll('.tabButton');
+            buttons.forEach(button => button.style.backgroundColor = '#37474f');
+            const activeButton = Array.from(buttons).find(button => button.onclick.toString().includes(tabId));
+            if (activeButton) activeButton.style.backgroundColor = '#66bb6a';
+        }
+
+        // Exibe a aba de "Porta" como padrão ao abrir o modal
+        document.addEventListener('DOMContentLoaded', () => {
+            // Inicializa apenas as abas sem abrir o modal
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => tab.style.display = 'none');
+            document.getElementById('doorImages').style.display = 'block';
+        });
+
+
+        function selectImage(imagePath) {
+            selectedImage = imagePath;
+            Swal.fire({
+                position: "center",
+                icon: "success",
+                title: "Imagem selecionada com sucesso!",
+                showConfirmButton: false,
+                timer: 1300
+            });
+            closeImageModal();
+        }
+
+        function saveItemData() {
+            const width = document.getElementById('width').value;
+            const height = document.getElementById('height').value;
+            const Quantidade = document.getElementById('Quantidade').value;
+            const glassColor = document.getElementById('glassColor').value;
+            const glassThickness = document.getElementById('glassThickness').value;
+
+            if (!width || !height || !Quantidade || !glassColor || !glassThickness || !selectedImage) {
+                Swal.fire({
+                    position: "center",
+                    icon: "info",
+                    title: "Preencha todos os campos obrigatórios!",
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+                return;
+            }
+
+            const item = {
+                width,
+                height,
+                Quantidade,
+                glassColor,
+                glassThickness,
+                image: selectedImage
+            };
+
+            items.push(item);
+            updatePreview();
+            Swal.fire({
+            position: "center",
+            icon: "success",
+            title: "Item adicionado com sucesso!",
+            showConfirmButton: false,
+            timer: 1500
+          });
+
+            document.getElementById('detailsForm').reset();
+            selectedImage = null;
+        }
+
+        function updatePreview() {
+            const previewList = document.getElementById('itemPreviewList');
+            previewList.innerHTML = '';
+
+            items.forEach((item, index) => {
+                const listItem = document.createElement('li');
+                listItem.innerHTML = `
+                    <img src="${item.image}" alt="Imagem do item ${index + 1}">
+                    <div>
+                        <p><strong>Item ${index + 1}</strong></p>
+                        <p>Largura: ${item.width} cm, Altura: ${item.height} cm</p>
+                        <p>Quantidade: ${item.Quantidade}</p>
+                        <p>Cor do Vidro: ${item.glassColor}, Espessura: ${item.glassThickness}</p>
+                    </div>
+                `;
+                previewList.appendChild(listItem);
+            });
+        }
+
+        async function generateFinalPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            if (items.length === 0) {
+                Swal.fire({
+            position: "center",
+            icon: "error",
+            title: "Nenhum item adicionado!",
+            showConfirmButton: false,
+            timer: 1500
+          });
+                return;
+            }
+
+            let yPosition = 10;
+            const pageHeight = doc.internal.pageSize.getHeight();
+
+            for (const [index, item] of items.entries()) {
+                // Verificar se há espaço suficiente para o próximo bloco
+                const blockHeight = 150; // Altura estimada para cada item completo
+                if (yPosition + blockHeight > pageHeight) {
+                    doc.addPage();
+                    yPosition = 10;
+                }
+
+                // Calcular largura da página para centralização
+                const pageWidth = doc.internal.pageSize.getWidth();
+
+                // Destacar o título do item
+                doc.setFontSize(16);
+                doc.setFont("helvetica", "bold");
+
+                const text = `Item ${index + 1}`;
+                const textWidth = doc.getTextWidth(text);
+                const textX = (pageWidth - textWidth) / 2;
+
+                // Desenhar retângulo para o título do item
+                const rectWidth = textWidth + 10;
+                const rectX = (pageWidth - rectWidth) / 2;
+                doc.rect(rectX, yPosition, rectWidth, 10, 'S');
+                doc.text(text, textX, yPosition + 7);
+
+                yPosition += 20;
+
+                // Resetar fonte para o restante do conteúdo
+                doc.setFontSize(12);
+                doc.setFont("helvetica", "normal");
+
+                doc.rect(10, yPosition, 190, 20);
+                const glassColors = ["Incolor", "Fumê", "Verde", "Pontilhado", "Bronze"];
+                const selectedGlassColor = glassColors.map(color => color === item.glassColor ? `[X] ${color}` : `[ ] ${color}`).join("    ");
+                doc.text(`Cor do Vidro: ${selectedGlassColor}`, 15, yPosition + 10);
+
+                yPosition += 25;
+
+                doc.rect(10, yPosition, 190, 20);
+                const glassThicknesses = ["6mm", "8mm", "10mm"];
+                const selectedGlassThickness = glassThicknesses.map(thickness => thickness === item.glassThickness ? `[X] ${thickness}` : `[ ] ${thickness}`).join("    ");
+                doc.text(`Espessura do Vidro: ${selectedGlassThickness}`, 15, yPosition + 10);
+
+                yPosition += 25;
+
+                doc.rect(10, yPosition, 190, 20);
+                doc.text(`Quantidade: ${item.Quantidade}`, 15, yPosition + 10);
+
+                yPosition += 25;
+
+                // Adicionar imagem
+                const image = await fetch(item.image).then(res => res.blob()).then(blob => {
+                    return new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.onload = function (e) {
+                            resolve(e.target.result);
+                        };
+                        reader.readAsDataURL(blob);
+                    });
+                });
+
+                const imageWidth = 60;
+                const imageHeight = 60;
+                const imageX = (pageWidth - imageWidth) / 2; // Centralizar imagem
+                doc.addImage(image, 'JPEG', imageX, yPosition, imageWidth, imageHeight);
+
+                yPosition += imageHeight + 5;
+
+                // Verificar espaço antes de largura e altura
+                if (yPosition + 40 > pageHeight) {
+                    doc.addPage();
+                    yPosition = 10;
+                }
+
+                // Adicionar retângulos e textos para Largura e Altura
+                doc.rect(10, yPosition, 60, 15); // Largura
+                doc.text(`Largura do Vão: ${item.width} cm`, 15, yPosition + 10);
+
+                doc.rect(80, yPosition, 60, 15); // Altura
+                doc.text(`Altura do Vão: ${item.height} cm`, 85, yPosition + 10);
+
+                yPosition += 20;
+            }
+
+            doc.save("Tempera.pdf");
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</body>
+
+</html>
