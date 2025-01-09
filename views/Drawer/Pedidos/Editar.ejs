@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="images/Logo/Logo2.jpg" type="image/x-icon">
+    <title>Editar Orçamento</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/stylesheets/Drawer/Orcamentos/swal.css">
+    <link rel="stylesheet" href="/stylesheets/Drawer/Pedidos/Editar.css">
+</head>
+
+<body>
+    <div id="app">
+        <header>
+            <button onclick="window.history.back()">Voltar</button>
+            <button id="generate-pdf-button">Gerar PDF</button>
+        </header>
+        
+        <main>
+            <form id="edit-form">
+                <!-- Campos dinâmicos para editar os produtos -->
+                <div id="produtos-container"></div>
+
+                <button type="submit">Salvar</button>
+            </form>
+            
+        </main>
+    </div>
+
+    <!-- Modal de Seleção de Imagem -->
+    <div id="image-modal" style="display:none;">
+        <div id="modal-content">
+            <h2>Escolha uma Imagem</h2>
+            
+            <!-- Abas para seleção de modelos -->
+            <div class="tabs">
+                <div class="tab active" data-tab="novos">Novos Modelos</div>
+                <div class="tab" data-tab="fixos">Modelos Fixos</div>
+                <div class="tab" data-tab="clientes">Modelos Clientes</div>
+                
+                
+            </div>
+            
+            <!-- Conteúdos das abas -->
+            <div id="novos" class="tab-content active">
+                <div id="image-list"></div>
+            </div>
+            <div id="fixos" class="tab-content">
+                <div id="image-list"></div>
+            </div>
+            <div id="clientes" class="tab-content">
+                <div id="image-list"></div>
+            </div>
+
+            <button id="close-modal">Fechar</button>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+   <script type = "module" src="/javascripts/Drawer/Pedidos/Editar.js"></script>
+</body>
+
+</html>

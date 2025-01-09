@@ -874,26 +874,53 @@ async function gerarPdf(descricaoServico = '') {
 //Salvar no firebase como mapa
 btnSalvar.addEventListener('click', async () => {
     try {
+        const user = auth.currentUser;
+        if (!user) {
+            console.error('Usuário não autenticado.');
+            Swal.fire('Erro!', 'Você precisa estar autenticado para salvar.', 'error');
+            return;
+        }
         const data = {
-            produtos: Array.from(produtosEscolhidos.querySelectorAll('li')).map((li) => {
+            userId: user.uid,
+            produtos: await Promise.all(Array.from(produtosEscolhidos.querySelectorAll('li')).map(async (li) => {
                 const modelo = li.querySelector('img').alt;
                 const cliente = li.querySelector('.cliente').textContent;
                 const descricao = li.querySelector('.descricao').textContent;
                 const dimensoes = li.querySelector('.dimensoes').textContent;
-                const quantidade = li.querySelector('.quantidade').textContent; 3
+                const quantidade = li.querySelector('.quantidade').textContent;
                 const valorMetro = li.querySelector('.metro').textContent;
-
                 const vidro = li.querySelector('.vidro').textContent ? li.querySelector('.vidro').textContent : 'Sem cor de vidro';
-                const ferragem = li.querySelector('.ferragem').textContent ? li.querySelector('.ferragem').textContent : 'Sem cor deferragem';
+                const ferragem = li.querySelector('.ferragem').textContent ? li.querySelector('.ferragem').textContent : 'Sem cor de ferragem';
                 const valorTotal = li.querySelector('.total').textContent;
-                return { modelo, cliente, descricao, dimensoes, quantidade, valorMetro, ferragem, vidro, valorTotal };
-            })
+                
+                // Obter a imagem do produto
+                const imageFile = li.querySelector('img').src;
+
+                // Converter a imagem para base64
+                const base64Image = await toBase64(imageFile);
+
+                // Retornar o objeto do produto com a imagem em base64
+                return { 
+                    modelo, 
+                    cliente, 
+                    descricao, 
+                    dimensoes, 
+                    quantidade, 
+                    valorMetro,  
+                    ferragem, 
+                    vidro, 
+                    valorTotal, 
+                    imagemBase64: base64Image // Imagem em base64
+                };
+            }))
         };
+
         if (data.produtos.length === 0) {
             Swal.fire('Erro!', 'Nenhum produto foi escolhido.', 'error');
             return;
         }
 
+        // Salvar os dados no Firestore
         await db.collection('servicos').add(data);
 
         Swal.fire('Sucesso!', 'Dados salvos com sucesso.', 'success');
@@ -902,6 +929,25 @@ btnSalvar.addEventListener('click', async () => {
         Swal.fire('Erro', 'Ocorreu um erro ao salvar os dados.', 'error');
     }
 });
+
+// Função para converter imagem para base64
+function toBase64(url) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = 'Anonymous';
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0);
+            const dataURL = canvas.toDataURL();
+            resolve(dataURL);
+        };
+        img.onerror = (error) => reject(error);
+        img.src = url;
+    });
+}
 
 function formatarParaReal(valor) {
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor);

@@ -1,145 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Agenda Interativa</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      background-color: #f9f9f9;
-    }
-
-    .container {
-      max-width: 600px;
-      margin: 50px auto;
-      padding: 20px;
-      background-color: #ffffff;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      border-radius: 10px;
-    }
-
-    h1 {
-      text-align: center;
-      color: #333;
-    }
-
-    .form-group {
-      margin-bottom: 20px;
-    }
-
-    label {
-      font-weight: bold;
-      display: block;
-      margin-bottom: 5px;
-    }
-
-    input[type="date"], input[type="text"], button {
-      width: 100%;
-      padding: 10px;
-      margin-top: 5px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      box-sizing: border-box;
-    }
-
-    button {
-      background-color: #007BFF;
-      color: white;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background-color 0.3s;
-    }
-
-    button:hover {
-      background-color: #0056b3;
-    }
-
-    .activity-list {
-      margin-top: 20px;
-    }
-
-    .activity {
-      background-color: #f1f1f1;
-      padding: 15px;
-      border-radius: 5px;
-      margin-bottom: 10px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .activity span {
-      font-size: 16px;
-      color: #333;
-    }
-
-    .delete-btn {
-      background-color: #FF4D4D;
-      color: white;
-      border: none;
-      padding: 5px 10px;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: background-color 0.3s;
-    }
-
-    .delete-btn:hover {
-      background-color: #cc0000;
-    }
-  </style>
+  <link rel="icon" href="images/Logo/Logo2.jpg" type="image/x-icon">
+  <title>Lista de Orçamentos</title>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="stylesheets/Drawer/Pedidos/Pedidos.css">
 </head>
-<body>
-  <div class="container">
-    <h1>Agenda Interativa</h1>
-    <div class="form-group">
-      <label for="date">Escolha uma data:</label>
-      <input type="date" id="date" />
-    </div>
-    <div class="form-group">
-      <label for="activity">Atividade:</label>
-      <input type="text" id="activity" placeholder="Digite sua atividade aqui" />
-    </div>
-    <button id="addActivity">Adicionar Atividade</button>
 
-    <div class="activity-list" id="activityList"></div>
+<body>
+  <div id="app">
+    <header>
+      <button onclick="window.history.back()">Voltar</button>
+      <h1>Lista de Orçamentos</h1>
+      <input type="text" id="search" placeholder="Pesquisar Cliente">
+    </header>
+    <main>
+      <ul id="budget-list"></ul>
+    </main>
   </div>
 
-  <script>
-    const addActivityButton = document.getElementById('addActivity');
-    const activityList = document.getElementById('activityList');
-
-    addActivityButton.addEventListener('click', () => {
-      const date = document.getElementById('date').value;
-      const activity = document.getElementById('activity').value;
-
-      if (!date || !activity) {
-        alert('Por favor, preencha a data e a atividade!');
-        return;
-      }
-
-      const activityDiv = document.createElement('div');
-      activityDiv.className = 'activity';
-
-      const activityText = document.createElement('span');
-      activityText.textContent = `${date} - ${activity}`;
-      activityDiv.appendChild(activityText);
-
-      const deleteButton = document.createElement('button');
-      deleteButton.className = 'delete-btn';
-      deleteButton.textContent = 'Remover';
-      deleteButton.addEventListener('click', () => {
-        activityDiv.remove();
-      });
-
-      activityDiv.appendChild(deleteButton);
-      activityList.appendChild(activityDiv);
-
-      document.getElementById('date').value = '';
-      document.getElementById('activity').value = '';
-    });
-  </script>
+  <script type="module" src="/javascripts/Drawer/Pedidos/Pedidos.js"></script>
 </body>
+
 </html>
