@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,10 +12,13 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="stylesheets/Drawer/Orcamentos/swal.css">
     <link rel="stylesheet" href="stylesheets/Drawer/Orcamentos/ComMedida.css">
+    <link rel="stylesheet" href="stylesheets/Modal/ModalEstoque.css">
+    
 </head>
+
 <body>
     <header>
-        <i class="fa-solid fa-arrow-left" onclick = "window.history.back()"></i>
+        <i class="fa-solid fa-arrow-left" onclick="window.history.back()"></i>
         <p>Converter para PDF</p>
         <i class="fa-solid fa-file-pdf" id="btn-converter"></i>
     </header>
@@ -24,7 +28,7 @@
             <div class="form-group">
                 <label for="clientes">Selecione o cliente</label>
                 <select name="clientes" id="clientes">
-                    
+
                 </select>
             </div>
             <div class="form-group">
@@ -41,13 +45,14 @@
             </div>
             <div class="form-group">
                 <label for="metro">Valor do Metro</label>
-                <input type="number" name="metro" id="metro" required min="0">
+                    <input type="number" name="metro" id="metro" required min="0">
             </div>
             <div class="form-group">
                 <label for="material">Valor do Material</label>
                 <div class="input-icon">
                     <input type="number" name="material" id="material" required min="0">
-                    <button type="button" id="por-mat-btn"><i class="fa-solid fa-plus"></i></button>
+                    <button type="button" id="por-material-btn"><i class="fa-solid fa-plus"></i></button>
+                    <button type="button" id="por-mat-btn"><i class="fa-solid fa-percent"></i></button>
                 </div>
             </div>
             <div class="form-group">
@@ -81,14 +86,38 @@
         <section class="produtos-escolhidos">
             <h2>Produtos Escolhidos</h2>
             <ul id="produtos-escolhidos">
-                
+
             </ul>
         </section>
+
+        <div id="stock-modal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>Estoque</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Produto</th>
+                            <th>Quantidade</th>
+                            <th>Preço</th>
+                            <th>Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody id="stock-table-body">
+                        <!-- Produtos serão carregados dinamicamente -->
+                    </tbody>
+                </table>
+                <div class="total" id="total-amount">Total: R$ 0,00</div>
+            </div>
+        </div>
+
         <button id="btn-salvar">Salvar Serviço</button>
     </main>
     <footer>
 
     </footer>
-    <script src=" javascripts/Drawer/Orcamentos/ComMedida.js" type="module"></script>
+    <script src="javascripts/Drawer/Orcamentos/ComMedida.js" type="module"></script>
+    <script src = "javascripts/Modal/ModalEstoque.js" type="module"></script>
 </body>
+
 </html>

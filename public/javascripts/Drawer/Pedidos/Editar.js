@@ -47,25 +47,89 @@ async function loadService() {
 
                 // Adiciona campos para cada produto
                 produtoDiv.innerHTML = `
-                    <h3>Produto ${index + 1}</h3>
-                    ${produto.cliente ? `<div><label for="cliente${index}">Cliente</label><input type="text" id="cliente${index}" name="cliente${index}" value="${produto.cliente}" /></div>` : ''} 
-                    ${produto.descricao ? `<div><label for="descricao${index}">Descrição</label><input type="text" id="descricao${index}" name="descricao${index}" value="${produto.descricao}" /></div>` : ''}
-                    ${produto.dimensoes ? `<div><label for="dimensoes${index}">Dimensões</label><input type="text" id="dimensoes${index}" name="dimensoes${index}" value="${produto.dimensoes}" /></div>` : ''}
-                    ${produto.material ? `<div><label for="material${index}">Material</label><input type="text" id="material${index}" name="material${index}" value="${produto.material}" /></div>` : ''}
-                    ${produto.quantidade ? `<div><label for="quantidade${index}">Quantidade</label><input type="text" id="quantidade${index}" name="quantidade${index}" value="${produto.quantidade}" /></div>` : ''}
-                    ${produto.valorMetro ? `<div><label for="valorMetro${index}">Valor por Metro</label><input type="text" id="valorMetro${index}" name="valorMetro${index}" value="${produto.valorMetro}" /></div>` : ''}
-                    ${produto.ferragem ? `<div><label for="ferragem${index}">Ferragem</label><input type="text" id="ferragem${index}" name="ferragem${index}" value="${produto.ferragem}" /></div>` : ''}
-                    ${produto.vidro ? `<div><label for="vidro${index}">Vidro</label><input type="text" id="vidro${index}" name="vidro${index}" value="${produto.vidro}" /></div>` : ''}
-                    ${produto.valorTotal ? `<div><label for="valorTotal${index}">Valor Total</label><input type="text" id="valorTotal${index}" name="valorTotal${index}" value="${produto.valorTotal}" /></div>` : ''}
+<h3>Produto ${index + 1}</h3>
+${produto.cliente ? `<div><label for="cliente${index}">Cliente</label><input type="text" id="cliente${index}" name="cliente${index}" value="${produto.cliente}" /></div>` : ''} 
+${produto.descricao ? `<div><label for="descricao${index}">Descrição</label><input type="text" id="descricao${index}" name="descricao${index}" value="${produto.descricao}" /></div>` : ''}
+${produto.dimensoes ? `<div><label for="dimensoes${index}">Dimensões</label><input type="text" id="dimensoes${index}" name="dimensoes${index}" value="${produto.dimensoes}" /></div>` : ''} 
+${produto.material ? `<div><label for="material${index}">Material</label><input type="text" id="material${index}" name="material${index}" value="${produto.material}" /></div>
+<div><label for="porcentagem${index}">Porcentagem</label><input type="text" id="porcentagem${index}" name="porcentagem${index}" value="${produto.porcentagem || ''}" /></div>` : ''}
+${produto.quantidade ? `<div><label for="quantidade${index}">Quantidade</label><input type="text" id="quantidade${index}" name="quantidade${index}" value="${produto.quantidade}" /></div>` : ''}
+${produto.valorMetro ? `<div><label for="valorMetro${index}">Valor por Metro</label><input type="text" id="valorMetro${index}" name="valorMetro${index}" value="${produto.valorMetro}" /></div>` : ''} 
+${produto.ferragem ? `<div><label for="ferragem${index}">Ferragem</label><input type="text" id="ferragem${index}" name="ferragem${index}" value="${produto.ferragem}" /></div>` : ''}
+${produto.vidro ? `<div><label for="vidro${index}">Vidro</label><input type="text" id="vidro${index}" name="vidro${index}" value="${produto.vidro}" /></div>` : ''} 
+${produto.valorTotal ? `<div><label for="valorTotal${index}">Valor Total</label><input type="text" id="valorTotal${index}" name="valorTotal${index}" value="${produto.valorTotal}" /><button type="button" class="calcular-total" data-index="${index}"><i class="fas fa-calculator"></i></button></div>` : ''}
+${produto.imagemBase64 ? `<div><label for="modelo${index}">Imagem</label><img id="produtoImagem${index}" src="${produto.imagemBase64}" alt="Produto ${index + 1}" width="200"/></div>` : ''} 
+${produto.imagemServico ? `<div><label for="imagemServico${index}">Imagem do Serviço</label><img id="imagemServico${index}" src="${produto.imagemServico}" alt="Imagem do Serviço ${index + 1}" width="200" /></div>` : ''}
 
-                    ${produto.imagemBase64 ? `<div><label for="modelo${index}">Imagem</label><img id="produtoImagem${index}" src="${produto.imagemBase64}" alt="Produto ${index + 1}" width="200"/></div>` : ''}
-                    ${produto.imagemServico ? `<div><label for="imagemServico${index}">Imagem do Serviço</label><img id="imagemServico${index}" src="${produto.imagemServico}" alt="Imagem do Serviço ${index + 1}" width="200" /></div>` : ''}
+<button type="button" class="edit-image-button" data-index="${index}">Editar Imagem</button>
+`;
 
-                    <button type="button" class="edit-image-button" data-index="${index}">Editar Imagem</button>
-                `;
+
 
                 produtosContainer.appendChild(produtoDiv);
             });
+
+
+            const getValue = (id) => {
+                const element = document.getElementById(id);
+                const value = element ? element.value.trim() : "";
+            
+                // Remover "R$" e substituir a vírgula por ponto
+                const cleanValue = value.replace("R$", "").replace(",", ".").trim();
+            
+                // Converter para float, se for válido
+                const numericValue = parseFloat(cleanValue);
+            
+                // Se não for um número válido, retornar 0
+                return isNaN(numericValue) ? 0 : numericValue;
+            };
+            
+            const getDimension = (id) => {
+                const element = document.getElementById(id);
+                const value = element ? element.value.trim() : "";
+            
+                // Verificar se a dimensão está no formato correto (largura x altura)
+                const dimensionValues = value.split("x").map(v => parseFloat(v.trim()));
+            
+                // Se houver dois valores válidos para a dimensão, retorná-los multiplicados
+                if (dimensionValues.length === 2 && !isNaN(dimensionValues[0]) && !isNaN(dimensionValues[1])) {
+                    return dimensionValues[0] * dimensionValues[1];
+                }
+            
+                // Se não for um formato válido, retornar 0
+                return 0;
+            };
+            
+            document.querySelectorAll('.calcular-total').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const index = e.target.getAttribute('data-index');
+            
+                    // Obter os valores com a função getValue
+                    const valorMetro = getValue(`valorMetro${index}`);
+                    const dimensao = getDimension(`dimensoes${index}`);
+                    const material = getValue(`material${index}`);
+                    const porcentagemGeral = getValue(`porcentagem${index}`);
+                    const quantidade = getValue(`quantidade${index}`);
+            
+                    // Cálculo inicial: (valorMetro * (largura * altura) + material)
+                    let total = (valorMetro * dimensao) + material;
+            
+                    // Cálculo final: (total + (total * (porcentagemGeral / 100))) * quantidade
+                    let totalFinal = (total + (total * (porcentagemGeral / 100))) * quantidade;
+            
+                    // Atualizar o campo de valor total
+                    const valorTotalField = document.getElementById(`valorTotal${index}`);
+                    if (valorTotalField) {
+                        valorTotalField.value = totalFinal.toFixed(2);
+                    }
+                });
+            });
+            
+
+
+
+
+
 
             // Adiciona evento de clique nos botões de editar imagem
             document.querySelectorAll('.edit-image-button').forEach(button => {
@@ -103,62 +167,62 @@ document.getElementById('close-modal').addEventListener('click', () => {
 // Função para carregar as imagens do servidor
 
 async function loadImages(index) {
-try {
-// Carregar as imagens de cada categoria
-const responseClientes = await fetch('/listarModelos');
-const clientesImages = await responseClientes.json();
+    try {
+        // Carregar as imagens de cada categoria
+        const responseClientes = await fetch('/listarModelos');
+        const clientesImages = await responseClientes.json();
 
-const responseModelosFixos = await fetch('/listarModelosFixos');
-const modelosFixosImages = await responseModelosFixos.json();
+        const responseModelosFixos = await fetch('/listarModelosFixos');
+        const modelosFixosImages = await responseModelosFixos.json();
 
-const responseNovasImages = await fetch('/listarNovos');
-const novasImages = await responseNovasImages.json();
+        const responseNovasImages = await fetch('/listarNovos');
+        const novasImages = await responseNovasImages.json();
 
-// Adicionar imagens nas abas correspondentes
-const clientesList = document.querySelector("#clientes #image-list");
-const fixosList = document.querySelector("#fixos #image-list");
-const novosList = document.querySelector("#novos #image-list");
+        // Adicionar imagens nas abas correspondentes
+        const clientesList = document.querySelector("#clientes #image-list");
+        const fixosList = document.querySelector("#fixos #image-list");
+        const novosList = document.querySelector("#novos #image-list");
 
-clientesList.innerHTML = ""; // Limpa antes de adicionar
-fixosList.innerHTML = "";
-novosList.innerHTML = "";
+        clientesList.innerHTML = ""; // Limpa antes de adicionar
+        fixosList.innerHTML = "";
+        novosList.innerHTML = "";
 
-clientesImages.forEach((imagePath) => {
-    const imgElement = document.createElement('img');
-    imgElement.src = imagePath;
-    imgElement.alt = 'Modelo Cliente';
-    imgElement.addEventListener('click', () => selectImage(imagePath, index));
-    clientesList.appendChild(imgElement);
-});
+        clientesImages.forEach((imagePath) => {
+            const imgElement = document.createElement('img');
+            imgElement.src = imagePath;
+            imgElement.alt = 'Modelo Cliente';
+            imgElement.addEventListener('click', () => selectImage(imagePath, index));
+            clientesList.appendChild(imgElement);
+        });
 
-modelosFixosImages.forEach((imagePath) => {
-    const imgElement = document.createElement('img');
-    imgElement.src = imagePath;
-    imgElement.alt = 'Modelo Fixo';
-    imgElement.addEventListener('click', () => selectImage(imagePath, index));
-    fixosList.appendChild(imgElement);
-});
+        modelosFixosImages.forEach((imagePath) => {
+            const imgElement = document.createElement('img');
+            imgElement.src = imagePath;
+            imgElement.alt = 'Modelo Fixo';
+            imgElement.addEventListener('click', () => selectImage(imagePath, index));
+            fixosList.appendChild(imgElement);
+        });
 
-novasImages.forEach((imagePath) => {
-    const imgElement = document.createElement('img');
-    imgElement.src = imagePath;
-    imgElement.alt = 'Novo Modelo';
-    imgElement.addEventListener('click', () => selectImage(imagePath, index));
-    novosList.appendChild(imgElement);
-});
-} catch (error) {
-console.error("Erro ao carregar as imagens:", error);
-}
+        novasImages.forEach((imagePath) => {
+            const imgElement = document.createElement('img');
+            imgElement.src = imagePath;
+            imgElement.alt = 'Novo Modelo';
+            imgElement.addEventListener('click', () => selectImage(imagePath, index));
+            novosList.appendChild(imgElement);
+        });
+    } catch (error) {
+        console.error("Erro ao carregar as imagens:", error);
+    }
 }
 
 document.querySelectorAll(".tab").forEach((tab) => {
-tab.addEventListener("click", () => {
-document.querySelectorAll(".tab").forEach((t) => t.classList.remove("active"));
-document.querySelectorAll(".tab-content").forEach((content) => content.classList.remove("active"));
+    tab.addEventListener("click", () => {
+        document.querySelectorAll(".tab").forEach((t) => t.classList.remove("active"));
+        document.querySelectorAll(".tab-content").forEach((content) => content.classList.remove("active"));
 
-tab.classList.add("active");
-document.getElementById(tab.getAttribute("data-tab")).classList.add("active");
-});
+        tab.classList.add("active");
+        document.getElementById(tab.getAttribute("data-tab")).classList.add("active");
+    });
 });
 
 
@@ -193,6 +257,8 @@ async function dadosEmpresa() {
         return null;
     }
 }
+
+
 
 async function gerarPdf() {
     const { jsPDF } = window.jspdf;
@@ -337,21 +403,22 @@ async function saveBudget(id, produtos) {
             produtos: produtos
         });
         Swal.fire({
-        position: "center",
-        text: 'Sucesso!', 
-        title: 'Itens atualizados com sucesso!',
-        icon: 'success',
-        showConfirmButton: false,
-        timer: 1500});
+            position: "center",
+            text: 'Sucesso!',
+            title: 'Itens atualizados com sucesso!',
+            icon: 'success',
+            showConfirmButton: false,
+            timer: 1500
+        });
     } catch (error) {
         console.error("Erro ao salvar orçamento:", error);
         Swal.fire({
-              position: "center",
-              icon: "error",
-              title: "Erro ao atualizar os itens!",
-              showConfirmButton: false,
-              timer: 1500
-            });
+            position: "center",
+            icon: "error",
+            title: "Erro ao atualizar os itens!",
+            showConfirmButton: false,
+            timer: 1500
+        });
     }
 }
 

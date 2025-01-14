@@ -54,6 +54,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebas
                         <td>${produto.nomeProduto}</td>
                         <td>${produto.quantidade}</td>
                         <td>${produto.categoria}</td>
+                        <td>${produto.valor}</td>
                         <td>${produto.validade}</td>
                         <td class="action-buttons">
                             <button class="edit">Editar</button>
@@ -82,6 +83,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebas
       event.preventDefault();
       const nomeProduto = document.getElementById("product-name").value;
       const quantidade = document.getElementById("product-quantity").value;
+      const valor = document.getElementById("product-valor").value;
       const categoria = document.getElementById("product-category").value;
       const validade = document.getElementById("product-Valid").value;
       const user = auth.currentUser;
@@ -89,7 +91,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebas
       if (!user) {
         alert("Por favor, faça login para adicionar um produto.");
         return;
-      }if (!nomeProduto || !quantidade || !categoria || !validade) {
+      }if (!nomeProduto || !quantidade || !categoria || !validade || !valor) {
         Swal.fire({
           position: "center",
           icon: "info",
@@ -103,6 +105,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebas
         await addDoc(collection(db, "produtos"), {
           nomeProduto,
           quantidade,
+          valor,
           categoria,
           validade,
           userId: user.uid, 
@@ -138,10 +141,12 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebas
       const nomeProduto = row.querySelector("td:nth-child(1)").textContent;
       const quantidade = row.querySelector("td:nth-child(2)").textContent;
       const categoria = row.querySelector("td:nth-child(3)").textContent;
-      const validade = row.querySelector("td:nth-child(4)").textContent;
+      const valor = row.querySelector("td:nth-child(4)").textContent;
+      const validade = row.querySelector("td:nth-child(5)").textContent;
 
       document.getElementById("edit-product-name").value = nomeProduto;
       document.getElementById("edit-product-quantity").value = quantidade;
+      document.getElementById("edit-product-valor").value = valor;
       document.getElementById("edit-product-category").value = categoria;
       document.getElementById("edit-product-Valid").value = validade;
 
@@ -159,6 +164,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebas
 
       const nomeProduto = document.getElementById("edit-product-name").value;
       const quantidade = document.getElementById("edit-product-quantity").value;
+      const valor = document.getElementById("edit-product-valor").value;
       const categoria = document.getElementById("edit-product-category").value;
       const validade = document.getElementById("edit-product-Valid").value;
 
@@ -174,6 +180,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebas
         await updateDoc(produtoRef, {
           nomeProduto,
           quantidade,
+          valor,
           categoria,
           validade,
           updatedAt: serverTimestamp()
