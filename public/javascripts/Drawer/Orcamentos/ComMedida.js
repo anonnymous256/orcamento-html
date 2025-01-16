@@ -918,8 +918,7 @@ async function gerarPdf(descricaoServico = '') {
     // Baixar o PDF
     doc.save("relatorio.pdf");
 }
-
-//Salvar no firebase como mapa
+// Salva no firestore como subcolecao
 btnSalvar.addEventListener('click', async () => {
     try {
         const user = auth.currentUser;
@@ -928,6 +927,7 @@ btnSalvar.addEventListener('click', async () => {
             Swal.fire('Erro!', 'Você precisa estar autenticado para salvar.', 'error');
             return;
         }
+
         const data = {
             userId: user.uid,
             produtos: await Promise.all(Array.from(produtosEscolhidos.querySelectorAll('li')).map(async (li) => {
@@ -970,14 +970,31 @@ btnSalvar.addEventListener('click', async () => {
             return;
         }
 
-        // Salvar os dados no Firestore
-        await db.collection('servicos').add(data);
+        // Iniciar o batch para salvar os dados de uma vez
+        const batch = db.batch();
+
+        // Criar o documento na coleção 'servicos'
+        const servicoRef = db.collection('servicos').doc(); // Gerar um novo ID para o serviço
+        batch.set(servicoRef, {
+            userId: user.uid,
+            produtosCount: data.produtos.length, // Número de produtos no serviço
+            criadoEm: firebase.firestore.FieldValue.serverTimestamp(),
+        });
+
+        // Para cada produto, adicionar na subcoleção 'subservicos' do serviço
+        data.produtos.forEach((produto) => {
+            const subservicoRef = servicoRef.collection('subservicos').doc(); // Criar um documento para o produto na subcoleção
+            batch.set(subservicoRef, produto); // Adicionar o produto na subcoleção 'subservicos' no batch
+        });
+
+        // Commitar o batch para salvar todas as operações de uma vez
+        await batch.commit();
 
         Swal.fire('Sucesso!', 'Dados salvos com sucesso.', 'success');
     } catch (error) {
         console.error('Erro ao salvar os dados:', error);
         Swal.fire('Erro', 'Ocorreu um erro ao salvar os dados.', 'error');
-    }
+    }
 });
 
 // Função para converter imagem para base64

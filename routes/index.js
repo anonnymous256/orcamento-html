@@ -6,7 +6,7 @@ const app = express();
 
 
 const { initializeApp } = require('firebase/app');
-const { getFirestore, doc, getDoc } = require('firebase/firestore');
+const { getFirestore, doc, getDoc, getDocs, collection } = require('firebase/firestore');
 
 const firebaseConfig = {
   apiKey: "AIzaSyCm0bhy9OSaZ83OTO0-JQpICl9WMwPc_fk",
@@ -83,30 +83,55 @@ router.get('/Editar/:id', async function(req, res) {
   const docId = req.params.id;  // Captura o ID do orçamento da URL
   console.log("ID do documento:", docId);  // Verifique o valor do docId
 
+  if (!docId) {
+    console.error("ID do orçamento não fornecido.");
+    return res.status(400).send("ID do orçamento não fornecido");
+  }
+
   try {
-    // Referência ao documento usando o getDoc
+    // Referência ao documento principal da coleção 'servicos'
     const docRef = doc(db, 'servicos', docId);
-    const docSnap = await getDoc(docRef);  // Obtemos o documento
+    const docSnap = await getDoc(docRef);  // Obtemos o documento principal
 
     if (!docSnap.exists()) {
       console.log("Orçamento não encontrado:", docId);  // Log do erro com o docId
       return res.status(404).send("Orçamento não encontrado");
     }
 
-    const data = docSnap.data();
-    const produto = data.produtos[0];  // Considerando que há apenas um produto no array
+    // Agora, acessamos a subcoleção 'subservicos' deste documento
+    const subservicosRef = collection(docRef, 'subservicos');
+    const subservicosSnap = await getDocs(subservicosRef);  // Obtemos os documentos da subcoleção
 
-    // Renderizar a página de edição passando os dados do produto
-    res.render('Drawer/Pedidos/Editar.ejs', {
-      title: 'Editar Orçamento',
-      produto: produto,
-      docId: docId  // Passando o ID do orçamento para a página de edição
-    });
+    if (subservicosSnap.empty) {
+      console.log("Nenhum item encontrado na subcoleção 'subservicos'.");
+      return res.status(404).send("Nenhum item encontrado na subcoleção 'subservicos'.");
+    }
+
+    // Vamos pegar o primeiro produto da subcoleção (supondo que tenha produtos)
+    // Criar um array de produtos, incluindo seus índices
+const produtosComIndex = subservicosSnap.docs.map((doc, index) => {
+  return {
+    index: index, // Índice do produto na lista
+    produto: doc.data() // Dados do produto
+  };
+});
+
+console.log("Produtos encontrados na subcoleção:", produtosComIndex);
+
+// Renderizar a página com os produtos e seus índices
+res.render('Drawer/Pedidos/Editar.ejs', {
+  title: 'Editar Orçamento',
+  produtos: produtosComIndex, // Passando o array de produtos com seus índices
+  docId: docId
+});
+
+    
   } catch (error) {
     console.error("Erro ao buscar orçamento:", error);
-    res.status(500).send("Erro ao buscar orçamento");
+    res.status(500).send("Erro ao buscar orçamento: " + error.message);
   }
 });
+
 
 
 

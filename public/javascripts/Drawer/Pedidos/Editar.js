@@ -17,7 +17,6 @@ const firebaseConfig = {
 // Inicializar Firebase
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
-const storage = firebase.storage();
 const auth = firebase.auth();
 
 // Função para carregar os dados do orçamento
@@ -31,43 +30,50 @@ async function loadService() {
     }
 
     try {
-        const doc = await db.collection("servicos").doc(docId).get();
-        if (doc.exists) {
-            const data = doc.data();
-            console.log("Dados do documento:", data);
+        // Obtém a subcoleção de "subservicos" do documento específico
+        const subServicosSnapshot = await db.collection("servicos").doc(docId).collection("subservicos").get();
 
-            // Carregar os dados dos produtos no formulário
+        if (!subServicosSnapshot.empty) {
+            console.log("Subcoleção de produtos carregada.");
+
             const produtosContainer = document.getElementById("produtos-container");
             produtosContainer.innerHTML = "";  // Limpar qualquer conteúdo anterior
 
-            // Para cada produto no array de produtos
-            data.produtos.forEach((produto, index) => {
+            // Variável para armazenar o índice
+            let produtoIndex = 1;
+
+            // Iterar sobre cada documento na subcoleção
+            subServicosSnapshot.forEach((subDoc) => {
+                const produto = subDoc.data();
+                console.log(`Produto ${produtoIndex}:`, produto);
+            
                 const produtoDiv = document.createElement("div");
                 produtoDiv.classList.add("produto");
-
-                // Adiciona campos para cada produto
+            
+                // Usando o índice manualmente para cada campo
                 produtoDiv.innerHTML = `
-<h3>Produto ${index + 1}</h3>
-${produto.cliente ? `<div><label for="cliente${index}">Cliente</label><input type="text" id="cliente${index}" name="cliente${index}" value="${produto.cliente}" /></div>` : ''} 
-${produto.descricao ? `<div><label for="descricao${index}">Descrição</label><input type="text" id="descricao${index}" name="descricao${index}" value="${produto.descricao}" /></div>` : ''}
-${produto.dimensoes ? `<div><label for="dimensoes${index}">Dimensões</label><input type="text" id="dimensoes${index}" name="dimensoes${index}" value="${produto.dimensoes}" /></div>` : ''} 
-${produto.material ? `<div><label for="material${index}">Material</label><input type="text" id="material${index}" name="material${index}" value="${produto.material}" /></div>
-<div><label for="porcentagem${index}">Porcentagem</label><input type="text" id="porcentagem${index}" name="porcentagem${index}" value="${produto.porcentagem || ''}" /></div>` : ''}
-${produto.quantidade ? `<div><label for="quantidade${index}">Quantidade</label><input type="text" id="quantidade${index}" name="quantidade${index}" value="${produto.quantidade}" /></div>` : ''}
-${produto.valorMetro ? `<div><label for="valorMetro${index}">Valor por Metro</label><input type="text" id="valorMetro${index}" name="valorMetro${index}" value="${produto.valorMetro}" /></div>` : ''} 
-${produto.ferragem ? `<div><label for="ferragem${index}">Ferragem</label><input type="text" id="ferragem${index}" name="ferragem${index}" value="${produto.ferragem}" /></div>` : ''}
-${produto.vidro ? `<div><label for="vidro${index}">Vidro</label><input type="text" id="vidro${index}" name="vidro${index}" value="${produto.vidro}" /></div>` : ''} 
-${produto.valorTotal ? `<div><label for="valorTotal${index}">Valor Total</label><input type="text" id="valorTotal${index}" name="valorTotal${index}" value="${produto.valorTotal}" /><button type="button" class="calcular-total" data-index="${index}"><i class="fas fa-calculator"></i></button></div>` : ''}
-${produto.imagemBase64 ? `<div><label for="modelo${index}">Imagem</label><img id="produtoImagem${index}" src="${produto.imagemBase64}" alt="Produto ${index + 1}" width="200"/></div>` : ''} 
-${produto.imagemServico ? `<div><label for="imagemServico${index}">Imagem do Serviço</label><img id="imagemServico${index}" src="${produto.imagemServico}" alt="Imagem do Serviço ${index + 1}" width="200" /></div>` : ''}
-
-<button type="button" class="edit-image-button" data-index="${index}">Editar Imagem</button>
-`;
-
-
-
+                <button type="button" class="delete-product-button" data-doc-id="${subDoc.id}" data-index="${produtoIndex}"><i class="fas fa-trash"></i> </button>
+                    <h3>Produto ${produtoIndex}</h3>
+                    ${produto.cliente ? `<div><label for="cliente${produtoIndex}">Cliente</label><input type="text" id="cliente${produtoIndex}" name="cliente${produtoIndex}" value="${produto.cliente}" /></div>` : ''} 
+                    ${produto.descricao ? `<div><label for="descricao${produtoIndex}">Descrição</label><input type="text" id="descricao${produtoIndex}" name="descricao${produtoIndex}" value="${produto.descricao}" /></div>` : ''} 
+                    ${produto.dimensoes ? `<div><label for="dimensoes${produtoIndex}">Dimensões</label><input type="text" id="dimensoes${produtoIndex}" name="dimensoes${produtoIndex}" value="${produto.dimensoes}" /></div>` : ''} 
+                    ${produto.material ? `<div><label for="material${produtoIndex}">Material</label><input type="text" id="material${produtoIndex}" name="material${produtoIndex}" value="${produto.material}" /></div>` : ''} 
+                    ${produto.porcentagem ? `<div><label for="porcentagem${produtoIndex}">Porcentagem</label><input type="text" id="porcentagem${produtoIndex}" name="porcentagem${produtoIndex}" value="${produto.porcentagem}" /></div>` : ''} 
+                    ${produto.quantidade ? `<div><label for="quantidade${produtoIndex}">Quantidade</label><input type="text" id="quantidade${produtoIndex}" name="quantidade${produtoIndex}" value="${produto.quantidade}" /></div>` : ''} 
+                    ${produto.valorMetro ? `<div><label for="valorMetro${produtoIndex}">Valor por Metro</label><input type="text" id="valorMetro${produtoIndex}" name="valorMetro${produtoIndex}" value="${produto.valorMetro}" /></div>` : ''} 
+                    ${produto.ferragem ? `<div><label for="ferragem${produtoIndex}">Ferragem</label><input type="text" id="ferragem${produtoIndex}" name="ferragem${produtoIndex}" value="${produto.ferragem}" /></div>` : ''} 
+                    ${produto.vidro ? `<div><label for="vidro${produtoIndex}">Vidro</label><input type="text" id="vidro${produtoIndex}" name="vidro${produtoIndex}" value="${produto.vidro}" /></div>` : ''} 
+                    ${produto.valorTotal ? `<div><label for="valorTotal${produtoIndex}">Valor Total</label><input type="text" id="valorTotal${produtoIndex}" name="valorTotal${produtoIndex}" value="${produto.valorTotal}" /><button type="button" class="calcular-total" data-index="${produtoIndex}"><i class="fas fa-calculator"></i></button></div>` : ''} 
+                    ${produto.imagemBase64 ? `<div><label for="modelo${produtoIndex}">Imagem</label><img id="produtoImagem${produtoIndex}" src="${produto.imagemBase64}" alt="Produto ${produtoIndex}" width="200"/></div>` : ''} 
+                    <button type="button" class="edit-image-button" data-index="${produtoIndex}">Editar Imagem</button>
+                `;
+            
                 produtosContainer.appendChild(produtoDiv);
+
+                // Incrementar o índice
+                produtoIndex++;
             });
+            
 
 
             const getValue = (id) => {
@@ -99,6 +105,46 @@ ${produto.imagemServico ? `<div><label for="imagemServico${index}">Imagem do Ser
                 // Se não for um formato válido, retornar 0
                 return 0;
             };
+
+            document.querySelectorAll('.delete-product-button').forEach(button => {
+                button.addEventListener('click', async (e) => {
+                    const index = e.target.getAttribute('data-index');
+            
+                    // Verifique se o índice foi capturado corretamente
+                    if (!index) {
+                        console.error("Índice do produto não encontrado.");
+                        return;
+                    }
+            
+                    // Confirmação de exclusão com SweetAlert2
+                    const result = await Swal.fire({
+                        title: `Tem certeza de que deseja excluir o produto ${index}?`,
+                        text: "Ele será removido temporemente do orçamento.",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Sim, excluir',
+                        cancelButtonText: 'Cancelar',
+                    });
+            
+                    if (!result.isConfirmed) return;
+            
+                    try {
+                        // Remove o produto visualmente do DOM
+                        const produtoDiv = document.querySelector(`#produtos-container .produto:nth-child(${index})`);
+                        if (produtoDiv) {
+                            produtoDiv.remove();
+                        } else {
+                            console.error(`Produto com índice ${index} não encontrado.`);
+                        }
+                    } catch (error) {
+                        console.error("Erro ao excluir o produto:", error);
+                        Swal.fire("Erro", "Erro ao excluir o produto.", "error");
+                    }
+                });
+            });
+            
+            
+            
             
             document.querySelectorAll('.calcular-total').forEach(button => {
                 button.addEventListener('click', (e) => {
@@ -395,20 +441,55 @@ async function gerarPdf() {
 document.getElementById("generate-pdf-button").addEventListener("click", gerarPdf);
 
 
+/*
 // Função para salvar as alterações
-async function saveBudget(id, produtos) {
+async function saveBudget(docId, produtos) {
     try {
-        // Atualiza o array de produtos
-        await db.collection("servicos").doc(id).update({
-            produtos: produtos
+        const servicoRef = db.collection("servicos").doc(docId);
+
+        // Obter os documentos existentes na subcoleção 'subservicos'
+        const snapshot = await servicoRef.collection("subservicos").get();
+        const existentes = {};
+        snapshot.forEach(doc => {
+            existentes[doc.id] = doc.data();
         });
+
+        const batch = db.batch();
+
+        for (const produto of produtos) {
+            if (produto.id) {
+                const subservicoRef = servicoRef.collection("subservicos").doc(produto.id);
+                const dadosExistentes = existentes[produto.id];
+
+                // Detectar alterações
+                const alterado = Object.keys(produto).some(key => produto[key] !== dadosExistentes[key]);
+
+                console.log("Produto alterado:", produto.id, alterado, produto, dadosExistentes);
+
+                if (alterado) {
+                    try {
+                        console.log(`Atualizando produto com ID: ${produto.id}`);
+                        batch.update(subservicoRef, produto);
+                    } catch (error) {
+                        console.error(`Erro ao atualizar produto com ID: ${produto.id}`, error);
+                    }
+                }
+            } else {
+                console.warn("Produto sem ID, ignorado:", produto);
+            }
+        }
+
+        console.log("Batch sendo commitado com alterações.");
+        await batch.commit();
+        console.log("Batch commitado com sucesso.");
+
         Swal.fire({
             position: "center",
-            text: 'Sucesso!',
-            title: 'Itens atualizados com sucesso!',
-            icon: 'success',
+            text: "Sucesso!",
+            title: "Itens atualizados com sucesso!",
+            icon: "success",
             showConfirmButton: false,
-            timer: 1500
+            timer: 1500,
         });
     } catch (error) {
         console.error("Erro ao salvar orçamento:", error);
@@ -417,18 +498,17 @@ async function saveBudget(id, produtos) {
             icon: "error",
             title: "Erro ao atualizar os itens!",
             showConfirmButton: false,
-            timer: 1500
+            timer: 1500,
         });
     }
 }
-
 
 
 // Evento de submit do formulário
 document.getElementById("edit-form").addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    const docId = window.location.pathname.split('/')[2];  // Captura o ID da URL novamente
+    const docId = window.location.pathname.split('/')[2]; // Captura o ID da URL novamente
 
     // Coleta os dados dos produtos no formulário
     const produtos = [];
@@ -466,7 +546,11 @@ document.getElementById("edit-form").addEventListener("submit", async (e) => {
 
         // Atualiza a imagem base64
         const imagem = produtoElement.querySelector(`#produtoImagem${index}`);
-        if (imagem) produto.imagemBase64 = imagem.src;
+        if (imagem && imagem.src) produto.imagemBase64 = imagem.src;
+
+        // Verifica se há um ID para identificar produtos existentes
+        const produtoId = produtoElement.dataset.produtoId;
+        if (produtoId) produto.id = produtoId;
 
         // Adiciona o produto ao array
         produtos.push(produto);
@@ -475,6 +559,7 @@ document.getElementById("edit-form").addEventListener("submit", async (e) => {
     // Chama a função para salvar os dados
     await saveBudget(docId, produtos);
 });
+*/
 
 
 
