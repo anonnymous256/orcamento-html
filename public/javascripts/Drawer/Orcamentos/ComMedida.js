@@ -535,7 +535,7 @@ async function abrirModalEdicaoFoto(produto, li) {
     });
 
 }
- async function carregarModelos(produtoAtual = null, callback) {
+async function carregarModelos(produtoAtual = null, callback) {
     try {
         const responseClientes = await fetch('/listarModelos');
         const imagensClientes = await responseClientes.json();
@@ -928,6 +928,17 @@ btnSalvar.addEventListener('click', async () => {
             return;
         }
 
+        // Exibir modal de carregamento
+        Swal.fire({
+            title: 'processando',
+            text: 'por favor, aguarde enquato processamos os dados.',
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
         const data = {
             userId: user.uid,
             produtos: await Promise.all(Array.from(produtosEscolhidos.querySelectorAll('li')).map(async (li) => {
@@ -990,11 +1001,16 @@ btnSalvar.addEventListener('click', async () => {
         // Commitar o batch para salvar todas as operações de uma vez
         await batch.commit();
 
+
+        Swal.close();
         Swal.fire('Sucesso!', 'Dados salvos com sucesso.', 'success');
     } catch (error) {
         console.error('Erro ao salvar os dados:', error);
+
+        // Fechar o modal de carregamento e exibir erro
+        Swal.close();
         Swal.fire('Erro', 'Ocorreu um erro ao salvar os dados.', 'error');
-    }
+    }
 });
 
 // Função para converter imagem para base64

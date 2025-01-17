@@ -880,6 +880,18 @@ btnSalvar.addEventListener('click', async () => {
             Swal.fire('Erro!', 'Você precisa estar autenticado para salvar.', 'error');
             return;
         }
+
+        // Exibir modal de carregamento
+         Swal.fire({
+            title: 'Processando...',
+            text: 'Por favor, aguarde enquanto processamos os dados.',
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
         const data = {
             userId: user.uid,
             produtos: await Promise.all(Array.from(produtosEscolhidos.querySelectorAll('li')).map(async (li) => {
@@ -892,7 +904,7 @@ btnSalvar.addEventListener('click', async () => {
                 const vidro = li.querySelector('.vidro').textContent ? li.querySelector('.vidro').textContent : 'Sem cor de vidro';
                 const ferragem = li.querySelector('.ferragem').textContent ? li.querySelector('.ferragem').textContent : 'Sem cor de ferragem';
                 const valorTotal = li.querySelector('.total').textContent;
-                
+
                 // Obter a imagem do produto
                 const imageFile = li.querySelector('img').src;
 
@@ -939,12 +951,18 @@ btnSalvar.addEventListener('click', async () => {
         // Commitar o batch para salvar todas as operações de uma vez
         await batch.commit();
 
+        // Fechar o modal de carregamento e exibir sucesso
+        Swal.close();
         Swal.fire('Sucesso!', 'Dados salvos com sucesso.', 'success');
     } catch (error) {
         console.error('Erro ao salvar os dados:', error);
+
+        // Fechar o modal de carregamento e exibir erro
+        Swal.close();
         Swal.fire('Erro', 'Ocorreu um erro ao salvar os dados.', 'error');
     }
 });
+
 
 // Função para converter imagem para base64
 function toBase64(url) {
