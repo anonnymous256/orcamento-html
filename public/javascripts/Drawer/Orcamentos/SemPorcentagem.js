@@ -83,7 +83,10 @@ async function carregarClientes() {
     clientesSelect.appendChild(noOpt);
 
     try {
-        const snapshot = await db.collection('clientes').where('userId', '==', user.uid).get();
+        const snapshot = await db.collection('clientes')
+        .where('userId', '==', user.uid)
+        .orderBy('createdAt', 'desc')
+        .get();
 
         if (snapshot.empty) {
             console.warn("Nenhum cliente encontrado para este usuário.");

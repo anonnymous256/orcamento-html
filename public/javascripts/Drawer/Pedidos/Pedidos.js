@@ -22,79 +22,100 @@ const auth = firebase.auth();
 
 const searchInput = document.getElementById("search");
 const budgetList = document.getElementById("budget-list");
+const loadMoreBtn = document.getElementById("load-more-btn");
+
+let lastVisible = null;
+let isLoading = false;
+let isLoadingMore = false;
+let noMoreItems = false;  // Flag para verificar se há mais itens
 
 // Verificar se o usuário está autenticado
 function checkUserAuthentication(user) {
-
   if (!user) {
     Swal.fire("Erro!", "Você precisa estar autenticado para visualizar os orçamentos.", "error");
     window.location.href = "/Inicio";
     return false;
   }
-  console.log("Usuário autenticado:", user.uid);
   return true;
 }
 
-// Carregar orçamentos
+// Função de debouncing
+let debounceTimeout;
+function debounceSearch() {
+  clearTimeout(debounceTimeout);
+  debounceTimeout = setTimeout(() => {
+    if (auth.currentUser) {
+      loadBudgets(auth.currentUser, searchInput.value.trim().toLowerCase());
+    }
+  }, 500);
+}
+
+// Carregar orçamentos com paginação e carregamento paralelo
 async function loadBudgets(user, search = "") {
   if (!checkUserAuthentication(user)) return;
 
-  budgetList.innerHTML = "<li>Carregando...</li>";
+  if (isLoading) return; // Evita múltiplos carregamentos ao mesmo tempo
+  isLoading = true;
+
+  if (!isLoadingMore) {
+    budgetList.innerHTML = "<li>Carregando...</li>";
+  }
 
   try {
-    const query = db.collection("servicos").where("userId", "==", user.uid);
+    let query = db.collection("servicos").where("userId", "==", user.uid).orderBy("criadoEm", "desc").limit(10);
+
+    if (lastVisible) {
+      query = query.startAfter(lastVisible); // Paginação
+    }
+
     const snapshot = await query.get();
 
-    console.log("Consulta Firestore executada.");
-    console.log("Documentos encontrados:", snapshot.docs.length);
-
     if (!snapshot.empty) {
-      const docsWithProducts = [];
-      for (const doc of snapshot.docs) {
+      lastVisible = snapshot.docs[snapshot.docs.length - 1]; // Atualiza o último item carregado
+      const docsWithProducts = await Promise.all(snapshot.docs.map(async (doc) => {
         const data = doc.data();
-        console.log("Dados do documento:", data);
-
-        // Buscar produtos na subcoleção "subservicos"
         const subservicosSnapshot = await doc.ref.collection("subservicos").get();
         const produtos = subservicosSnapshot.docs.map(subDoc => subDoc.data());
 
-        console.log("Produtos encontrados no documento:", produtos);
-
-        // Filtrar produtos pelo cliente
         const produtosFiltrados = produtos.filter(produto => {
           const cliente = produto.cliente?.toLowerCase() || "";
           return cliente.includes(search.toLowerCase());
         });
 
         if (produtosFiltrados.length > 0) {
-          docsWithProducts.push({
-            id: doc.id,
-            produtos: produtosFiltrados,
-          });
+          return { id: doc.id, produtos: produtosFiltrados };
         }
-      }
+      }));
 
-      console.log("Documentos após filtragem:", docsWithProducts.length);
+      const filteredDocs = docsWithProducts.filter(doc => doc); // Remove undefined
 
-      if (docsWithProducts.length > 0) {
-        renderBudgets(docsWithProducts);
+      if (filteredDocs.length > 0) {
+        renderBudgets(filteredDocs);
+        showLoadMoreButton(); // Exibe o botão "Carregar mais"
       } else {
-        budgetList.innerHTML = "<li>Nenhum orçamento encontrado.</li>";
+        if (!noMoreItems) {
+          Swal.fire("Informação", "Não há mais itens para carregar.", "info");
+          noMoreItems = true; // Marca que não há mais itens
+        }
+        loadMoreBtn.style.display = 'none'; // Oculta o botão quando não houver mais itens
       }
     } else {
-      budgetList.innerHTML = "<li>Nenhum orçamento encontrado.</li>";
+      if (!noMoreItems) {
+        Swal.fire("Informação", "Não há mais itens para carregar.", "info");
+        noMoreItems = true; // Marca que não há mais itens
+      }
+      loadMoreBtn.style.display = 'none'; // Oculta o botão quando não houver mais itens
     }
   } catch (error) {
     console.error("Erro ao carregar orçamentos:", error);
     budgetList.innerHTML = "<li>Erro ao carregar dados. Veja o console para mais detalhes.</li>";
   }
+
+  isLoading = false;
 }
-
-
 
 // Renderizar orçamentos
 function renderBudgets(docsWithProducts) {
-  budgetList.innerHTML = "";
   docsWithProducts.forEach((doc) => {
     const { id, produtos } = doc;
 
@@ -122,49 +143,26 @@ function openEditPage(docId) {
   window.location.href = `/Editar/${docId}`;
 }
 
+// Exibir o botão "Carregar mais"
+function showLoadMoreButton() {
+  loadMoreBtn.style.display = 'block';
+  loadMoreBtn.addEventListener("click", async () => {
+    if (isLoadingMore) return;
 
+    isLoadingMore = true;
+    loadMoreBtn.innerHTML = "Carregando...";
 
-// Exibir itens da subcoleção
-async function displaySubcollectionItems(docId) {
-  try {
-    const subcollectionRef = db.collection("servicos").doc(docId).collection("subservicos");
-    const snapshot = await subcollectionRef.get();
-
-    if (!snapshot.empty) {
-      const subItems = snapshot.docs.map(doc => doc.data());
-      console.log("Itens da subcoleção:", subItems);
-
-      // Renderizar os itens no frontend
-      budgetList.innerHTML = subItems
-        .map(item => `
-          <li>
-            <strong>Modelo:</strong> ${item.modelo}<br>
-            <strong>Descrição:</strong> ${item.descricao}<br>
-            <strong>Cliente:</strong> ${item.cliente}<br>
-            <strong>Dimensões:</strong> ${item.dimensoes}<br>
-            <strong>Material:</strong> ${item.material}<br>
-            <strong>Vidro:</strong> ${item.vidro}<br>
-            <strong>Quantidade:</strong> ${item.quantidade}<br>
-            <strong>Total:</strong> ${item.valorTotal}
-          </li>
-        `)
-        .join("");
-    } else {
-      Swal.fire("Informação", "Nenhum item encontrado na subcoleção.", "info");
+    if (auth.currentUser) {
+      await loadBudgets(auth.currentUser);
     }
-  } catch (error) {
-    console.error("Erro ao carregar subcoleção:", error);
-    Swal.fire("Erro", "Não foi possível carregar os itens.", "error");
-  }
+
+    loadMoreBtn.innerHTML = "Carregar mais";
+    isLoadingMore = false;
+  });
 }
 
-// Evento de busca
-searchInput.addEventListener("input", e => {
-  const searchTerm = e.target.value.trim().toLowerCase();
-  if (auth.currentUser) {
-    loadBudgets(auth.currentUser, searchTerm);
-  }
-});
+// Evento de busca com debouncing
+searchInput.addEventListener("input", debounceSearch);
 
 // Verificar autenticação na inicialização
 auth.onAuthStateChanged(user => {
