@@ -85,7 +85,7 @@ async function carregarClientes() {
     try {
         const snapshot = await db.collection('clientes')
         .where('userId', '==', user.uid)
-        .orderBy('createdAt', 'desc')
+        .orderBy('nome', 'asc')
         .get();
 
         if (snapshot.empty) {
