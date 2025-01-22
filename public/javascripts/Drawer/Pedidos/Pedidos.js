@@ -1,4 +1,4 @@
-// Configuração do Firebase
+
 import 'https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js';
 import 'https://www.gstatic.com/firebasejs/10.11.0/firebase-auth-compat.js';
 import 'https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore-compat.js';
@@ -13,7 +13,7 @@ const firebaseConfig = {
   measurementId: "G-ZMY6CHL8QW",
 };
 
-// Inicializar Firebase
+
 if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
 }
@@ -27,9 +27,9 @@ const loadMoreBtn = document.getElementById("load-more-btn");
 let lastVisible = null;
 let isLoading = false;
 let isLoadingMore = false;
-let noMoreItems = false;  // Flag para verificar se há mais itens
+let noMoreItems = false;  
 
-// Verificar se o usuário está autenticado
+
 function checkUserAuthentication(user) {
   if (!user) {
     Swal.fire("Erro!", "Você precisa estar autenticado para visualizar os orçamentos.", "error");
@@ -39,7 +39,7 @@ function checkUserAuthentication(user) {
   return true;
 }
 
-// Função de debouncing
+
 let debounceTimeout;
 function debounceSearch() {
   clearTimeout(debounceTimeout);
@@ -50,11 +50,11 @@ function debounceSearch() {
   }, 500);
 }
 
-// Carregar orçamentos com paginação e carregamento paralelo
+// Carregar orçamentos com paginação 
 async function loadBudgets(user, search = "") {
   if (!checkUserAuthentication(user)) return;
 
-  if (isLoading) return; // Evita múltiplos carregamentos ao mesmo tempo
+  if (isLoading) return; 
   isLoading = true;
 
   if (!isLoadingMore) {

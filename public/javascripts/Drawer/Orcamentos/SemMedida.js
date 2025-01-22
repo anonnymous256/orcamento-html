@@ -16,12 +16,12 @@ addServicoButton.addEventListener("click", () => {
 
   if (!descricao || isNaN(unidade) || isNaN(quantidade)) {
     Swal.fire({
-        position: "center",
-        icon: "error",
-        title: "Por favor, preencha todos os campos!",
-        showConfirmButton: false,
-        timer: 1500
-      });
+      position: "center",
+      icon: "error",
+      title: "Por favor, preencha todos os campos!",
+      showConfirmButton: false,
+      timer: 1500
+    });
     return;
   }
 
@@ -58,156 +58,180 @@ function renderServices() {
   });
 }
 
+
 function deleteService(index) {
-    Swal.fire({
-      title: 'Excluir Serviço',
-      text: 'Tem certeza que deseja excluir este serviço?',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: 'Sim, excluir',
-      cancelButtonText: 'Cancelar',
-      reverseButtons: true 
-    }).then((result) => {
-      if (result.isConfirmed) {
-        servicos.splice(index, 1);
-        renderServices();
-  
-        Swal.fire({
-          title: 'Excluído!',
-          text: 'O serviço foi excluído com sucesso.',
-          icon: 'success',
-          showConfirmButton: false,
-          timer: 1500
-        });
-      }
-    });
-  }
-  
+  Swal.fire({
+    title: 'Excluir Serviço',
+    text: 'Tem certeza que deseja excluir este serviço?',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Sim, excluir',
+    cancelButtonText: 'Cancelar',
+    reverseButtons: true
+  }).then((result) => {
+    if (result.isConfirmed) {
+      servicos.splice(index, 1);
+      renderServices();
+
+      Swal.fire({
+        title: 'Excluído!',
+        text: 'O serviço foi excluído com sucesso.',
+        icon: 'success',
+        showConfirmButton: false,
+        timer: 1500
+      });
+    }
+  });
+}
+
 
 function editService(index) {
-    Swal.fire({
-      title: 'Editar Serviço',
-      text: 'Tem certeza que deseja editar este serviço?',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: 'Sim, editar',
-      cancelButtonText: 'Cancelar'
-    }).then((result) => {
-      if (result.isConfirmed) {
-        const servico = servicos[index];
-        descricaoInput.value = servico.descricao;
-        unidadeInput.value = servico.unidade;
-        quantidadeInput.value = servico.quantidade;
-        observacaoInput.value = servico.observacao;
-        servicos.splice(index, 1);
-        renderServices();
-  
-        Swal.fire({
-          title: 'Serviço em Edição',
-          text: 'O serviço foi carregado para edição.',
-          icon: 'success',
-          showConfirmButton: false,
-          timer: 1500
-        });
-      }
-    });
-  }
-  
+  Swal.fire({
+    title: 'Editar Serviço',
+    text: 'Tem certeza que deseja editar este serviço?',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Sim, editar',
+    cancelButtonText: 'Cancelar'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      const servico = servicos[index];
+      descricaoInput.value = servico.descricao;
+      unidadeInput.value = servico.unidade;
+      quantidadeInput.value = servico.quantidade;
+      observacaoInput.value = servico.observacao;
+      servicos.splice(index, 1);
+      renderServices();
+
+      Swal.fire({
+        title: 'Serviço em Edição',
+        text: 'O serviço foi carregado para edição.',
+        icon: 'success',
+        showConfirmButton: false,
+        timer: 1500
+      });
+    }
+  });
+}
+
 
 generatePdfButton.addEventListener("click", () => {
-    if(servicos.length === 0) {
-        Swal.fire({
-            position: "center",
-            icon: "error",
-            title: "Nenhum serviço adicionado!",
-            showConfirmButton: false,
-            timer: 1500
-        })
-        return;
-    }
-const { jsPDF } = window.jspdf;
-const doc = new jsPDF();
+  if (servicos.length === 0) {
+    Swal.fire({
+      position: "center",
+      icon: "error",
+      title: "Nenhum serviço adicionado!",
+      showConfirmButton: false,
+      timer: 1500
+    })
+    return;
+  }
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
 
 
-doc.setFillColor(40, 167, 69);
-doc.rect(0, 0, 210, 20, "F");
-doc.setFont("helvetica", "bold");
-doc.setTextColor(255, 255, 255);
-doc.setFontSize(16);
-doc.text("Orçamento - Serviços", 10, 13);
+  doc.setFillColor(40, 167, 69);
+  doc.rect(0, 0, 210, 20, "F");
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(16);
+  doc.text("Orçamento - Serviços", 10, 13);
 
 
-doc.setFontSize(12);
-doc.setTextColor(0, 0, 0);
-let startY = 30;
+  doc.setFontSize(12);
+  doc.setTextColor(0, 0, 0);
+  let startY = 30;
 
-const columnHeaders = ["Descrição", "Preço/Unidade", "Quantidade", "Total"];
-const columnWidths = [70, 40, 30, 30]; 
-const startX = 10;
+  const columnHeaders = ["Descrição", "Preço/Unidade", "Quantidade", "Total"];
+  const columnWidths = [70, 40, 30, 30];
+  const startX = 10;
 
-
-doc.setFont("helvetica", "bold");
-columnHeaders.forEach((header, index) => {
-const columnX = startX + columnWidths.slice(0, index).reduce((a, b) => a + b, 0);
-doc.text(header, columnX, startY);
-});
-
-startY += 5;
-doc.setLineWidth(0.5);
-doc.line(startX, startY, startX + columnWidths.reduce((a, b) => a + b, 0), startY);  
-
-doc.setFont("helvetica", "normal");
-let totalGeral = 0;
-
-servicos.forEach(servico => {
-startY += 10;
-
-if (startY > 270) {
-  doc.addPage();
-  startY = 30;
 
   doc.setFont("helvetica", "bold");
   columnHeaders.forEach((header, index) => {
     const columnX = startX + columnWidths.slice(0, index).reduce((a, b) => a + b, 0);
     doc.text(header, columnX, startY);
   });
+
   startY += 5;
-  doc.line(startX, startY, startX + columnWidths.reduce((a, b) => a + b, 0), startY); 
+  doc.setLineWidth(0.5);
+  doc.line(startX, startY, startX + columnWidths.reduce((a, b) => a + b, 0), startY);
+
   doc.setFont("helvetica", "normal");
-}
+  let totalGeral = 0;
 
-const values = [
-  servico.descricao,
-  `R$${servico.unidade.toFixed(2)}`,
-  `${servico.quantidade}`,
-  `R$${servico.valor.toFixed(2)}`
-];
+  servicos.forEach(servico => {
+    startY += 10;
+  
+    // Adicionar nova página se necessário
+    if (startY > 270) {
+      doc.addPage();
+      startY = 30;
+  
+      doc.setFont("helvetica", "bold");
+      columnHeaders.forEach((header, index) => {
+        const columnX = startX + columnWidths.slice(0, index).reduce((a, b) => a + b, 0);
+        doc.text(header, columnX, startY);
+      });
+      startY += 5;
+      doc.line(startX, startY, startX + columnWidths.reduce((a, b) => a + b, 0), startY); 
+      doc.setFont("helvetica", "normal");
+    }
+  
+    // Ajustar descrições longas
+    const descricaoQuebrada = doc.splitTextToSize(servico.descricao, columnWidths[0]); // Limita o texto à largura da coluna
+    const values = [
+      descricaoQuebrada, // Descrição com quebra de linha
+      `R$${servico.unidade.toFixed(2)}`,
+      `${servico.quantidade}`,
+      `R$${servico.valor.toFixed(2)}`
+    ];
+  
+    // Renderizar linhas
+    values.forEach((value, index) => {
+      const columnX = startX + columnWidths.slice(0, index).reduce((a, b) => a + b, 0);
+      if (Array.isArray(value)) {
+        value.forEach((line, i) => {
+          doc.text(line, columnX, startY + i * 5);
+        });
+      } else {
+        doc.text(value, columnX, startY);
+      }
+    });
+  
+    startY += descricaoQuebrada.length * 5; // Ajustar altura com base nas linhas quebradas
+    totalGeral += servico.valor;
+  });
+  
 
-values.forEach((value, index) => {
-  const columnX = startX + columnWidths.slice(0, index).reduce((a, b) => a + b, 0);
-  doc.text(value, columnX, startY);
-});
+  const observacoes = servicos.filter(servico => servico.observacao.trim());
+  if (observacoes.length > 0) {
+    startY += 15;
+    doc.setFont("helvetica", "bold");
+    doc.text("Observações:", startX, startY);
+  
+    doc.setFont("helvetica", "normal");
+    observacoes.forEach(servico => {
+      const observacaoQuebrada = doc.splitTextToSize(`- ${servico.observacao}`, 190); // Limita a largura do texto
+      observacaoQuebrada.forEach(line => {
+        startY += 10;
+  
+        // Adicionar nova página se necessário
+        if (startY > 270) {
+          doc.addPage();
+          startY = 30;
+        }
+  
+        doc.text(line, startX, startY);
+      });
+    });
+  }
+  
 
-totalGeral += servico.valor;
-});
-
-const observacoes = servicos.filter(servico => servico.observacao.trim());
-if (observacoes.length > 0) {
-startY += 15;
-doc.setFont("helvetica", "bold");
-doc.text("Observações:", startX, startY);
-
-doc.setFont("helvetica", "normal");
-observacoes.forEach(servico => {
   startY += 10;
-  doc.text(`- ${servico.observacao}`, startX, startY);
-});
-}
+  doc.setFont("helvetica", "bold");
+  doc.text("Valor Total Geral:", startX, startY);
+  doc.text(`R$${totalGeral.toFixed(2)}`, startX + columnWidths.slice(0, 3).reduce((a, b) => a + b, 0), startY, { align: "right" });
 
-startY += 10;
-doc.setFont("helvetica", "bold");
-doc.text("Valor Total Geral:", startX, startY);
-doc.text(`R$${totalGeral.toFixed(2)}`, startX + columnWidths.slice(0, 3).reduce((a, b) => a + b, 0), startY, { align: "right" });
-
-doc.save("orcamento.pdf");
+  doc.save("orcamento.pdf");
 });
