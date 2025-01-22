@@ -365,7 +365,17 @@ btnTotal.addEventListener('click', () => {
     const total = (valorMetro * (largura * altura) + materialValor);
     const totalFinal = (total + (total * (porcentagemGeral / 100))) * quantidade;
 
+
     document.getElementById('total').value = totalFinal.toFixed(2);
+
+    // Calcular o lucro 
+    const lucro = totalFinal - total * quantidade;
+    document.getElementById('lucro-valor').innerText = lucro.toFixed(2);
+
+    // Mostrar a "nuvem" de lucro
+    const lucroNuvem = document.getElementById('lucro-nuvem');
+    lucroNuvem.style.display = 'block';
+    lucroNuvem.style.opacity = 1;  // Aparece suavemente
 });
 
 // Adicionar produtos a serviços
@@ -416,6 +426,11 @@ function adicionarProduto(produto) {
 
     produtosEscolhidos.appendChild(li);
     btnSalvar.style.display = 'block';
+
+    // Aqui escondemos a nuvem de lucro quando um produto for adicionado
+    const lucroNuvem = document.getElementById('lucro-nuvem');
+    lucroNuvem.style.display = 'none';  // Esconde a nuvem
+    lucroNuvem.style.opacity = 0;      // Garante que ela fique invisível
 }
 
 async function abrirModalEdicao(produto, li) {
