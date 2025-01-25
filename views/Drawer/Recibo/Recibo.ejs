@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recibos Pardal Portoes</title>
+    <link rel="shortcut icon" href="assets/img/favicon.ico" type="image/x-icon">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="/stylesheets/Drawer/Recibo/Recibo.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+</head>
+<body>
+    <div class="container">
+        <div class="info">
+            <div class="voltar" onclick="window.history.back()">Voltar</div>
+            <div class="info-ipt">
+                <div class="info-cliente">
+                    <h2>Informações do Cliente</h2>
+                    <div class="input-item">
+                        <label for="cliente">Nome do Cliente:</label>
+                        <select name="cliente" id="cliente">
+                            <!-- As opções serão carregadas dinamicamente -->
+                        </select>
+                    </div>
+                    
+                    <div class="input-item">
+                        <label for="input-data">Data:</label>
+                        <input type="date" name="input-data" id="input-data">
+                    </div>
+                    <div class="input-item">
+                        <label for="input-end">Endereço para instalação:</label>
+                        <input type="text" name="input-end" id="input-end" > 
+                    </div>
+                    
+                </div>
+                <div class="info-servicos">
+                    <h2>Informações do Serviço</h2>
+                    <div class="input-item">
+                        <label for="desc-serv">Descrição:</label>
+                        <input type="text" name="desc-serv" id="desc-serv">
+                    </div>
+                    <div class="input-item">
+                        <label for="quantidade">Quantidade:</label>
+                        <input type="number" name="quantidade" id="quantidade">
+                    </div>
+                    <div class="input-item">
+                        <label for="valor">Valor:</label>
+                        <input type="number" name="valor" id="valor">
+                    </div>
+            </div>
+                <div class="btn">
+                    <button class="enviar">Enviar Dados</button>
+                    <button class="remover">Limpar Item</button>
+                    <p><button class="baixar">Baixar PDF</button></p>
+                </div>
+            </div>
+        </div> 
+        <div class="recibo">
+            <header>
+                <img src="assets/img/placeholder-logo.png" alt="Logo da empresa" id="logo-usuario">
+                    <div class="info-empresa">
+                        <h2 id="nome-empresa">Nome da Empresa</h2>
+                        <p id="endereco-empresa">Endereço: </p>
+                        <p id="cnpj-empresa">CNPJ: </p>
+                        <p id="telefone-empresa">Telefone: </p>
+                    </div>
+                    <hr>
+                <div class="dados">
+                    <p class="nome-cliente">Cliente:</p>
+                    <p class="data-recibo">Data:</p>
+                    <p class="end-recibo">Endereço:</p>
+                </div>
+                <hr>
+                
+
+            </header>
+            
+            <main>
+                <h1>Declaração</h1>
+                <div class="recibo-declaracao">
+                    <p id="declaracao-recibo"></p> <!-- Parágrafo para a declaração -->
+                </div>
+                <h1>Serviços</h1>
+                <table class="tabela-servicos">
+                    <tr class="titulo-tabela">
+                        <th>Item</th>
+                        <th>Descrição</th>
+                        <th>Quantidade</th>
+                        <th>Valor</th>
+                    </tr>
+                </table>
+                
+            </main>
+        </div>
+    </div>
+
+
+    <script type = "module" src="/javascripts/Drawer/Recibo/Recibo.js"></script>
+</body>
+</html>

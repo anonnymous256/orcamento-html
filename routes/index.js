@@ -78,6 +78,10 @@ router.get('/Tempera', function(req, res) {
   res.render('Drawer/SistemaTempera/Tempera', { title: 'Express' });
 });
 
+router.get('/Recibo', function(req, res) {
+  res.render('Drawer/Recibo/Recibo', { title: 'Express' });
+});
+
 
 router.get('/Editar/:id', async function(req, res) {
   const docId = req.params.id;  // Captura o ID do orçamento da URL
