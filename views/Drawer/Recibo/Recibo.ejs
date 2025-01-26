@@ -48,6 +48,19 @@
                         <label for="valor">Valor:</label>
                         <input type="number" name="valor" id="valor">
                     </div>
+                    <div class="input-item">
+                        <label for="forma-pagamento">Forma de Pagamento:</label>
+                        <select name="formapagamento" id="formapagamento">
+                            <option value="Dinheiro">Dinheiro</option>
+                            <option value="Pix">Pix</option>
+                            <option value="Cartão">Cartão</option>
+                            <option value="Cheque">Cheque</option>
+                            <option value="Boleto">Boleto</option>
+                            <option value="Deposito">Depósito</option>
+                            <option value="Outro">Outro</option>
+                        </select>
+                        
+                    </div>
             </div>
                 <div class="btn">
                     <button class="enviar">Enviar Dados</button>
@@ -72,17 +85,18 @@
                     <p class="end-recibo">Endereço:</p>
                 </div>
                 <hr>
-                
-
             </header>
-            
             <main>
-                <h1>Declaração</h1>
+                <h1 class = "hidden">Declaração</h1>
                 <div class="recibo-declaracao">
                     <p id="declaracao-recibo"></p> <!-- Parágrafo para a declaração -->
                 </div>
-                <h1>Serviços</h1>
-                <table class="tabela-servicos">
+                <h1 class = "hidden">Forma de Pagamento</h1>
+                <div class = "pagamento-recibo">
+                <p id = "forma-pagamento"></p>
+                </div>
+                <h1 class = "hidden">Serviços</h1>
+                <table class="tabela-servicos hidden">
                     <tr class="titulo-tabela">
                         <th>Item</th>
                         <th>Descrição</th>
@@ -90,7 +104,6 @@
                         <th>Valor</th>
                     </tr>
                 </table>
-                
             </main>
         </div>
     </div>

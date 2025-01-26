@@ -126,6 +126,7 @@ function EnvDados() {
     const rcbData = document.querySelector('.data-recibo');
     const iptEnd = document.querySelector('#input-end');
     const rcbEnd = document.querySelector('.end-recibo');
+    const iptForma = document.querySelector('#formapagamento');
 
     const tabela = document.querySelector('.tabela-servicos');
     const desc = document.querySelector('#desc-serv');
@@ -176,16 +177,34 @@ function EnvDados() {
     };
 
     this.envInfoCliente = function (nome, end) {
+        const h1Declaracao = document.querySelector("h1:nth-of-type(1)");
+        const declaracaoDiv = document.querySelector(".recibo-declaracao");
+        const h1Pagamento = document.querySelector("h1:nth-of-type(2)");
+        const pagamentoDiv = document.querySelector(".pagamento-recibo");
+        const h1Servicos = document.querySelector("h1:nth-of-type(3)");
+        const tabelaServicos = document.querySelector(".tabela-servicos");
+
         rcbCliente.innerHTML = `Cliente: ${nome}`;
         rcbData.innerHTML = `Data: ${this.formtData()}`;
         rcbEnd.innerHTML = `Endereço para Instalação: ${end}`;
-        
+
         const totalValor = this.calcularTotalValor();
         const valorTotalFormatado = `R$ ${totalValor.toFixed(2).replace('.', ',')}`;
 
         // Declaração com valor total
-        const declaracao = `Declaro que recebi de ${nome}, com endereço em ${end}, o valor de ${valorTotalFormatado} em ${this.formtData()}, referente aos seguintes serviços:`;
+        const declaracao = `Declaro que recebi de ${nome}, com endereço em ${end}, o valor de ${valorTotalFormatado} em ${this.formtData()}, referente as seguintes serviços:`;
+
+        const FormadePagamento = `${iptForma.value}`;
         document.getElementById('declaracao-recibo').innerText = declaracao;
+        document.getElementById('forma-pagamento').innerText = FormadePagamento;
+
+        // Remove a classe 'hidden' para exibir os elementos
+    h1Declaracao.classList.remove("hidden");
+    declaracaoDiv.classList.remove("hidden");
+    h1Pagamento.classList.remove("hidden");
+    pagamentoDiv.classList.remove("hidden");
+    h1Servicos.classList.remove("hidden");
+    tabelaServicos.classList.remove("hidden");
 
         const valorRecibo = document.querySelector('.valor-recibo');
         if (valorRecibo) {
@@ -223,7 +242,7 @@ function EnvDados() {
 
     this.addServ = function (cont, desc, quantidade, valor) {
         const linhas = document.querySelectorAll('.tabela-servicos tr');
-        
+
         // Verifica se o número de itens na tabela já chegou ao limite de 12
         if (linhas.length - 1 >= 12) {
             Swal.fire('Limite Atingido', 'Você pode adicionar no máximo 12 itens na lista.', 'warning');
@@ -234,24 +253,25 @@ function EnvDados() {
             Swal.fire('Erro!', 'Por favor, preencha todos os campos (descrição, quantidade e valor).', 'error');
             return;
         }
-    
+
+
         const tr = document.createElement('tr');
         tabela.appendChild(tr);
-    
+
         const valorOriginal = valor;
-    
+
         const itens = [cont, desc, quantidade, valorOriginal];
         for (let i = 0; i < itens.length; i++) {
             const td = document.createElement('td');
             td.innerText = itens[i];
             tr.appendChild(td);
         }
-    
+
         contador++;
-    
+
         this.envInfoCliente(iptCliente.value, iptEnd.value);
     };
-    
+
 
     this.formtData = function () {
         const dataIpt = new Date(iptData.value),
