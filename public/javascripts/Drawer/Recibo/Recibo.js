@@ -192,7 +192,7 @@ function EnvDados() {
         const valorTotalFormatado = `R$ ${totalValor.toFixed(2).replace('.', ',')}`;
 
         // Declaração com valor total
-        const declaracao = `Declaro que recebi de ${nome}, com endereço em ${end}, o valor de ${valorTotalFormatado} em ${this.formtData()}, referente as seguintes serviços:`;
+        const declaracao = `Declaro que recebi de ${nome}, com endereço em ${end}, o valor de ${valorTotalFormatado} em ${this.formtData()}, referente a:`;
 
         const FormadePagamento = `${iptForma.value}`;
         document.getElementById('declaracao-recibo').innerText = declaracao;
@@ -307,7 +307,7 @@ function EnvDados() {
         const item = document.querySelector('.recibo');
         const opt = {
             filename: iptCliente.value + 'recibo.pdf',
-            html2canvas: { dpi: 300, scale: 5, letterRendering: true },
+            html2canvas: { dpi: 150, scale: 3, letterRendering: true },
             jsPDF: { format: 'a4', orientation: 'portrait' },
         };
         html2pdf().set(opt).from(item).save();
