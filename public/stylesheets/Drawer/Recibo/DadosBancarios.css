@@ -5,33 +5,32 @@ body {
     padding: 0;
 }
 
+/* Estilo para o cabeçalho */
 header {
-    background-color: #28a745; 
-    padding: 20px 0; 
-    text-align: center;
-    color: white; 
+    background-color: #1c2719; /* Cor de fundo do cabeçalho */
+    padding: 20px 0; /* Preenchimento do cabeçalho */
+    text-align: center; /* Alinha o conteúdo ao centro */
+    color: white; /* Cor do texto */
 }
 
-
+/* Estilo para o container do cabeçalho */
 .header-container {
     display: flex;
-    justify-content: center;
-    align-items: center;
+    justify-content: space-between; /* Espaça os itens (nome e botão) */
+    align-items: center; /* Alinha os itens verticalmente */
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 20px;
-    position: relative;
 }
 
-
+/* Estilo do título no cabeçalho */
 h1 {
     font-size: 24px;
+    margin: 0; /* Remove qualquer margem */
 }
 
-
+/* Estilo do botão "Voltar" */
 .back-button {
-    position: absolute; 
-    left: 20px;
     padding: 10px 20px;
     background-color: #ffffff;
     color: #28a745;
@@ -42,8 +41,25 @@ h1 {
 }
 
 .back-button:hover {
-    background-color: #f1f1f1; 
+    background-color: #f1f1f1; /* Cor de fundo quando passar o mouse */
 }
+
+/* Responsividade para telas menores */
+@media (max-width: 768px) {
+    .header-container {
+        padding: 0 10px; /* Diminui o padding lateral em telas pequenas */
+    }
+
+    h1 {
+        font-size: 20px; /* Diminui o tamanho da fonte do título em telas pequenas */
+    }
+
+    .back-button {
+        font-size: 14px; /* Ajusta o tamanho da fonte do botão */
+        padding: 8px 16px; /* Ajusta o preenchimento do botão */
+    }
+}
+
 
 .form-container {
     width: 100%;
@@ -94,7 +110,7 @@ input, select, textarea {
 button {
     width: 100%; 
     padding: 12px; 
-    background-color: #28a745; 
+    background-color: #1c2719; 
     color: white; 
     border: none; 
     border-radius: 4px; 

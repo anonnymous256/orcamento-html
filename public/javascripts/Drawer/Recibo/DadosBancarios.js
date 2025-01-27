@@ -58,7 +58,13 @@ onAuthStateChanged(auth, async (usuario) => {
         const dadosUsuario = await carregarDadosUsuario(usuario.uid);
         preencherFormularioComDados(dadosUsuario);
     } else {
-        alert('Você precisa estar logado.');
+        Swal.fire({
+            position: "center",
+            icon: "warning",
+            title: "Você precisa estar logado!",
+            showConfirmButton: false,
+            timer: 1500
+          });
     }
 });
 
@@ -68,7 +74,13 @@ document.getElementById('formularioPagamento').addEventListener('submit', async 
 
     const usuario = auth.currentUser;
     if (!usuario) {
-        alert('Você precisa estar logado.');
+        Swal.fire({
+            position: "center",
+            icon: "warning",
+            title: "Você precisa estar logado!",
+            showConfirmButton: false,
+            timer: 1500
+          });
         return;
     }
 
@@ -95,5 +107,12 @@ document.getElementById('formularioPagamento').addEventListener('submit', async 
     // Salvar os dados com base no UID do usuário
     await salvarDadosUsuario(usuario.uid, dadosConta);
 
-    alert('Dados salvos com sucesso!');
+
+    Swal.fire({
+        position: "center",
+        icon: "success",
+        title: "Dados atualizadod com sucesso!",
+        showConfirmButton: false,
+        timer: 1500
+      });
 });
