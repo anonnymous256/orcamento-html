@@ -94,6 +94,27 @@ async function carregarClientes() {
     }
 }
 
+async function carregarDadosConta() {
+    const user = auth.currentUser;
+    if (!user) return null;
+
+    try {
+        const dadosRef = doc(db, 'DadosConta', user.uid); // Assuming DadosConta is linked by user ID
+        const dadosSnap = await getDoc(dadosRef);
+
+        if (dadosSnap.exists()) {
+            return dadosSnap.data(); // Retorna os dados da conta
+        } else {
+            console.error("Dados da conta não encontrados.");
+            return null;
+        }
+    } catch (error) {
+        console.error("Erro ao carregar dados da conta:", error);
+        return null;
+    }
+}
+
+
 async function atualizarEndereco(clienteId) {
     const enderecoInput = document.getElementById('input-end');
     if (!clienteId) {
@@ -303,15 +324,105 @@ function EnvDados() {
         this.envInfoCliente(iptCliente.value, iptEnd.value);
     };
 
-    this.baixarPdf = function () {
-        const item = document.querySelector('.recibo');
-        const opt = {
-            filename: iptCliente.value + 'recibo.pdf',
-            html2canvas: { dpi: 150, scale: 3, letterRendering: true },
-            jsPDF: { format: 'a4', orientation: 'portrait' },
-        };
-        html2pdf().set(opt).from(item).save();
+  
+    const { jsPDF } = window.jspdf;
+
+this.baixarPdf = async function () {
+    const dadosConta = await carregarDadosConta(); // Carrega os dados da conta
+
+    // Verifique se os dados estão sendo carregados corretamente
+    console.log("Dados da Conta:", dadosConta);
+
+    if (!dadosConta) {
+        Swal.fire('Erro!', 'Não foi possível carregar os dados da conta.', 'error');
+        return;
+    }
+
+    // Cria o PDF com jsPDF
+    const doc = new jsPDF();
+
+    const item = document.querySelector('.recibo');
+    const opt = {
+        filename: iptCliente.value + 'recibo.pdf',
+        html2canvas: { dpi: 150, scale: 3, letterRendering: true },
+        jsPDF: { format: 'a4', orientation: 'portrait' },
     };
+
+    await html2pdf().set(opt).from(item).toPdf().get('pdf').then((pdf) => {
+        let yPosition = 20;
+        
+        const pageHeight = pdf.internal.pageSize.height;
+
+        const contentHeight = pdf.internal.getNumberOfPages() === 1 ? pdf.internal.pageSize.height : 0;
+
+        if (contentHeight + 60 > pageHeight) {
+            pdf.addPage();
+            yPosition = 20; 
+        }
+
+        function addBankData(pdf, yPosition) {
+            pdf.setFont('helvetica', 'bold');
+            pdf.setFontSize(16);
+            pdf.text('Pagamento', 14, yPosition);
+            yPosition += 10;
+
+            pdf.setFont('helvetica', 'normal');  // Tira o negrito para os dados
+            pdf.setFontSize(12);
+            yPosition = addTextWrapped(pdf, `Método de Pagamento: ${dadosConta.metodoPagamento || 'Não disponível'}`, 14, yPosition);
+            yPosition = addTextWrapped(pdf, `Tipo de Chave Pix: ${dadosConta.tipoChavePix || 'Não disponível'}`, 14, yPosition);
+            yPosition = addTextWrapped(pdf, `Chave Pix: ${dadosConta.chavePix || 'Não disponível'}`, 14, yPosition);
+            yPosition += 5;
+
+            pdf.setFont('helvetica', 'bold');
+            pdf.setFontSize(16);
+            pdf.text('Dados Bancários', 14, yPosition);
+            yPosition += 10;
+
+            pdf.setFont('helvetica', 'normal');  // Tira o negrito para os dados
+            pdf.setFontSize(12);
+            yPosition = addTextWrapped(pdf, `Banco: ${dadosConta.nomeBanco || 'Não disponível'}`, 14, yPosition);
+            yPosition = addTextWrapped(pdf, `Agência: ${dadosConta.codigoAgencia || 'Não disponível'}`, 14, yPosition);
+            yPosition = addTextWrapped(pdf, `Conta: ${dadosConta.numeroConta || 'Não disponível'}`, 14, yPosition);
+            yPosition = addTextWrapped(pdf, `Tipo de Conta: ${dadosConta.tipoConta || 'Não disponível'}`, 14, yPosition);
+            yPosition = addTextWrapped(pdf, `Titular da conta: ${dadosConta.nomeBanco || 'Não disponível'}`, 14, yPosition);
+            yPosition += 5;
+
+            pdf.setFont('helvetica', 'bold');
+            pdf.setFontSize(16);
+            pdf.text('Informações Adicionais', 14, yPosition);
+            yPosition += 10;
+
+            pdf.setFont('helvetica', 'normal');  
+            pdf.setFontSize(12);  
+            yPosition = addTextWrapped(pdf, `${dadosConta.notas || 'Não disponível'}`, 14, yPosition);
+
+            return yPosition;
+        }
+
+        
+        function addTextWrapped(pdf, text, x, y) {
+            const margin = 14;
+            const maxWidth = pdf.internal.pageSize.width - 2 * margin;
+            const textArray = pdf.splitTextToSize(text, maxWidth);
+            pdf.text(textArray, x, y);
+            return y + textArray.length * 7; 
+        }
+
+        yPosition = addBankData(pdf, yPosition);
+
+        
+        if (yPosition > 250) {  
+            pdf.addPage();  
+            yPosition = 20; 
+            yPosition = addBankData(pdf, yPosition);  
+        }
+
+        // Salva o PDF depois de gerar
+        pdf.save(iptCliente.value + 'recibo.pdf');
+    });
+};
+
+     
 }
 
 const enviar = new EnvDados();

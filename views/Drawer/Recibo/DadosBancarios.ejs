@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulário de Dados Bancários e Meios de Pagamento</title>
+    <link rel="stylesheet" href="stylesheets/Drawer/Recibo/DadosBancarios.css">
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <button onclick="window.history.back()" class="back-button">Voltar</button>
+            <h1>Dados Bancários</h1> 
+        </div>
+    </header>
+    
+    <div class="form-container">
+        <h2>Formulário de Dados Bancários e Meios de Pagamento</h2>
+        <form id="formularioPagamento">
+            <fieldset>
+                <legend>Dados Bancários</legend>
+                <label for="nomeBanco">Nome do Banco:</label>
+                <input type="text" id="nomeBanco" name="nomeBanco" required>
+
+                <label for="numeroConta">Número da Conta:</label>
+                <input type="text" id="numeroConta" name="numeroConta" required>
+
+                <label for="codigoAgencia">Código da Agência:</label>
+                <input type="text" id="codigoAgencia" name="codigoAgencia" required>
+
+                <label for="tipoConta">Tipo de Conta:</label>
+                <select id="tipoConta" name="tipoConta" required>
+                    <option value="corrente">Conta Corrente</option>
+                    <option value="poupanca">Conta Poupança</option>
+                </select>
+            </fieldset>
+
+            <fieldset>
+                <legend>Meios de Pagamento</legend>
+                <label for="metodoPagamento">Escolha o Meio de Pagamento:</label>
+                <input type="text" id="metodoPagamento" name="metodoPagamento" required>
+            </fieldset>
+
+            <fieldset>
+                <legend>Dados do PIX</legend>
+                <label for="chavePix">Chave PIX:</label>
+                <input type="text" id="chavePix" name="chavePix" placeholder="Digite sua chave PIX" required>
+
+                <label for="tipoChavePix">Tipo de Chave PIX:</label>
+                <select id="tipoChavePix" name="tipoChavePix" required>
+                    <option value="cpf">CPF</option>
+                    <option value="cnpj">CNPJ</option>
+                    <option value="email">E-mail</option>
+                    <option value="telefone">Telefone</option>
+                </select>
+            </fieldset>
+
+            <fieldset>
+                <legend>Informações Adicionais</legend>
+                <label for="notas">Notas:</label>
+                <textarea id="notas" name="notas" rows="4"></textarea>
+            </fieldset>
+
+            <button type="submit">Enviar</button>
+        </form>
+    </div>
+
+    <script src="/javascripts/Drawer/Recibo/DadosBancarios.js" type="module"></script>
+
+</body>
+</html>
