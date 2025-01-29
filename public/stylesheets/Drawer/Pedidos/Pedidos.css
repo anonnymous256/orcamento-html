@@ -144,4 +144,25 @@ body,
       background-color: #6c757d;  
       cursor: not-allowed;       
     }
+
+    .budget-item {
+      display: flex;
+      flex-direction: column; /* Organiza os itens na vertical */
+      gap: 10px; /* Espaçamento entre os itens */
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      margin-bottom: 15px;
+      width: 90%; /* Para garantir que ocupe toda a largura disponível */
+    }
+    
+    .budget-item div {
+      margin: 0;
+    }
+    
+    .status {
+      cursor: pointer;
+      font-weight: bold;
+    }
+    
     
