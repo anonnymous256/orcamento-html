@@ -114,7 +114,7 @@ function editStatus(docId, currentStatus) {
       'pendente': 'Pendente',
       'realizado': 'Realizado',
       'cancelado': 'Cancelado',
-      'em_producao': 'Em Produção',
+      'producao': 'Em Produção',
       'enviado': 'Enviado'
     },
     inputValue: currentStatus,
