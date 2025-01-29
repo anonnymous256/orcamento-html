@@ -946,10 +946,55 @@ btnSalvar.addEventListener('click', async () => {
             return;
         }
 
+        // Criando HTML para exibir os status em uma lista vertical com rolagem
+        const statusOptions = {
+            pendente: { cor: "#f1c40f", nome: "Pendente" },
+            realizado: { cor: "#2ecc71", nome: "Realizado" },
+            cancelado: { cor: "#e74c3c", nome: "Cancelado" },
+            producao: { cor: "#3498db", nome: "Em Produção" }, // Exemplo de mais status
+            enviado: { cor: "#9b59b6", nome: "Enviado" }
+        };
+
+        let statusHtml = '<div style="max-height: 200px; overflow-y: auto; text-align: left;">';
+        Object.entries(statusOptions).forEach(([key, { cor, nome }]) => {
+            statusHtml += `
+                <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; cursor: pointer;">
+                    <input type="radio" name="status" value="${key}" style="margin: 0;">
+                    <span style="color: ${cor}; font-size: 20px;">●</span> <strong style = "color: black;">${nome}</strong>
+                </label>
+            `;
+        });
+        statusHtml += '</div>';
+
+        // Exibir o modal com a lista vertical
+        const { value: statusPedido } = await Swal.fire({
+            title: 'Selecione o status do pedido',
+            html: statusHtml,
+            focusConfirm: false,
+            showCancelButton: true,
+            cancelButtonText: 'Cancelar',
+            confirmButtonText: 'Salvar',
+            preConfirm: () => {
+                const selectedStatus = document.querySelector('input[name="status"]:checked');
+                if (!selectedStatus) {
+                    Swal.showValidationMessage('Você precisa selecionar um status!');
+                    return false;
+                }
+                return selectedStatus.value;
+            },
+            allowOutsideClick: false,
+            allowEscapeKey: false
+        });
+
+        if (!statusPedido) {
+            Swal.fire('Cancelado', 'O salvamento foi cancelado.', 'info');
+            return;
+        }
+
         // Exibir modal de carregamento
         Swal.fire({
-            title: 'processando',
-            text: 'por favor, aguarde enquato processamos os dados.',
+            title: 'Processando',
+            text: 'Por favor, aguarde enquanto processamos os dados.',
             allowOutsideClick: false,
             allowEscapeKey: false,
             didOpen: () => {
@@ -959,6 +1004,7 @@ btnSalvar.addEventListener('click', async () => {
 
         const data = {
             userId: user.uid,
+            status: statusPedido,
             produtos: await Promise.all(Array.from(produtosEscolhidos.querySelectorAll('li')).map(async (li) => {
                 const modelo = li.querySelector('img').alt;
                 const cliente = li.querySelector('.cliente').textContent;
@@ -967,17 +1013,14 @@ btnSalvar.addEventListener('click', async () => {
                 const quantidade = li.querySelector('.quantidade').textContent;
                 const valorMetro = li.querySelector('.metro').textContent;
                 const material = li.querySelector('.material').textContent;
-                const vidro = li.querySelector('.vidro').textContent ? li.querySelector('.vidro').textContent : 'Sem cor de vidro';
-                const ferragem = li.querySelector('.ferragem').textContent ? li.querySelector('.ferragem').textContent : 'Sem cor de ferragem';
+                const vidro = li.querySelector('.vidro')?.textContent || 'Sem cor de vidro';
+                const ferragem = li.querySelector('.ferragem')?.textContent || 'Sem cor de ferragem';
                 const valorTotal = li.querySelector('.total').textContent;
 
                 // Obter a imagem do produto
                 const imageFile = li.querySelector('img').src;
+                const base64Image = await toBase64(imageFile); // Converter para base64
 
-                // Converter a imagem para base64
-                const base64Image = await toBase64(imageFile);
-
-                // Retornar o objeto do produto com a imagem em base64
                 return {
                     modelo,
                     cliente,
@@ -989,7 +1032,7 @@ btnSalvar.addEventListener('click', async () => {
                     ferragem,
                     vidro,
                     valorTotal,
-                    imagemBase64: base64Image // Imagem em base64
+                    imagemBase64: base64Image
                 };
             }))
         };
@@ -999,37 +1042,35 @@ btnSalvar.addEventListener('click', async () => {
             return;
         }
 
-        // Iniciar o batch para salvar os dados de uma vez
+        // Criar batch para salvar os dados no Firestore
         const batch = db.batch();
+        const servicoRef = db.collection('servicos').doc(); // Criar novo documento na coleção
 
-        // Criar o documento na coleção 'servicos'
-        const servicoRef = db.collection('servicos').doc(); // Gerar um novo ID para o serviço
         batch.set(servicoRef, {
             userId: user.uid,
-            produtosCount: data.produtos.length, // Número de produtos no serviço
-            criadoEm: firebase.firestore.FieldValue.serverTimestamp(),
+            status: statusPedido,
+            produtosCount: data.produtos.length,
+            criadoEm: firebase.firestore.FieldValue.serverTimestamp()
         });
 
-        // Para cada produto, adicionar na subcoleção 'subservicos' do serviço
+        // Salvar os produtos na subcoleção 'subservicos'
         data.produtos.forEach((produto) => {
-            const subservicoRef = servicoRef.collection('subservicos').doc(); // Criar um documento para o produto na subcoleção
-            batch.set(subservicoRef, produto); // Adicionar o produto na subcoleção 'subservicos' no batch
+            const subservicoRef = servicoRef.collection('subservicos').doc();
+            batch.set(subservicoRef, produto);
         });
 
-        // Commitar o batch para salvar todas as operações de uma vez
+        // Commitar todas as operações
         await batch.commit();
-
 
         Swal.close();
         Swal.fire('Sucesso!', 'Dados salvos com sucesso.', 'success');
     } catch (error) {
         console.error('Erro ao salvar os dados:', error);
-
-        // Fechar o modal de carregamento e exibir erro
         Swal.close();
         Swal.fire('Erro', 'Ocorreu um erro ao salvar os dados.', 'error');
     }
 });
+
 
 // Função para converter imagem para base64
 function toBase64(url) {

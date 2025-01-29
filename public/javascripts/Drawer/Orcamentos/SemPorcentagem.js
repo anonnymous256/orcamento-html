@@ -884,6 +884,51 @@ btnSalvar.addEventListener('click', async () => {
             return;
         }
 
+        // Criando HTML para exibir os status em uma lista vertical com rolagem
+        const statusOptions = {
+            pendente: { cor: "#f1c40f", nome: "Pendente" },
+            realizado: { cor: "#2ecc71", nome: "Realizado" },
+            cancelado: { cor: "#e74c3c", nome: "Cancelado" },
+            producao: { cor: "#3498db", nome: "Em Produção" }, // Exemplo de mais status
+            enviado: { cor: "#9b59b6", nome: "Enviado" }
+        };
+
+        let statusHtml = '<div style="max-height: 200px; overflow-y: auto; text-align: left;">';
+        Object.entries(statusOptions).forEach(([key, { cor, nome }]) => {
+            statusHtml += `
+                <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; cursor: pointer;">
+                    <input type="radio" name="status" value="${key}" style="margin: 0;">
+                    <span style="color: ${cor}; font-size: 20px;">●</span> <strong style = "color: black;">${nome}</strong>
+                </label>
+            `;
+        });
+        statusHtml += '</div>';
+
+        // Exibir o modal com a lista vertical
+        const { value: statusPedido } = await Swal.fire({
+            title: 'Selecione o status do pedido',
+            html: statusHtml,
+            focusConfirm: false,
+            showCancelButton: true,
+            cancelButtonText: 'Cancelar',
+            confirmButtonText: 'Salvar',
+            preConfirm: () => {
+                const selectedStatus = document.querySelector('input[name="status"]:checked');
+                if (!selectedStatus) {
+                    Swal.showValidationMessage('Você precisa selecionar um status!');
+                    return false;
+                }
+                return selectedStatus.value;
+            },
+            allowOutsideClick: false,
+            allowEscapeKey: false
+        });
+
+        if (!statusPedido) {
+            Swal.fire('Cancelado', 'O salvamento foi cancelado.', 'info');
+            return;
+        }
+
         // Exibir modal de carregamento
          Swal.fire({
             title: 'Processando...',
@@ -941,6 +986,7 @@ btnSalvar.addEventListener('click', async () => {
         const servicoRef = db.collection('servicos').doc(); // Gerar um novo ID para o serviço
         batch.set(servicoRef, {
             userId: user.uid,
+            status: statusPedido,
             produtosCount: data.produtos.length, // Número de produtos no serviço
             criadoEm: firebase.firestore.FieldValue.serverTimestamp(),
         });
