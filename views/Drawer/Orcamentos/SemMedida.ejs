@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +9,7 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
   <link rel="stylesheet" href="stylesheets/Drawer/Orcamentos/SemMedida.css">
 </head>
+
 <body>
   <header>
     <i class="fa-solid fa-arrow-left" onclick="window.history.back()"></i>
@@ -17,39 +19,48 @@
 
   <h2>Gerenciar Serviços</h2>
 
-  <div class="form-group">
-    <label for="descricao">Descrição do Serviço:</label>
-    <input type="text" id="descricao" placeholder="Digite a descrição" required>
-  </div>
+  
+    <div class="form-group">
+      <label for="clientes">Selecione o cliente</label>
+      <select name="clientes" id="clientes">
 
-  <div class="form-group">
-    <label for="unidade">Preço por Unidade:</label>
-    <input type="number" id="unidade" step="0.01" placeholder="Digite o preço por unidade" required>
-  </div>
+      </select>
+    </div>
 
-  <div class="form-group">
-    <label for="quantidade">Quantidade:</label>
-    <input type="number" id="quantidade" placeholder="Digite a quantidade" required>
-  </div>
+    <div class="form-group">
+      <label for="descricao">Descrição do Serviço:</label>
+      <input type="text" id="descricao" placeholder="Digite a descrição" required>
+    </div>
 
-  <div class="form-group">
-    <label for="observacao">Observação:</label>
-    <textarea id="observacao" rows="3" placeholder="Digite uma observação (opcional)"></textarea>
-  </div>
+    <div class="form-group">
+      <label for="unidade">Preço por Unidade:</label>
+      <input type="number" id="unidade" step="0.01" placeholder="Digite o preço por unidade" required>
+    </div>
 
-  <div class="form-group">
-    <button id="addServico">Adicionar Serviço</button>
-  </div>
+    <div class="form-group">
+      <label for="quantidade">Quantidade:</label>
+      <input type="number" id="quantidade" placeholder="Digite a quantidade" required>
+    </div>
 
-  <h2>Serviços em Andamento</h2>
-  <div class="services-list" id="servicesList"></div>
+    <div class="form-group">
+      <label for="observacao">Observação:</label>
+      <textarea id="observacao" rows="3" placeholder="Digite uma observação (opcional)"></textarea>
+    </div>
 
-  <div class="form-group">
-    <button id="generatePdf">Gerar PDF</button>
-  </div>
+    <div class="form-group">
+      <button id="addServico">Adicionar Serviço</button>
+    </div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <script src="javascripts/Drawer/Orcamentos/SemMedida.js"> </script>
+    <h2>Serviços em Andamento</h2>
+    <div class="services-list" id="servicesList"></div>
+
+    <div class="form-group">
+      <button id="generatePdf">Gerar PDF</button>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="javascripts/Drawer/Orcamentos/SemMedida.js" type="module"> </script>
 </body>
+
 </html>

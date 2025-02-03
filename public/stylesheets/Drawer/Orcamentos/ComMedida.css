@@ -73,6 +73,17 @@ label {
     color: var(--font-color);
 }
 
+select {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border: 2px solid #ccc;
+    border-radius: 6px;
+    background-color: #fff;
+    transition: border-color 0.3s ease-in-out;
+    outline: none;
+}
+
 input, select, button {
     padding: 10px;
     font-size: 20px;
