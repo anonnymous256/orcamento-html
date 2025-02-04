@@ -287,12 +287,12 @@ generatePdfButton.addEventListener("click", async () => {
       if (empresa.endereco) {
           startY += 8;
           doc.setFontSize(12);
-          doc.text(empresa.endereco, 10, startY); // Endereço da empresa
+          doc.text(empresa.endereco, 10, startY); 
       }
 
       if (empresa.cnpj) {
           startY += 8;
-          doc.text(`CNPJ: ${empresa.cnpj}`, 10, startY); // CNPJ da empresa
+          doc.text(`CNPJ: ${empresa.cnpj}`, 10, startY); 
       }
 
       if (empresa.telefone) {
