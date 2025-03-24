@@ -19,15 +19,24 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const auth = firebase.auth();
 
+// Variável para armazenar o ID do documento atual e o índice máximo de produtos
+let currentDocId = '';
+let maxProdutoIndex = 0;
+let clientesList = []; // Array para armazenar a lista de clientes
+
 // Função para carregar os dados do orçamento
 async function loadService() {
     const docId = window.location.pathname.split('/')[2];  // Captura o ID da URL
     console.log("ID do serviço capturado:", docId);
+    currentDocId = docId; // Armazenar o ID para uso posterior
 
     if (!docId) {
         alert("ID do serviço não encontrado.");
         return;
     }
+
+    // Carregar a lista de clientes
+    await loadClientes();
 
     try {
         // Obtém a subcoleção de "subservicos" do documento específico
@@ -49,6 +58,7 @@ async function loadService() {
             
                 const produtoDiv = document.createElement("div");
                 produtoDiv.classList.add("produto");
+                produtoDiv.dataset.docId = subDoc.id; // Armazenar o ID do documento
             
                 // Usando o índice manualmente para cada campo
                 produtoDiv.innerHTML = `
@@ -69,6 +79,9 @@ async function loadService() {
                 `;
             
                 produtosContainer.appendChild(produtoDiv);
+
+                // Atualizar o índice máximo para uso posterior
+                maxProdutoIndex = Math.max(maxProdutoIndex, produtoIndex);
 
                 // Incrementar o índice
                 produtoIndex++;
@@ -130,7 +143,7 @@ async function loadService() {
             
                     try {
                         // Remove o produto visualmente do DOM
-                        const produtoDiv = document.querySelector(`#produtos-container .produto:nth-child(${index})`);
+                        const produtoDiv = button.closest('.produto');
                         if (produtoDiv) {
                             produtoDiv.remove();
                         } else {
@@ -172,11 +185,6 @@ async function loadService() {
             });
             
 
-
-
-
-
-
             // Adiciona evento de clique nos botões de editar imagem
             document.querySelectorAll('.edit-image-button').forEach(button => {
                 button.addEventListener('click', (e) => {
@@ -192,10 +200,415 @@ async function loadService() {
     }
 }
 
+// Função para carregar a lista de clientes do usuário atual
+async function loadClientes() {
+    try {
+        // Espera a autenticação estar pronta
+        const user = await new Promise((resolve, reject) => {
+            const unsubscribe = auth.onAuthStateChanged(user => {
+                unsubscribe(); // Para de observar após o primeiro evento
+                resolve(user);
+            }, reject);
+        });
+
+        if (!user) {
+            console.error('Usuário não autenticado.');
+            return;
+        }
+
+        console.log('Usuário logado:', user.uid); // Verifique se o UID está correto
+
+        const snapshot = await db.collection('clientes')
+            .where('userId', '==', user.uid)
+            .orderBy('nome', 'asc')
+            .get();
+
+        clientesList = [];
+        snapshot.forEach((doc) => {
+            const cliente = doc.data();
+            clientesList.push({
+                id: doc.id,
+                nome: cliente.nome,
+                email: cliente.email,
+                endereco: cliente.endereco,
+                telefone: cliente.telefone
+            });
+        });
+
+        console.log("Lista de clientes carregada:", clientesList);
+    } catch (error) {
+        console.error("Erro ao carregar clientes:", error);
+        Swal.fire('Erro', 'Não foi possível carregar a lista de clientes.', 'error');
+    }
+}
+
 // Carregar o serviço quando a página for carregada
-loadService();
+document.addEventListener('DOMContentLoaded', () => {
+    loadService();
+    
+    // Adicionar evento ao botão de adicionar novo produto
+    const addButton = document.getElementById('add-new-product-button');
+    if (addButton) {
+        addButton.addEventListener('click', openNewProductModal);
+    }
+    
+    // Adicionar evento ao botão de salvar alterações
+    const saveButton = document.getElementById('save-changes-button');
+    if (saveButton) {
+        saveButton.addEventListener('click', saveAllChanges);
+    }
+});
 
+// Função para abrir o modal de adição de novo produto
+function openNewProductModal() {
+    // Criar o dropdown de clientes
+    let clientesOptions = '<option value="" disabled selected>Selecione um cliente</option>';
+    clientesList.forEach(cliente => {
+        clientesOptions += `<option value="${cliente.nome}">${cliente.nome}</option>`;
+    });
+    
+    Swal.fire({
+        title: 'Adicionar Novo Produto',
+        html: `
+            <form id="new-product-form" class="swal2-form">
+                <div class="form-group">
+                    <label for="new-cliente">Cliente</label>
+                    <select id="new-cliente" class="swal2-select" required>
+                        ${clientesOptions}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="new-descricao">Descrição</label>
+                    <input type="text" id="new-descricao" class="swal2-input" placeholder="Descrição do produto">
+                </div>
+                <div class="form-group">
+                    <label for="new-altura">Altura (m)</label>
+                    <input type="number" id="new-altura" class="swal2-input" placeholder="Altura em metros" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label for="new-largura">Largura (m)</label>
+                    <input type="number" id="new-largura" class="swal2-input" placeholder="Largura em metros" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label for="new-valorMetro">Valor por Metro</label>
+                    <input type="number" id="new-valorMetro" class="swal2-input" placeholder="Valor por metro" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label for="new-material">Material</label>
+                    <input type="number" id="new-material" class="swal2-input" placeholder="Valor do material" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label for="new-quantidade">Quantidade</label>
+                    <input type="number" id="new-quantidade" class="swal2-input" placeholder="Quantidade" min="1" value="1">
+                </div>
+                <div class="form-group">
+                    <label for="new-porcentagem">Porcentagem</label>
+                    <input type="number" id="new-porcentagem" class="swal2-input" placeholder="Porcentagem" step="0.01" value="0">
+                </div>
+                <div class="form-group">
+                    <label for="new-vidro">Cor do Vidro</label>
+                    <input type="text" id="new-vidro" class="swal2-input" placeholder="Cor do vidro">
+                </div>
+                <div class="form-group">
+                    <label for="new-ferragem">Cor da Ferragem</label>
+                    <input type="text" id="new-ferragem" class="swal2-input" placeholder="Cor da ferragem">
+                </div>
+                <div class="form-group">
+                    <label for="new-valorTotal">Valor Total</label>
+                    <input type="number" id="new-valorTotal" class="swal2-input" placeholder="Valor total" step="0.01" readonly>
+                </div>
+                <button type="button" id="calculate-total-button" class="swal2-confirm swal2-styled">Calcular Total</button>
+            </form>
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'Adicionar Produto',
+        cancelButtonText: 'Cancelar',
+        focusConfirm: false,
+        didOpen: () => {
+            // Adicionar evento para calcular o total
+            document.getElementById('calculate-total-button').addEventListener('click', () => {
+                const altura = parseFloat(document.getElementById('new-altura').value) || 0;
+                const largura = parseFloat(document.getElementById('new-largura').value) || 0;
+                const valorMetro = parseFloat(document.getElementById('new-valorMetro').value) || 0;
+                const material = parseFloat(document.getElementById('new-material').value) || 0;
+                const quantidade = parseInt(document.getElementById('new-quantidade').value) || 1;
+                const porcentagem = parseFloat(document.getElementById('new-porcentagem').value) || 0;
+                
+                // Cálculo do valor total
+                const total = (valorMetro * (altura * largura) + material);
+                const totalFinal = (total + (total * (porcentagem / 100))) * quantidade;
+                
+                document.getElementById('new-valorTotal').value = totalFinal.toFixed(2);
+            });
+        },
+        preConfirm: () => {
+            // Validar os campos obrigatórios
+            const cliente = document.getElementById('new-cliente').value;
+            const descricao = document.getElementById('new-descricao').value;
+            const altura = document.getElementById('new-altura').value;
+            const largura = document.getElementById('new-largura').value;
+            const valorMetro = document.getElementById('new-valorMetro').value;
+            
+            if (!cliente || !descricao || !altura || !largura || !valorMetro) {
+                Swal.showValidationMessage('Por favor, preencha todos os campos obrigatórios');
+                return false;
+            }
+            
+            // Retornar os dados do formulário
+            return {
+                cliente: document.getElementById('new-cliente').value,
+                descricao: document.getElementById('new-descricao').value,
+                altura: document.getElementById('new-altura').value,
+                largura: document.getElementById('new-largura').value,
+                valorMetro: document.getElementById('new-valorMetro').value,
+                material: document.getElementById('new-material').value,
+                quantidade: document.getElementById('new-quantidade').value,
+                porcentagem: document.getElementById('new-porcentagem').value,
+                vidro: document.getElementById('new-vidro').value,
+                ferragem: document.getElementById('new-ferragem').value,
+                valorTotal: document.getElementById('new-valorTotal').value
+            };
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Adicionar o novo produto à lista
+            addNewProduct(result.value);
+        }
+    });
+}
 
+// Função para adicionar o novo produto à lista e ao Firestore
+async function addNewProduct(productData) {
+    try {
+        // Abrir modal para seleção de imagem
+        const imageUrl = await selectProductImage();
+        if (!imageUrl) {
+            Swal.fire('Aviso', 'É necessário selecionar uma imagem para o produto', 'warning');
+            return;
+        }
+
+        // Incrementar o índice máximo de produtos
+        maxProdutoIndex++;
+        const newIndex = maxProdutoIndex;
+
+        // Criar o elemento do produto
+        const produtoDiv = document.createElement('div');
+        produtoDiv.classList.add('produto');
+        produtoDiv.dataset.isNew = 'true'; // Marcar como novo produto
+
+        // Calcular dimensões para exibição
+        const dimensoes = `${productData.altura}m x ${productData.largura}m`;
+
+        // Construir o HTML do novo produto
+        produtoDiv.innerHTML = `
+            <button type="button" class="delete-product-button" data-index="${newIndex}"><i class="fas fa-trash"></i></button>
+            <h3>Produto ${newIndex}</h3>
+            <div><label for="cliente${newIndex}">Cliente</label><input type="text" id="cliente${newIndex}" name="cliente${newIndex}" value="${productData.cliente}" /></div>
+            <div><label for="descricao${newIndex}">Descrição</label><input type="text" id="descricao${newIndex}" name="descricao${newIndex}" value="${productData.descricao}" /></div>
+            <div><label for="dimensoes${newIndex}">Dimensões</label><input type="text" id="dimensoes${newIndex}" name="dimensoes${newIndex}" value="${dimensoes}" /></div>
+            <div><label for="material${newIndex}">Material</label><input type="text" id="material${newIndex}" name="material${newIndex}" value="${productData.material}" /></div>
+            <div><label for="porcentagem${newIndex}">Porcentagem</label><input type="text" id="porcentagem${newIndex}" name="porcentagem${newIndex}" value="${productData.porcentagem}" /></div>
+            <div><label for="quantidade${newIndex}">Quantidade</label><input type="text" id="quantidade${newIndex}" name="quantidade${newIndex}" value="${productData.quantidade}" /></div>
+            <div><label for="valorMetro${newIndex}">Valor por Metro</label><input type="text" id="valorMetro${newIndex}" name="valorMetro${newIndex}" value="${productData.valorMetro}" /></div>
+            <div><label for="ferragem${newIndex}">Ferragem</label><input type="text" id="ferragem${newIndex}" name="ferragem${newIndex}" value="${productData.ferragem}" /></div>
+            <div><label for="vidro${newIndex}">Vidro</label><input type="text" id="vidro${newIndex}" name="vidro${newIndex}" value="${productData.vidro}" /></div>
+            <div><label for="valorTotal${newIndex}">Valor Total</label><input type="text" id="valorTotal${newIndex}" name="valorTotal${newIndex}" value="${productData.valorTotal}" /><button type="button" class="calcular-total" data-index="${newIndex}"><i class="fas fa-calculator"></i></button></div>
+            <div><label for="modelo${newIndex}">Imagem</label><img id="produtoImagem${newIndex}" src="${imageUrl}" alt="Produto ${newIndex}" width="200"/></div>
+            <button type="button" class="edit-image-button" data-index="${newIndex}">Editar Imagem</button>
+        `;
+
+        // Adicionar o novo produto ao container
+        document.getElementById('produtos-container').appendChild(produtoDiv);
+
+        // Adicionar eventos aos botões do novo produto
+        produtoDiv.querySelector('.delete-product-button').addEventListener('click', async (e) => {
+            const index = e.target.getAttribute('data-index');
+            
+            // Confirmação de exclusão com SweetAlert2
+            const result = await Swal.fire({
+                title: `Tem certeza de que deseja excluir o produto ${index}?`,
+                text: "Ele será removido do orçamento.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Sim, excluir',
+                cancelButtonText: 'Cancelar',
+            });
+            
+            if (result.isConfirmed) {
+                produtoDiv.remove();
+            }
+        });
+
+        produtoDiv.querySelector('.calcular-total').addEventListener('click', (e) => {
+            const index = e.target.getAttribute('data-index');
+            
+            // Obter os valores
+            const valorMetroEl = document.getElementById(`valorMetro${index}`);
+            const dimensoesEl = document.getElementById(`dimensoes${index}`);
+            const materialEl = document.getElementById(`material${index}`);
+            const porcentagemEl = document.getElementById(`porcentagem${index}`);
+            const quantidadeEl = document.getElementById(`quantidade${index}`);
+            
+            if (!valorMetroEl || !dimensoesEl || !materialEl || !porcentagemEl || !quantidadeEl) {
+                console.error("Algum elemento não foi encontrado");
+                return;
+            }
+            
+            // Extrair valores numéricos
+            const valorMetro = parseFloat(valorMetroEl.value.replace(/[^\d.-]/g, '')) || 0;
+            const dimensoes = dimensoesEl.value.split('x').map(d => parseFloat(d) || 0);
+            const altura = dimensoes[0] || 0;
+            const largura = dimensoes[1] || 0;
+            const material = parseFloat(materialEl.value.replace(/[^\d.-]/g, '')) || 0;
+            const porcentagem = parseFloat(porcentagemEl.value) || 0;
+            const quantidade = parseInt(quantidadeEl.value) || 1;
+            
+            // Calcular total
+            const total = (valorMetro * (altura * largura) + material);
+            const totalFinal = (total + (total * (porcentagem / 100))) * quantidade;
+            
+            // Atualizar o campo
+            const valorTotalField = document.getElementById(`valorTotal${index}`);
+            if (valorTotalField) {
+                valorTotalField.value = totalFinal.toFixed(2);
+            }
+        });
+
+        produtoDiv.querySelector('.edit-image-button').addEventListener('click', (e) => {
+            const index = e.target.getAttribute('data-index');
+            openImageModal(index);
+        });
+
+        // Salvar o novo produto no Firestore
+        await saveNewProductToFirestore(productData, imageUrl);
+
+        Swal.fire('Sucesso!', 'Produto adicionado com sucesso!', 'success');
+    } catch (error) {
+        console.error("Erro ao adicionar novo produto:", error);
+        Swal.fire('Erro', 'Ocorreu um erro ao adicionar o produto.', 'error');
+    }
+}
+
+// Função para selecionar uma imagem para o produto
+async function selectProductImage() {
+    return new Promise((resolve) => {
+        // Abrir o modal de seleção de imagem
+        document.getElementById('image-modal').style.display = 'flex';
+        
+        // Função temporária para capturar a seleção de imagem
+        window.selectImageForNewProduct = (imagePath) => {
+            // Fechar o modal
+            document.getElementById('image-modal').style.display = 'none';
+            // Retornar o caminho da imagem selecionada
+            resolve(imagePath);
+            // Remover a função temporária
+            delete window.selectImageForNewProduct;
+        };
+        
+        // Carregar as imagens com a função temporária
+        loadImagesForNewProduct();
+    });
+}
+
+// Função para carregar imagens para o novo produto
+async function loadImagesForNewProduct() {
+    try {
+        // Carregar as imagens de cada categoria
+        const responseClientes = await fetch('/listarModelos');
+        const clientesImages = await responseClientes.json();
+
+        const responseModelosFixos = await fetch('/listarModelosFixos');
+        const modelosFixosImages = await responseModelosFixos.json();
+
+        const responseNovasImages = await fetch('/listarNovos');
+        const novasImages = await responseNovasImages.json();
+
+        // Adicionar imagens nas abas correspondentes
+        const clientesList = document.querySelector("#clientes #image-list");
+        const fixosList = document.querySelector("#fixos #image-list");
+        const novosList = document.querySelector("#novos #image-list");
+
+        clientesList.innerHTML = ""; // Limpa antes de adicionar
+        fixosList.innerHTML = "";
+        novosList.innerHTML = "";
+
+        // Adicionar imagens com evento de clique para a função temporária
+        clientesImages.forEach((imagePath) => {
+            const imgElement = document.createElement('img');
+            imgElement.src = imagePath;
+            imgElement.alt = 'Modelo Cliente';
+            imgElement.addEventListener('click', () => window.selectImageForNewProduct(imagePath));
+            clientesList.appendChild(imgElement);
+        });
+
+        modelosFixosImages.forEach((imagePath) => {
+            const imgElement = document.createElement('img');
+            imgElement.src = imagePath;
+            imgElement.alt = 'Modelo Fixo';
+            imgElement.addEventListener('click', () => window.selectImageForNewProduct(imagePath));
+            fixosList.appendChild(imgElement);
+        });
+
+        novasImages.forEach((imagePath) => {
+            const imgElement = document.createElement('img');
+            imgElement.src = imagePath;
+            imgElement.alt = 'Novo Modelo';
+            imgElement.addEventListener('click', () => window.selectImageForNewProduct(imagePath));
+            novosList.appendChild(imgElement);
+        });
+    } catch (error) {
+        console.error("Erro ao carregar as imagens:", error);
+    }
+}
+
+// Função para salvar o novo produto no Firestore
+async function saveNewProductToFirestore(productData, imageUrl) {
+    try {
+        if (!currentDocId) {
+            console.error("ID do documento não encontrado.");
+            return;
+        }
+
+        // Converter a imagem para base64 se não estiver nesse formato
+        let imageBase64 = imageUrl;
+        if (!imageUrl.startsWith('data:')) {
+            imageBase64 = await toBase64(imageUrl);
+        }
+
+        // Criar o objeto do produto para salvar no Firestore
+        const produto = {
+            cliente: productData.cliente,
+            descricao: productData.descricao,
+            dimensoes: `${productData.altura}m x ${productData.largura}m`,
+            material: productData.material,
+            porcentagem: productData.porcentagem,
+            quantidade: productData.quantidade,
+            valorMetro: productData.valorMetro,
+            ferragem: productData.ferragem,
+            vidro: productData.vidro,
+            valorTotal: productData.valorTotal,
+            imagemBase64: imageBase64,
+            criadoEm: firebase.firestore.FieldValue.serverTimestamp() // Adicionar timestamp de criação
+        };
+
+        // Adicionar o produto à subcoleção 'subservicos'
+        const docRef = await db.collection('servicos').doc(currentDocId).collection('subservicos').add(produto);
+        
+        // Atualizar o atributo data-doc-id do elemento do produto no DOM
+        const produtosContainer = document.getElementById('produtos-container');
+        const produtoElements = produtosContainer.querySelectorAll('.produto');
+        const newProductElement = produtoElements[produtoElements.length - 1];
+        if (newProductElement && newProductElement.dataset.isNew) {
+            newProductElement.dataset.docId = docRef.id;
+            delete newProductElement.dataset.isNew;
+        }
+        
+        console.log("Produto adicionado ao Firestore com sucesso! ID:", docRef.id);
+    } catch (error) {
+        console.error("Erro ao salvar o produto no Firestore:", error);
+        throw error;
+    }
+}
 
 // Função para abrir o modal de seleção de imagem
 function openImageModal(index) {
@@ -208,10 +621,7 @@ document.getElementById('close-modal').addEventListener('click', () => {
     document.getElementById('image-modal').style.display = 'none';
 });
 
-
-
 // Função para carregar as imagens do servidor
-
 async function loadImages(index) {
     try {
         // Carregar as imagens de cada categoria
@@ -271,7 +681,6 @@ document.querySelectorAll(".tab").forEach((tab) => {
     });
 });
 
-
 // Função para substituir a imagem do produto
 function selectImage(imagePath, index) {
     // Substituir a imagem do produto no formulário
@@ -280,6 +689,25 @@ function selectImage(imagePath, index) {
 
     // Fechar o modal
     document.getElementById('image-modal').style.display = 'none';
+}
+
+// Função para converter imagem para base64
+function toBase64(url) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = 'Anonymous';
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0);
+            const dataURL = canvas.toDataURL();
+            resolve(dataURL);
+        };
+        img.onerror = (error) => reject(error);
+        img.src = url;
+    });
 }
 
 async function dadosEmpresa() {
@@ -303,8 +731,6 @@ async function dadosEmpresa() {
         return null;
     }
 }
-
-
 
 async function gerarPdf() {
     const { jsPDF } = window.jspdf;
@@ -433,134 +859,76 @@ async function gerarPdf() {
     doc.save("orcamento.pdf");
 }
 
-
-
-
-
-// Evento de clique para gerar PDF
-document.getElementById("generate-pdf-button").addEventListener("click", gerarPdf);
-
-
-/*
-// Função para salvar as alterações
-async function saveBudget(docId, produtos) {
+// Função para salvar todas as alterações no Firestore
+async function saveAllChanges() {
     try {
-        const servicoRef = db.collection("servicos").doc(docId);
+        if (!currentDocId) {
+            console.error("ID do documento não encontrado.");
+            return;
+        }
 
-        // Obter os documentos existentes na subcoleção 'subservicos'
-        const snapshot = await servicoRef.collection("subservicos").get();
-        const existentes = {};
-        snapshot.forEach(doc => {
-            existentes[doc.id] = doc.data();
+        // Exibir modal de carregamento
+        Swal.fire({
+            title: 'Processando',
+            text: 'Salvando alterações...',
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
         });
 
         const batch = db.batch();
-
+        const servicoRef = db.collection('servicos').doc(currentDocId);
+        
+        // Obter todos os produtos do formulário
+        const produtos = document.querySelectorAll('#produtos-container .produto');
+        
+        // Para cada produto, verificar se é um produto existente ou novo
         for (const produto of produtos) {
-            if (produto.id) {
-                const subservicoRef = servicoRef.collection("subservicos").doc(produto.id);
-                const dadosExistentes = existentes[produto.id];
-
-                // Detectar alterações
-                const alterado = Object.keys(produto).some(key => produto[key] !== dadosExistentes[key]);
-
-                console.log("Produto alterado:", produto.id, alterado, produto, dadosExistentes);
-
-                if (alterado) {
-                    try {
-                        console.log(`Atualizando produto com ID: ${produto.id}`);
-                        batch.update(subservicoRef, produto);
-                    } catch (error) {
-                        console.error(`Erro ao atualizar produto com ID: ${produto.id}`, error);
-                    }
-                }
-            } else {
-                console.warn("Produto sem ID, ignorado:", produto);
-            }
+            const docId = produto.dataset.docId;
+            const index = produto.querySelector('.delete-product-button').getAttribute('data-index');
+            
+            // Coletar os dados do produto
+            const produtoData = {
+                cliente: produto.querySelector(`#cliente${index}`)?.value || '',
+                descricao: produto.querySelector(`#descricao${index}`)?.value || '',
+                dimensoes: produto.querySelector(`#dimensoes${index}`)?.value || '',
+                material: produto.querySelector(`#material${index}`)?.value || '',
+                porcentagem: produto.querySelector(`#porcentagem${index}`)?.value || '',
+                quantidade: produto.querySelector(`#quantidade${index}`)?.value || '',
+                valorMetro: produto.querySelector(`#valorMetro${index}`)?.value || '',
+                ferragem: produto.querySelector(`#ferragem${index}`)?.value || '',
+                vidro: produto.querySelector(`#vidro${index}`)?.value || '',
+                valorTotal: produto.querySelector(`#valorTotal${index}`)?.value || '',
+                imagemBase64: produto.querySelector(`#produtoImagem${index}`)?.src || '',
+                atualizadoEm: firebase.firestore.FieldValue.serverTimestamp() // Adicionar timestamp de atualização
+            };
+            
+            // Se o produto tem um ID de documento, atualizar
+            if (docId) {
+                const subservicoRef = servicoRef.collection('subservicos').doc(docId);
+                batch.update(subservicoRef, produtoData);
+            } 
+            // Se é um produto novo (sem ID de documento), já foi adicionado pelo método saveNewProductToFirestore
         }
-
-        console.log("Batch sendo commitado com alterações.");
+        
+        // Atualizar também o documento principal do serviço
+        batch.update(servicoRef, {
+            atualizadoEm: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        
+        // Commitar todas as alterações
         await batch.commit();
-        console.log("Batch commitado com sucesso.");
-
-        Swal.fire({
-            position: "center",
-            text: "Sucesso!",
-            title: "Itens atualizados com sucesso!",
-            icon: "success",
-            showConfirmButton: false,
-            timer: 1500,
-        });
+        
+        Swal.close();
+        Swal.fire('Sucesso!', 'Alterações salvas com sucesso!', 'success');
     } catch (error) {
-        console.error("Erro ao salvar orçamento:", error);
-        Swal.fire({
-            position: "center",
-            icon: "error",
-            title: "Erro ao atualizar os itens!",
-            showConfirmButton: false,
-            timer: 1500,
-        });
+        console.error("Erro ao salvar alterações:", error);
+        Swal.close();
+        Swal.fire('Erro', 'Ocorreu um erro ao salvar as alterações.', 'error');
     }
 }
 
-
-// Evento de submit do formulário
-document.getElementById("edit-form").addEventListener("submit", async (e) => {
-    e.preventDefault();
-
-    const docId = window.location.pathname.split('/')[2]; // Captura o ID da URL novamente
-
-    // Coleta os dados dos produtos no formulário
-    const produtos = [];
-    const produtoElements = document.querySelectorAll(".produto");
-    produtoElements.forEach((produtoElement, index) => {
-        const produto = {};
-
-        // Verifique e colete apenas os campos que existem
-        const cliente = document.getElementById(`cliente${index}`);
-        if (cliente) produto.cliente = cliente.value;
-
-        const descricao = document.getElementById(`descricao${index}`);
-        if (descricao) produto.descricao = descricao.value;
-
-        const dimensoes = document.getElementById(`dimensoes${index}`);
-        if (dimensoes) produto.dimensoes = dimensoes.value;
-
-        const ferragem = document.getElementById(`ferragem${index}`);
-        if (ferragem) produto.ferragem = ferragem.value;
-
-        const material = document.getElementById(`material${index}`);
-        if (material) produto.material = material.value;
-
-        const quantidade = document.getElementById(`quantidade${index}`);
-        if (quantidade) produto.quantidade = quantidade.value;
-
-        const valorMetro = document.getElementById(`valorMetro${index}`);
-        if (valorMetro) produto.valorMetro = valorMetro.value;
-
-        const valorTotal = document.getElementById(`valorTotal${index}`);
-        if (valorTotal) produto.valorTotal = valorTotal.value;
-
-        const vidro = document.getElementById(`vidro${index}`);
-        if (vidro) produto.vidro = vidro.value;
-
-        // Atualiza a imagem base64
-        const imagem = produtoElement.querySelector(`#produtoImagem${index}`);
-        if (imagem && imagem.src) produto.imagemBase64 = imagem.src;
-
-        // Verifica se há um ID para identificar produtos existentes
-        const produtoId = produtoElement.dataset.produtoId;
-        if (produtoId) produto.id = produtoId;
-
-        // Adiciona o produto ao array
-        produtos.push(produto);
-    });
-
-    // Chama a função para salvar os dados
-    await saveBudget(docId, produtos);
-});
-*/
-
-
-
-
+// Evento de clique para gerar PDF
+document.getElementById("generate-pdf-button").addEventListener("click", gerarPdf);
