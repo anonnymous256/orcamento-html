@@ -90,6 +90,10 @@ router.get('/DadosBancarios', function(req, res) {
   res.render('Drawer/Recibo/DadosBancarios', { title: 'Express' });
 });
 
+router.get('/Projeto', function(req, res) {
+  res.render('Drawer/ProjetoMaterial/Projeto', { title: 'Express' });
+});
+
 
 router.get('/Editar/:id', async function(req, res) {
   const docId = req.params.id;

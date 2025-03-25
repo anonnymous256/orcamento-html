@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tipos de Projeto</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="stylesheets/Drawer/ProjetoMaterial/Projeto.css">
+</head>
+<body>
+    <!-- Tela principal -->
+    <div id="main-screen" class="screen">
+        <div class="header">
+            <div class="back-arrow" onclick="goBack()">
+                <i class="fas fa-arrow-left"></i>
+            </div>
+            <h1 class="title">Tipos de Projeto</h1>
+        </div>
+        
+        <div class="cards-container">
+            <div class="card" onclick="openModelScreen('Portas')">
+                <div class="card-image-container">
+                    <img src="images/ModelosCapa/portass.png" alt="Portas" class="card-image">
+                </div>
+                <div class="card-content">
+                    <div class="card-name">Janelas</div>
+                </div>
+            </div>
+            
+            <div class="card" onclick="openModelScreen('Janelas')">
+                <div class="card-image-container">
+                    <img src="images/ModelosCapa/portass.png" alt="Janelas" class="card-image">
+                </div>
+                <div class="card-content">
+                    <div class="card-name">Portas</div>
+                </div>
+            </div>
+            
+            <div class="card" onclick="openModelScreen('Portões')">
+                <div class="card-image-container">
+                    <img src="images/ModelosCapa/fixos.png" alt="Portões" class="card-image">
+                </div>
+                <div class="card-content">
+                    <div class="card-name">Fixos</div>
+                </div>
+            </div>
+            
+            <div class="card" onclick="openModelScreen('Guarda-Corpos')">
+                <div class="card-image-container">
+                    <img src="images/ModelosCapa/boxs.png" alt="Guarda-Corpos" class="card-image">
+                </div>
+                <div class="card-content">
+                    <div class="card-name">Boxs</div>
+                </div>
+            </div>
+
+            <div class="card" onclick="openModelScreen('Portões')">
+                <div class="card-image-container">
+                    <img src="images/ModelosCapa/kitpia.png" alt="Portões" class="card-image">
+                </div>
+                <div class="card-content">
+                    <div class="card-name">Fechamento de Pia</div>
+                </div>
+            </div>
+
+            <div class="card" onclick="openModelScreen('Portões')">
+                <div class="card-image-container">
+                    <img src="images/ModelosCapa/espelho.jpg" alt="Portões" class="card-image">
+                </div>
+                <div class="card-content">
+                    <div class="card-name">espelhos</div>
+                </div>
+            </div>
+
+            <div class="card" onclick="openModelScreen('Portões')">
+                <div class="card-image-container">
+                    <img src="images/ModelosCapa/basculantes.png" alt="Portões" class="card-image">
+                </div>
+                <div class="card-content">
+                    <div class="card-name">Basculantes/Maxi-ar</div>
+                </div>
+            </div>
+
+            <div class="card" onclick="openModelScreen('Portões')">
+                <div class="card-image-container">
+                    <img src="images/ModelosCapa/guarda_corpo.jpeg" alt="Portões" class="card-image">
+                </div>
+                <div class="card-content">
+                    <div class="card-name">Guarda-Corpo</div>
+                </div>
+            </div>
+
+            <div class="card" onclick="openModelScreen('Portões')">
+                <div class="card-image-container">
+                    <img src="images/ModelosCapa/stanley.png" alt="Portões" class="card-image">
+                </div>
+                <div class="card-content">
+                    <div class="card-name">Stanley</div>
+                </div>
+            </div>
+
+            <div class="card" onclick="openModelScreen('Portões')">
+                <div class="card-image-container">
+                    <img src="images/ModelosCapa/slidedoor.png" alt="Portões" class="card-image">
+                </div>
+                <div class="card-content">
+                    <div class="card-name">Slide Door</div>
+                </div>
+            </div>
+
+            <div class="card" onclick="openModelScreen('Portões')">
+                <div class="card-image-container">
+                    <img src="images/ModelosCapa/retrateis.png" alt="Portões" class="card-image">
+                </div>
+                <div class="card-content">
+                    <div class="card-name">Retráteis WD</div>
+                </div>
+            </div>
+
+            <div class="card" onclick="openModelScreen('Portões')">
+                <div class="card-image-container">
+                    <img src="images/ModelosCapa/rolldoor.png" alt="Portões" class="card-image">
+                </div>
+                <div class="card-content">
+                    <div class="card-name">Roll Door</div>
+                </div>
+            </div>
+
+            <div class="card" onclick="openModelScreen('Portões')">
+                <div class="card-image-container">
+                    <img src="images/ModelosCapa/elegance.jpg" alt="Portões" class="card-image">
+                </div>
+                <div class="card-content">
+                    <div class="card-name">Box Elegance</div>
+                </div>
+            </div>
+
+
+
+        </div>
+    </div>
+    
+    <!-- Tela de modelos -->
+    <div id="model-screen" class="screen hidden">
+        <div class="header">
+            <div class="back-arrow" onclick="backToMainScreen()">
+                <i class="fas fa-arrow-left"></i>
+            </div>
+            <h1 class="title" id="model-screen-title">Modelos</h1>
+        </div>
+        
+        <div class="models-container" id="models-container">
+            <!-- Modelos serão inseridos dinamicamente via JavaScript -->
+        </div>
+    </div>
+    
+    <script src = "javascripts/ModelosMaterial/Portas.js"></script>
+    <script src = "javascripts/Drawer/ProjetoMaterial/Projeto.js"></script>
+</body>
+</html>
