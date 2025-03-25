@@ -339,6 +339,49 @@ function EnvDados() {
     const { jsPDF } = window.jspdf;
 
     this.baixarPdf = async function () {
+        // Criar um clone do elemento para evitar problemas de renderização
+        const element = document.querySelector('.recibo');
+        const clone = element.cloneNode(true);
+        clone.style.position = 'absolute';
+        clone.style.left = '-9999px';
+        clone.style.width = '800px';
+        document.body.appendChild(clone);
+    
+        const opt = {
+            filename: iptCliente.value + 'recibo.pdf',
+            html2canvas: {
+                dpi: 300,
+                scale: isMobile() ? 1 : 2, // Escala menor para mobile
+                windowWidth: 800,
+                width: 800,
+                x: 0,
+                y: 0,
+                scrollX: 0,
+                scrollY: 0
+            },
+            jsPDF: {
+                format: 'a4',
+                orientation: 'portrait',
+                unit: 'mm',
+                hotfixes: ["px_scaling"]
+            }
+        };
+    
+        try {
+            await html2pdf().set(opt).from(clone).save();
+        } catch (error) {
+            console.error("Erro ao gerar PDF:", error);
+            Swal.fire('Erro!', 'Ocorreu um erro ao gerar o PDF.', 'error');
+        } finally {
+            document.body.removeChild(clone);
+        }
+    };
+    
+    function isMobile() {
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    }
+
+    this.baixarPdf = async function () {
         const dadosConta = await carregarDadosConta(); // Carrega os dados da conta
         const isParcial = iptTipoPagamento.value === 'Parcial';
 
@@ -356,24 +399,24 @@ function EnvDados() {
         const item = document.querySelector('.recibo');
         const opt = {
             filename: iptCliente.value + 'recibo.pdf',
-            html2canvas: { 
-                dpi: 150,
-                scale: 2, // Reduzido de 3 para 2
-                letterRendering: true,
-                width: 800 // Largura maior
+            html2canvas: {
+                dpi: 300,
+                scale: 2, // Reduzir a escala pode ajudar
+                scrollY: 0, // Desabilita o scroll
+                windowWidth: document.documentElement.scrollWidth, // Largura total do documento
+                width: 800, // Largura fixa para garantir consistência
+                x: 0,
+                y: 0,
+                useCORS: true,
+                allowTaint: true,
+                letterRendering: true
             },
-            jsPDF: { 
+            jsPDF: {
                 format: 'a4',
                 orientation: 'portrait',
                 unit: 'mm',
-                margins: {
-                    top: 10,
-                    bottom: 10,
-                    left: 10,
-                    right: 10
-                }
-            },
-            margin: 10
+                hotfixes: ["px_scaling"] // Corrige problemas de escala
+            }
         };
 
         await html2pdf().set(opt).from(item).toPdf().get('pdf').then((pdf) => {
