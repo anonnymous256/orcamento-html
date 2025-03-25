@@ -124,56 +124,269 @@ async function abrirModalTipos() {
             .where('userId', '==', user.uid)
             .get();
 
-        let tiposHTML = '<div class="tipos-lista" style="max-height: 300px; overflow-y: auto; margin-bottom: 20px;">';
-        
-        tiposSnapshot.forEach(doc => {
-            const tipo = doc.data();
-            tiposHTML += `
-                <div class="tipo-item" style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #ddd;">
-                    <div>
-                        <span style="font-weight: bold;color: white">${tipo.nome}</span>
-                        <span style="margin-left: 10px;color: white">R$ ${tipo.valor}</span>
-                    </div>
-                    <div>
-                        <button onclick="selecionarValor(${tipo.valor})" style="background-color: #4CAF50; color: white; border: none; padding: 5px 10px; border-radius: 3px; margin-right: 5px;">
-                            Selecionar
-                        </button>
-                        <button onclick="excluirTipo('${doc.id}')" style="background-color: #f44336; color: white; border: none; padding: 5px 10px; border-radius: 3px;">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                </div>
-            `;
-        });
+        // Estilos CSS para o modal responsivo
+        const modalStyles = `
+            <style>
+                .tipos-modal {
+                    font-family: 'Roboto', sans-serif;
+                    color: #333;
+                }
+                
+                .tipos-lista {
+                    max-height: 50vh;
+                    overflow-y: auto;
+                    margin-bottom: 20px;
+                    border-radius: 8px;
+                    background-color: rgba(255, 255, 255, 0.05);
+                }
+                
+                .tipo-item {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    padding: 12px;
+                    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                    transition: background-color 0.2s;
+                }
+                
+                .tipo-item:last-child {
+                    border-bottom: none;
+                }
+                
+                .tipo-item:hover {
+                    background-color: rgba(255, 255, 255, 0.08);
+                }
+                
+                .tipo-info {
+                    display: flex;
+                    flex-direction: column;
+                }
+                
+                .tipo-nome {
+                    font-weight: 600;
+                    color: #fff;
+                    margin-bottom: 4px;
+                    font-size: 16px;
+                }
+                
+                .tipo-valor {
+                    color: #4CAF50;
+                    font-weight: 500;
+                }
+                
+                .tipo-acoes {
+                    display: flex;
+                    gap: 8px;
+                }
+                
+                .btn {
+                    border: none;
+                    border-radius: 4px;
+                    padding: 8px 12px;
+                    font-weight: 500;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    transition: all 0.2s;
+                    font-size: 14px;
+                }
+                
+                .btn-selecionar {
+                    background-color: #4CAF50;
+                    color: white;
+                }
+                
+                .btn-selecionar:hover {
+                    background-color: #3d8b40;
+                }
+                
+                .btn-excluir {
+                    background-color: #f44336;
+                    color: white;
+                }
+                
+                .btn-excluir:hover {
+                    background-color: #d32f2f;
+                }
+                
+                .btn-adicionar {
+                    background-color: #2196F3;
+                    color: white;
+                    width: 100%;
+                    padding: 10px;
+                    font-size: 15px;
+                }
+                
+                .btn-adicionar:hover {
+                    background-color: #0b7dda;
+                }
+                
+                .novo-tipo {
+                    border-top: 1px solid rgba(255, 255, 255, 0.1);
+                    padding-top: 15px;
+                    margin-top: 10px;
+                }
+                
+                .novo-tipo h4 {
+                    color: #fff;
+                    margin-bottom: 15px;
+                    text-align: center;
+                    font-size: 18px;
+                }
+                
+                .form-row {
+                    display: flex;
+                    gap: 10px;
+                    margin-bottom: 15px;
+                }
+                
+                .form-input {
+                    flex: 1;
+                    padding: 10px;
+                    border-radius: 4px;
+                    border: 1px solid rgba(255, 255, 255, 0.2);
+                    background-color: rgba(255, 255, 255, 0.1);
+                    color: #fff;
+                    font-size: 14px;
+                }
+                
+                .form-input::placeholder {
+                    color: rgba(255, 255, 255, 0.5);
+                }
+                
+                .form-input:focus {
+                    outline: none;
+                    border-color: #2196F3;
+                    box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.3);
+                }
+                
+                .vazio-msg {
+                    text-align: center;
+                    padding: 20px;
+                    color: rgba(255, 255, 255, 0.7);
+                    font-style: italic;
+                }
+                
+                /* Responsividade */
+                @media (max-width: 576px) {
+                    .tipo-item {
+                        flex-direction: column;
+                        align-items: flex-start;
+                        gap: 10px;
+                    }
+                    
+                    .tipo-acoes {
+                        width: 100%;
+                        justify-content: space-between;
+                    }
+                    
+                    .btn {
+                        flex: 1;
+                        padding: 10px;
+                    }
+                    
+                    .form-row {
+                        flex-direction: column;
+                    }
+                }
+            </style>
+        `;
 
+        // Construir o HTML para a lista de tipos
+        let tiposHTML = modalStyles + '<div class="tipos-modal">';
+        
+        // Adicionar a lista de tipos
+        tiposHTML += '<div class="tipos-lista">';
+        
+        if (tiposSnapshot.empty) {
+            tiposHTML += '<div class="vazio-msg">Nenhum tipo cadastrado. Adicione um novo abaixo.</div>';
+        } else {
+            tiposSnapshot.forEach(doc => {
+                const tipo = doc.data();
+                tiposHTML += `
+                    <div class="tipo-item">
+                        <div class="tipo-info">
+                            <span class="tipo-nome">${tipo.nome}</span>
+                            <span class="tipo-valor">R$ ${tipo.valor.toFixed(2)}</span>
+                        </div>
+                        <div class="tipo-acoes">
+                            <button onclick="selecionarValor(${tipo.valor})" class="btn btn-selecionar">
+                                Selecionar
+                            </button>
+                            <button onclick="excluirTipo('${doc.id}')" class="btn btn-excluir">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+        
         tiposHTML += '</div>';
 
         // Adicionar formulário para novo tipo
         tiposHTML += `
-            <div style="border-top: 1px solid #ddd; padding-top: 15px;">
-                <h4 style="margin-bottom: 10px;">Adicionar Novo Tipo</h4>
-                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-                    <input id="novo-tipo-nome" placeholder="Nome do tipo" style="flex: 2;">
-                    <input id="novo-tipo-valor" type="number" placeholder="Valor" style="flex: 1;">
+            <div class="novo-tipo">
+                <h4>Adicionar Novo Tipo</h4>
+                <div class="form-row">
+                    <input id="novo-tipo-nome" class="form-input" placeholder="Nome do tipo" type="text">
+                    <input id="novo-tipo-valor" class="form-input" placeholder="Valor" type="number" step="0.01" min="0">
                 </div>
-                <button onclick="adicionarNovoTipo()" style="background-color: #2196F3; color: white; border: none; padding: 8px 15px; border-radius: 3px; width: 100%;">
+                <button onclick="adicionarNovoTipo()" class="btn btn-adicionar">
                     Adicionar Novo Tipo
                 </button>
             </div>
-        `;
+        </div>`;
 
+        // Configurações do modal SweetAlert2
         Swal.fire({
             title: 'Tipos de Metro',
             html: tiposHTML,
             showConfirmButton: false,
             showCloseButton: true,
-            width: '600px'
+            width: '90%',
+            maxWidth: '500px',
+            background: '#333',
+            color: '#fff',
+            customClass: {
+                title: 'swal-title',
+                closeButton: 'swal-close-button'
+            },
+            didOpen: () => {
+                // Adicionar estilos adicionais ao modal aberto
+                const modal = Swal.getPopup();
+                modal.style.borderRadius = '12px';
+                
+                // Estilizar o título
+                const title = modal.querySelector('.swal2-title');
+                if (title) {
+                    title.style.color = '#fff';
+                    title.style.fontSize = '22px';
+                    title.style.fontWeight = '600';
+                }
+                
+                // Estilizar o botão de fechar
+                const closeButton = modal.querySelector('.swal2-close');
+                if (closeButton) {
+                    closeButton.style.color = '#fff';
+                    closeButton.style.fontSize = '28px';
+                }
+            }
         });
 
         // Adicionar função global para selecionar valor
         window.selecionarValor = (valor) => {
             document.getElementById('metro').value = valor;
             Swal.close();
+            
+            // Feedback visual para o usuário
+            const inputMetro = document.getElementById('metro');
+            inputMetro.style.transition = 'background-color 0.3s';
+            inputMetro.style.backgroundColor = 'rgba(76, 175, 80, 0.2)';
+            setTimeout(() => {
+                inputMetro.style.backgroundColor = '';
+            }, 1000);
         };
 
         // Adicionar função global para excluir tipo
@@ -187,31 +400,86 @@ async function abrirModalTipos() {
                     confirmButtonColor: '#d33',
                     cancelButtonColor: '#3085d6',
                     confirmButtonText: 'Sim, excluir!',
-                    cancelButtonText: 'Cancelar'
+                    cancelButtonText: 'Cancelar',
+                    background: '#333',
+                    color: '#fff'
                 });
 
                 if (result.isConfirmed) {
                     await db.collection('tipos').doc(tipoId).delete();
-                    Swal.fire('Sucesso!', 'Tipo excluído com sucesso.', 'success');
-                    abrirModalTipos(); // Recarrega o modal
+                    
+                    // Feedback de sucesso
+                    const Toast = Swal.mixin({
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true,
+                        didOpen: (toast) => {
+                            toast.addEventListener('mouseenter', Swal.stopTimer);
+                            toast.addEventListener('mouseleave', Swal.resumeTimer);
+                        }
+                    });
+                    
+                    Toast.fire({
+                        icon: 'success',
+                        title: 'Tipo excluído com sucesso'
+                    });
+                    
+                    // Recarregar o modal
+                    abrirModalTipos();
                 }
             } catch (error) {
                 console.error('Erro ao excluir tipo:', error);
-                Swal.fire('Erro!', 'Erro ao excluir o tipo.', 'error');
+                Swal.fire({
+                    title: 'Erro!',
+                    text: 'Erro ao excluir o tipo.',
+                    icon: 'error',
+                    background: '#333',
+                    color: '#fff'
+                });
             }
         };
 
         // Adicionar função global para adicionar novo tipo
         window.adicionarNovoTipo = async () => {
             const nome = document.getElementById('novo-tipo-nome').value.trim();
-            const valor = parseFloat(document.getElementById('novo-tipo-valor').value);
+            const valorInput = document.getElementById('novo-tipo-valor').value;
+            const valor = parseFloat(valorInput);
 
-            if (!nome || isNaN(valor)) {
-                Swal.fire('Erro!', 'Preencha todos os campos corretamente.', 'error');
+            if (!nome) {
+                Swal.fire({
+                    title: 'Campo obrigatório',
+                    text: 'O nome do tipo é obrigatório.',
+                    icon: 'warning',
+                    background: '#333',
+                    color: '#fff'
+                });
+                return;
+            }
+
+            if (isNaN(valor) || valor <= 0) {
+                Swal.fire({
+                    title: 'Valor inválido',
+                    text: 'Por favor, informe um valor válido maior que zero.',
+                    icon: 'warning',
+                    background: '#333',
+                    color: '#fff'
+                });
                 return;
             }
 
             try {
+                // Mostrar indicador de carregamento
+                const inputNome = document.getElementById('novo-tipo-nome');
+                const inputValor = document.getElementById('novo-tipo-valor');
+                const btnAdicionar = document.querySelector('.btn-adicionar');
+                
+                inputNome.disabled = true;
+                inputValor.disabled = true;
+                btnAdicionar.disabled = true;
+                btnAdicionar.textContent = 'Adicionando...';
+                
                 await db.collection('tipos').add({
                     userId: user.uid,
                     nome: nome,
@@ -219,14 +487,35 @@ async function abrirModalTipos() {
                     criadoEm: firebase.firestore.FieldValue.serverTimestamp()
                 });
 
-                document.getElementById('novo-tipo-nome').value = '';
-                document.getElementById('novo-tipo-valor').value = '';
+                // Feedback de sucesso
+                const Toast = Swal.mixin({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true,
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer);
+                        toast.addEventListener('mouseleave', Swal.resumeTimer);
+                    }
+                });
                 
-                Swal.fire('Sucesso!', 'Novo tipo adicionado com sucesso.', 'success');
-                abrirModalTipos(); // Recarrega o modal
+                Toast.fire({
+                    icon: 'success',
+                    title: 'Tipo adicionado com sucesso'
+                });
+                
+                // Recarregar o modal
+                abrirModalTipos();
             } catch (error) {
                 console.error('Erro ao adicionar novo tipo:', error);
-                Swal.fire('Erro!', 'Erro ao adicionar novo tipo.', 'error');
+                Swal.fire({
+                    title: 'Erro!',
+                    text: 'Erro ao adicionar novo tipo.',
+                    icon: 'error',
+                    background: '#333',
+                    color: '#fff'
+                });
             }
         };
 
