@@ -335,178 +335,192 @@ function EnvDados() {
         this.envInfoCliente(iptCliente.value, iptEnd.value);
     };
 
-  
-    const { jsPDF } = window.jspdf;
-
     this.baixarPdf = async function () {
-        // Criar um clone do elemento para evitar problemas de renderização
-        const element = document.querySelector('.recibo');
-        const clone = element.cloneNode(true);
-        clone.style.position = 'absolute';
-        clone.style.left = '-9999px';
-        clone.style.width = '800px';
-        document.body.appendChild(clone);
-    
-        const opt = {
-            filename: iptCliente.value + 'recibo.pdf',
-            html2canvas: {
-                dpi: 300,
-                scale: isMobile() ? 1 : 2, // Escala menor para mobile
-                windowWidth: 800,
-                width: 800,
-                x: 0,
-                y: 0,
-                scrollX: 0,
-                scrollY: 0
-            },
-            jsPDF: {
-                format: 'a4',
-                orientation: 'portrait',
-                unit: 'mm',
-                hotfixes: ["px_scaling"]
-            }
-        };
-    
-        try {
-            await html2pdf().set(opt).from(clone).save();
-        } catch (error) {
-            console.error("Erro ao gerar PDF:", error);
-            Swal.fire('Erro!', 'Ocorreu um erro ao gerar o PDF.', 'error');
-        } finally {
-            document.body.removeChild(clone);
-        }
-    };
-    
-    function isMobile() {
-        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    }
-
-    this.baixarPdf = async function () {
-        const dadosConta = await carregarDadosConta(); // Carrega os dados da conta
+        const dadosConta = await carregarDadosConta();
         const isParcial = iptTipoPagamento.value === 'Parcial';
+        const totalValor = this.calcularTotalValor();
 
-        // Verifique se os dados estão sendo carregados corretamente
-        console.log("Dados da Conta:", dadosConta);
-
-        if (!dadosConta) {
-            Swal.fire('Erro!', 'Não foi possível carregar os dados da conta.', 'error');
-            return;
-        }
-
-        // Cria o PDF com jsPDF
-        const doc = new jsPDF();
-
-        const item = document.querySelector('.recibo');
-        const opt = {
-            filename: iptCliente.value + 'recibo.pdf',
-            html2canvas: {
-                dpi: 300,
-                scale: 2, // Reduzir a escala pode ajudar
-                scrollY: 0, // Desabilita o scroll
-                windowWidth: document.documentElement.scrollWidth, // Largura total do documento
-                width: 800, // Largura fixa para garantir consistência
-                x: 0,
-                y: 0,
-                useCORS: true,
-                allowTaint: true,
-                letterRendering: true
-            },
-            jsPDF: {
-                format: 'a4',
-                orientation: 'portrait',
-                unit: 'mm',
-                hotfixes: ["px_scaling"] // Corrige problemas de escala
-            }
-        };
-
-        await html2pdf().set(opt).from(item).toPdf().get('pdf').then((pdf) => {
-            let yPosition = 20;
-            
-            const pageHeight = pdf.internal.pageSize.height;
-            const contentHeight = pdf.internal.getNumberOfPages() === 1 ? pdf.internal.pageSize.height : 0;
-
-            if (contentHeight + 60 > pageHeight) {
-                pdf.addPage();
-                yPosition = 20; 
-            }
-
-            function addBankData(pdf, yPosition) {
-                pdf.setFont('helvetica', 'bold');
-                pdf.setFontSize(16);
-                pdf.text('Pagamento', 14, yPosition);
-                yPosition += 10;
-
-                pdf.setFont('helvetica', 'normal');  // Tira o negrito para os dados
-                pdf.setFontSize(12);
-                yPosition = addTextWrapped(pdf, `Método de Pagamento: ${iptForma.value}${isParcial ? ' (Pagamento Parcial - 50%)' : ''}`, 14, yPosition);
-                yPosition = addTextWrapped(pdf, `Tipo de Chave Pix: ${dadosConta.tipoChavePix || 'Não disponível'}`, 14, yPosition);
-                yPosition = addTextWrapped(pdf, `Chave Pix: ${dadosConta.chavePix || 'Não disponível'}`, 14, yPosition);
-                yPosition += 5;
-
-                // Adicionar informação sobre pagamento parcial se for o caso
-                if (isParcial) {
-                    const totalValor = this.calcularTotalValor();
-                    const valorRestante = totalValor / 2;
-                    const valorRestanteFormatado = `R$ ${valorRestante.toFixed(2).replace('.', ',')}`;
-                    
-                    pdf.setFont('helvetica', 'bold');
-                    pdf.setFontSize(14);
-                    pdf.text('Informações de Pagamento Parcial', 14, yPosition);
-                    yPosition += 7;
-                    
-                    pdf.setFont('helvetica', 'normal');
-                    pdf.setFontSize(12);
-                    yPosition = addTextWrapped(pdf, `Valor restante a ser pago na entrega: ${valorRestanteFormatado}`, 14, yPosition);
-                    yPosition += 5;
+        try {
+            // Mostrar mensagem de carregamento
+            Swal.fire({
+                title: 'Gerando PDF',
+                text: 'Por favor, aguarde...',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
                 }
+            });
 
-                pdf.setFont('helvetica', 'bold');
-                pdf.setFontSize(16);
-                pdf.text('Dados Bancários', 14, yPosition);
-                yPosition += 10;
-
-                pdf.setFont('helvetica', 'normal');  // Tira o negrito para os dados
-                pdf.setFontSize(12);
-                yPosition = addTextWrapped(pdf, `Banco: ${dadosConta.nomeBanco || 'Não disponível'}`, 14, yPosition);
-                yPosition = addTextWrapped(pdf, `Agência: ${dadosConta.codigoAgencia || 'Não disponível'}`, 14, yPosition);
-                yPosition = addTextWrapped(pdf, `Conta: ${dadosConta.numeroConta || 'Não disponível'}`, 14, yPosition);
-                yPosition = addTextWrapped(pdf, `Tipo de Conta: ${dadosConta.tipoConta || 'Não disponível'}`, 14, yPosition);
-                yPosition = addTextWrapped(pdf, `Titular da conta: ${dadosConta.nomeBanco || 'Não disponível'}`, 14, yPosition);
-                yPosition += 5;
-
-                pdf.setFont('helvetica', 'bold');
-                pdf.setFontSize(16);
-                pdf.text('Informações Adicionais', 14, yPosition);
-                yPosition += 10;
-
-                pdf.setFont('helvetica', 'normal');  
-                pdf.setFontSize(12);  
-                yPosition = addTextWrapped(pdf, `${dadosConta.notas || 'Não disponível'}`, 14, yPosition);
-
-                return yPosition;
-            }
-
+            // Preparar o conteúdo do recibo
+            const reciboElement = document.querySelector('.recibo');
             
-            function addTextWrapped(pdf, text, x, y) {
-                const margin = 14;
-                const maxWidth = pdf.internal.pageSize.width - 2 * margin;
-                const textArray = pdf.splitTextToSize(text, maxWidth);
-                pdf.text(textArray, x, y);
-                return y + textArray.length * 7; 
-            }
-
-            yPosition = addBankData.call(this, pdf, yPosition);
-
+            // Criar uma cópia do elemento para não modificar o original na página
+            const reciboClone = reciboElement.cloneNode(true);
             
-            if (yPosition > 250) {  
-                pdf.addPage();  
-                yPosition = 20; 
-                yPosition = addBankData.call(this, pdf, yPosition);  
+            // Garantir que todos os elementos estejam visíveis na cópia
+            reciboClone.querySelectorAll('.hidden').forEach(el => {
+                el.classList.remove('hidden');
+            });
+            
+            // Adicionar estilos específicos para o PDF
+            const pdfStyles = document.createElement('style');
+            pdfStyles.textContent = `
+                body { font-family: Arial, sans-serif; color: #000; }
+                .recibo { width: 100%; max-width: 100%; }
+                .recibo-header { padding: 10px; }
+                .recibo-header img { max-width: 100px; }
+                table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+                th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                th { background-color: #f2f2f2; }
+                h1 { background-color: #f2f2f2; padding: 8px; margin: 15px 0; font-size: 16px; }
+                .recibo-declaracao, .pagamento-recibo { margin: 15px 0; padding: 10px; border-left: 3px solid #2A8B44; }
+            `;
+            reciboClone.appendChild(pdfStyles);
+            
+            // Configurações do html2pdf
+            const opt = {
+                margin: [10, 10, 10, 10],
+                filename: `recibo_${iptCliente.value.replace(/\s+/g, '_')}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { 
+                    scale: 2,
+                    useCORS: true,
+                    letterRendering: true,
+                    scrollX: 0,
+                    scrollY: 0
+                },
+                jsPDF: { 
+                    unit: 'mm', 
+                    format: 'a4', 
+                    orientation: 'portrait'
+                },
+                pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+            };
+            
+            // Gerar o PDF com o conteúdo do recibo
+            const pdfObject = await html2pdf().from(reciboClone).set(opt).toPdf().get('pdf');
+            
+            // Adicionar página com informações bancárias
+            pdfObject.addPage();
+            
+            // Adicionar informações bancárias na nova página
+            const pageWidth = pdfObject.internal.pageSize.getWidth();
+            let yPos = 20;
+            
+            // Função para adicionar texto com quebra de linha
+            function addWrappedText(text, x, y, maxWidth, lineHeight) {
+                const lines = pdfObject.splitTextToSize(text, maxWidth);
+                pdfObject.text(lines, x, y);
+                return y + (lines.length * lineHeight);
             }
-
-            // Salva o PDF depois de gerar
-            pdf.save(iptCliente.value + 'recibo.pdf');
-        });
+            
+            // Título da página
+            pdfObject.setFontSize(18);
+            pdfObject.setFont('helvetica', 'bold');
+            pdfObject.text("Informações de Pagamento", 14, yPos);
+            yPos += 10;
+            
+            // Método de pagamento
+            pdfObject.setFontSize(12);
+            pdfObject.setFont('helvetica', 'normal');
+            yPos = addWrappedText(`Método de Pagamento: ${iptForma.value}${isParcial ? ' (Pagamento Parcial - 50%)' : ''}`, 14, yPos, pageWidth - 28, 7);
+            yPos += 5;
+            
+            // Informações sobre pagamento parcial
+            if (isParcial) {
+                const valorRestante = totalValor / 2;
+                const valorRestanteFormatado = `R$ ${valorRestante.toFixed(2).replace('.', ',')}`;
+                
+                pdfObject.setFont('helvetica', 'bold');
+                pdfObject.setFontSize(14);
+                pdfObject.text('Informações de Pagamento Parcial', 14, yPos);
+                yPos += 7;
+                
+                pdfObject.setFont('helvetica', 'normal');
+                pdfObject.setFontSize(12);
+                yPos = addWrappedText(`Valor restante a ser pago na entrega: ${valorRestanteFormatado}`, 14, yPos, pageWidth - 28, 7);
+                yPos += 10;
+            }
+            
+            // Dados bancários se estiverem disponíveis
+            if (dadosConta) {
+                pdfObject.setFontSize(16);
+                pdfObject.setFont('helvetica', 'bold');
+                pdfObject.text('Dados Bancários', 14, yPos);
+                yPos += 10;
+                
+                pdfObject.setFontSize(12);
+                pdfObject.setFont('helvetica', 'normal');
+                
+                if (dadosConta.tipoChavePix) {
+                    yPos = addWrappedText(`Tipo de Chave Pix: ${dadosConta.tipoChavePix}`, 14, yPos, pageWidth - 28, 7);
+                }
+                
+                if (dadosConta.chavePix) {
+                    yPos = addWrappedText(`Chave Pix: ${dadosConta.chavePix}`, 14, yPos, pageWidth - 28, 7);
+                }
+                
+                yPos += 5;
+                
+                if (dadosConta.nomeBanco) {
+                    yPos = addWrappedText(`Banco: ${dadosConta.nomeBanco}`, 14, yPos, pageWidth - 28, 7);
+                }
+                
+                if (dadosConta.codigoAgencia) {
+                    yPos = addWrappedText(`Agência: ${dadosConta.codigoAgencia}`, 14, yPos, pageWidth - 28, 7);
+                }
+                
+                if (dadosConta.numeroConta) {
+                    yPos = addWrappedText(`Conta: ${dadosConta.numeroConta}`, 14, yPos, pageWidth - 28, 7);
+                }
+                
+                if (dadosConta.tipoConta) {
+                    yPos = addWrappedText(`Tipo de Conta: ${dadosConta.tipoConta}`, 14, yPos, pageWidth - 28, 7);
+                }
+                
+                if (dadosConta.titularConta) {
+                    yPos = addWrappedText(`Titular da conta: ${dadosConta.titularConta}`, 14, yPos, pageWidth - 28, 7);
+                }
+                
+                yPos += 10;
+                
+                // Notas adicionais
+                if (dadosConta.notas) {
+                    pdfObject.setFontSize(16);
+                    pdfObject.setFont('helvetica', 'bold');
+                    pdfObject.text('Informações Adicionais', 14, yPos);
+                    yPos += 10;
+                    
+                    pdfObject.setFontSize(12);
+                    pdfObject.setFont('helvetica', 'normal');
+                    yPos = addWrappedText(dadosConta.notas, 14, yPos, pageWidth - 28, 7);
+                }
+            }
+            
+            // Salvar o PDF
+            pdfObject.save(`recibo_${iptCliente.value.replace(/\s+/g, '_')}.pdf`);
+            
+            // Fechar a mensagem de carregamento
+            Swal.close();
+            
+            // Mostrar mensagem de sucesso
+            Swal.fire({
+                title: 'Sucesso!',
+                text: 'PDF gerado com sucesso.',
+                icon: 'success'
+            });
+            
+        } catch (error) {
+            console.error('Erro ao gerar PDF:', error);
+            
+            // Fechar a mensagem de carregamento e mostrar erro
+            Swal.close();
+            Swal.fire({
+                title: 'Erro',
+                text: 'Ocorreu um erro ao gerar o PDF. Por favor, tente novamente.',
+                icon: 'error'
+            });
+        }
     };
 }
 

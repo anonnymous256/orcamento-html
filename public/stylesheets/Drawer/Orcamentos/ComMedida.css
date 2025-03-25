@@ -93,6 +93,41 @@ input, select, button {
     color: var(--font-color);
     outline: none;
 }
+
+/* Adicione estes estilos ao seu arquivo CSS existente */
+.input-icon button#btn-tipos {
+    background-color: var(--button-background);
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.input-icon button#btn-tipos:hover {
+    background-color: var(--green);
+}
+
+/* Estilos para o modal de tipos */
+.tipos-lista {
+    background-color: var(--form-background);
+    border-radius: 5px;
+}
+
+.tipo-item {
+    transition: background-color 0.3s;
+}
+
+.tipo-item:hover {
+    background-color: var(--input-background);
+}
+
+.tipo-item button {
+    opacity: 0.8;
+    transition: opacity 0.3s;
+}
+
+.tipo-item button:hover {
+    opacity: 1;
+}
 input:focus, select:focus {
     box-shadow: none;
     border: none;

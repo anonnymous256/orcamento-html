@@ -27,6 +27,7 @@ const btnprctmat = document.getElementById('por-mat-btn');
 const clientesSelect = document.getElementById('clientes');
 const btnTotal = document.getElementById('btn-total');
 const btnSalvar = document.getElementById('btn-salvar');
+const btnTipos = document.getElementById('btn-tipos');
 
 let clienteNome = '';
 
@@ -109,7 +110,132 @@ async function carregarClientes() {
 
 
 
-// FUNCIONALIDADE DO BOTAO DE PORCENTAGEM MATERIAL
+// Função para abrir o modal de tipos
+async function abrirModalTipos() {
+    const user = auth.currentUser;
+    if (!user) {
+        Swal.fire('Erro!', 'Usuário não autenticado.', 'error');
+        return;
+    }
+
+    try {
+        // Buscar tipos existentes
+        const tiposSnapshot = await db.collection('tipos')
+            .where('userId', '==', user.uid)
+            .get();
+
+        let tiposHTML = '<div class="tipos-lista" style="max-height: 300px; overflow-y: auto; margin-bottom: 20px;">';
+        
+        tiposSnapshot.forEach(doc => {
+            const tipo = doc.data();
+            tiposHTML += `
+                <div class="tipo-item" style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #ddd;">
+                    <div>
+                        <span style="font-weight: bold;color: white">${tipo.nome}</span>
+                        <span style="margin-left: 10px;color: white">R$ ${tipo.valor}</span>
+                    </div>
+                    <div>
+                        <button onclick="selecionarValor(${tipo.valor})" style="background-color: #4CAF50; color: white; border: none; padding: 5px 10px; border-radius: 3px; margin-right: 5px;">
+                            Selecionar
+                        </button>
+                        <button onclick="excluirTipo('${doc.id}')" style="background-color: #f44336; color: white; border: none; padding: 5px 10px; border-radius: 3px;">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+        });
+
+        tiposHTML += '</div>';
+
+        // Adicionar formulário para novo tipo
+        tiposHTML += `
+            <div style="border-top: 1px solid #ddd; padding-top: 15px;">
+                <h4 style="margin-bottom: 10px;">Adicionar Novo Tipo</h4>
+                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <input id="novo-tipo-nome" placeholder="Nome do tipo" style="flex: 2;">
+                    <input id="novo-tipo-valor" type="number" placeholder="Valor" style="flex: 1;">
+                </div>
+                <button onclick="adicionarNovoTipo()" style="background-color: #2196F3; color: white; border: none; padding: 8px 15px; border-radius: 3px; width: 100%;">
+                    Adicionar Novo Tipo
+                </button>
+            </div>
+        `;
+
+        Swal.fire({
+            title: 'Tipos de Metro',
+            html: tiposHTML,
+            showConfirmButton: false,
+            showCloseButton: true,
+            width: '600px'
+        });
+
+        // Adicionar função global para selecionar valor
+        window.selecionarValor = (valor) => {
+            document.getElementById('metro').value = valor;
+            Swal.close();
+        };
+
+        // Adicionar função global para excluir tipo
+        window.excluirTipo = async (tipoId) => {
+            try {
+                const result = await Swal.fire({
+                    title: 'Confirmar exclusão',
+                    text: 'Tem certeza que deseja excluir este tipo?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Sim, excluir!',
+                    cancelButtonText: 'Cancelar'
+                });
+
+                if (result.isConfirmed) {
+                    await db.collection('tipos').doc(tipoId).delete();
+                    Swal.fire('Sucesso!', 'Tipo excluído com sucesso.', 'success');
+                    abrirModalTipos(); // Recarrega o modal
+                }
+            } catch (error) {
+                console.error('Erro ao excluir tipo:', error);
+                Swal.fire('Erro!', 'Erro ao excluir o tipo.', 'error');
+            }
+        };
+
+        // Adicionar função global para adicionar novo tipo
+        window.adicionarNovoTipo = async () => {
+            const nome = document.getElementById('novo-tipo-nome').value.trim();
+            const valor = parseFloat(document.getElementById('novo-tipo-valor').value);
+
+            if (!nome || isNaN(valor)) {
+                Swal.fire('Erro!', 'Preencha todos os campos corretamente.', 'error');
+                return;
+            }
+
+            try {
+                await db.collection('tipos').add({
+                    userId: user.uid,
+                    nome: nome,
+                    valor: valor,
+                    criadoEm: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                document.getElementById('novo-tipo-nome').value = '';
+                document.getElementById('novo-tipo-valor').value = '';
+                
+                Swal.fire('Sucesso!', 'Novo tipo adicionado com sucesso.', 'success');
+                abrirModalTipos(); // Recarrega o modal
+            } catch (error) {
+                console.error('Erro ao adicionar novo tipo:', error);
+                Swal.fire('Erro!', 'Erro ao adicionar novo tipo.', 'error');
+            }
+        };
+
+    } catch (error) {
+        console.error('Erro ao carregar tipos:', error);
+        Swal.fire('Erro!', 'Erro ao carregar os tipos.', 'error');
+    }
+}
+
 
 
 
@@ -1038,3 +1164,5 @@ function formatarParaReal(valor) {
 
 await carregarClientes();
 document.getElementById("btn-converter").addEventListener("click", converterPDF);
+
+btnTipos.addEventListener('click', abrirModalTipos);
