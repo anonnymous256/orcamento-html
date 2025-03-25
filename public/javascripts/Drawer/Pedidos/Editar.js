@@ -270,56 +270,120 @@ function openNewProductModal() {
     Swal.fire({
         title: 'Adicionar Novo Produto',
         html: `
-            <form id="new-product-form" class="swal2-form">
-                <div class="form-group">
-                    <label for="new-cliente">Cliente</label>
-                    <select id="new-cliente" class="swal2-select" required>
-                        ${clientesOptions}
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="new-descricao">Descrição</label>
-                    <input type="text" id="new-descricao" class="swal2-input" placeholder="Descrição do produto">
-                </div>
-                <div class="form-group">
-                    <label for="new-altura">Altura (m)</label>
-                    <input type="number" id="new-altura" class="swal2-input" placeholder="Altura em metros" step="0.01">
-                </div>
-                <div class="form-group">
-                    <label for="new-largura">Largura (m)</label>
-                    <input type="number" id="new-largura" class="swal2-input" placeholder="Largura em metros" step="0.01">
-                </div>
-                <div class="form-group">
-                    <label for="new-valorMetro">Valor por Metro</label>
-                    <input type="number" id="new-valorMetro" class="swal2-input" placeholder="Valor por metro" step="0.01">
-                </div>
-                <div class="form-group">
-                    <label for="new-material">Material</label>
-                    <input type="number" id="new-material" class="swal2-input" placeholder="Valor do material" step="0.01">
-                </div>
-                <div class="form-group">
-                    <label for="new-quantidade">Quantidade</label>
-                    <input type="number" id="new-quantidade" class="swal2-input" placeholder="Quantidade" min="1" value="1">
-                </div>
-                <div class="form-group">
-                    <label for="new-porcentagem">Porcentagem</label>
-                    <input type="number" id="new-porcentagem" class="swal2-input" placeholder="Porcentagem" step="0.01" value="0">
-                </div>
-                <div class="form-group">
-                    <label for="new-vidro">Cor do Vidro</label>
-                    <input type="text" id="new-vidro" class="swal2-input" placeholder="Cor do vidro">
-                </div>
-                <div class="form-group">
-                    <label for="new-ferragem">Cor da Ferragem</label>
-                    <input type="text" id="new-ferragem" class="swal2-input" placeholder="Cor da ferragem">
-                </div>
-                <div class="form-group">
-                    <label for="new-valorTotal">Valor Total</label>
-                    <input type="number" id="new-valorTotal" class="swal2-input" placeholder="Valor total" step="0.01" readonly>
-                </div>
-                <button type="button" id="calculate-total-button" class="swal2-confirm swal2-styled">Calcular Total</button>
-            </form>
+            <style>
+                .responsive-modal {
+                    max-width: 100%;
+                    box-sizing: border-box;
+                }
+                .responsive-modal .form-group {
+                    margin-bottom: 12px;
+                    width: 100%;
+                }
+                .responsive-modal label {
+                    display: block;
+                    margin-bottom: 4px;
+                    font-size: 14px;
+                    color: #555;
+                }
+                .responsive-modal .swal2-input,
+                .responsive-modal .swal2-select {
+                    width: 100% !important;
+                    box-sizing: border-box;
+                    margin: 4px 0 !important;
+                    padding: 8px 10px !important;
+                    font-size: 14px !important;
+                }
+                .responsive-modal .swal2-select {
+                    height: auto !important;
+                    min-height: 38px;
+                }
+                #calculate-total-button {
+                    width: 100%;
+                    margin-top: 10px;
+                    padding: 10px;
+                }
+                @media (min-width: 576px) {
+                    .responsive-modal {
+                        min-width: 400px;
+                    }
+                    .form-columns {
+                        display: flex;
+                        gap: 10px;
+                    }
+                    .form-columns .form-group {
+                        flex: 1;
+                    }
+                }
+            </style>
+            
+            <div class="responsive-modal">
+                <form id="new-product-form" class="swal2-form">
+                    <div class="form-group">
+                        <label for="new-cliente">Cliente</label>
+                        <select id="new-cliente" class="swal2-select" required>
+                            ${clientesOptions}
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="new-descricao">Descrição</label>
+                        <input type="text" id="new-descricao" class="swal2-input" placeholder="Descrição do produto" required>
+                    </div>
+                    
+                    <div class="form-columns">
+                        <div class="form-group">
+                            <label for="new-altura">Altura (m)</label>
+                            <input type="number" id="new-altura" class="swal2-input" placeholder="Altura" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="new-largura">Largura (m)</label>
+                            <input type="number" id="new-largura" class="swal2-input" placeholder="Largura" step="0.01" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-columns">
+                        <div class="form-group">
+                            <label for="new-valorMetro">Valor por Metro</label>
+                            <input type="number" id="new-valorMetro" class="swal2-input" placeholder="Valor/m²" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="new-material">Material</label>
+                            <input type="number" id="new-material" class="swal2-input" placeholder="Material" step="0.01">
+                        </div>
+                    </div>
+                    
+                    <div class="form-columns">
+                        <div class="form-group">
+                            <label for="new-quantidade">Quantidade</label>
+                            <input type="number" id="new-quantidade" class="swal2-input" placeholder="Qtd" min="1" value="1">
+                        </div>
+                        <div class="form-group">
+                            <label for="new-porcentagem">Porcentagem (%)</label>
+                            <input type="number" id="new-porcentagem" class="swal2-input" placeholder="%" step="0.01" value="0">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="new-vidro">Cor do Vidro</label>
+                        <input type="text" id="new-vidro" class="swal2-input" placeholder="Cor do vidro">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="new-ferragem">Cor da Ferragem</label>
+                        <input type="text" id="new-ferragem" class="swal2-input" placeholder="Cor da ferragem">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="new-valorTotal">Valor Total</label>
+                        <input type="number" id="new-valorTotal" class="swal2-input" placeholder="Valor total" step="0.01" readonly>
+                    </div>
+                    
+                    <button type="button" id="calculate-total-button" class="swal2-confirm swal2-styled">Calcular Total</button>
+                </form>
+            </div>
         `,
+        width: '90%',
+        maxWidth: '600px',
         showCancelButton: true,
         confirmButtonText: 'Adicionar Produto',
         cancelButtonText: 'Cancelar',
@@ -371,7 +435,6 @@ function openNewProductModal() {
         }
     }).then((result) => {
         if (result.isConfirmed) {
-            // Adicionar o novo produto à lista
             addNewProduct(result.value);
         }
     });

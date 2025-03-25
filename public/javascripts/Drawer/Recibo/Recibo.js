@@ -148,6 +148,7 @@ function EnvDados() {
     const iptEnd = document.querySelector('#input-end');
     const rcbEnd = document.querySelector('.end-recibo');
     const iptForma = document.querySelector('#formapagamento');
+    const iptTipoPagamento = document.querySelector('#tipopagamento'); // Novo campo para tipo de pagamento
 
     const tabela = document.querySelector('.tabela-servicos');
     const desc = document.querySelector('#desc-serv');
@@ -210,26 +211,36 @@ function EnvDados() {
         rcbEnd.innerHTML = `Endereço para Instalação: ${end}`;
 
         const totalValor = this.calcularTotalValor();
+        const isParcial = iptTipoPagamento.value === 'Parcial';
+        const valorPago = isParcial ? totalValor / 2 : totalValor;
+        const valorPagoFormatado = `R$ ${valorPago.toFixed(2).replace('.', ',')}`;
         const valorTotalFormatado = `R$ ${totalValor.toFixed(2).replace('.', ',')}`;
 
-        // Declaração com valor total
-        const declaracao = `Declaro que recebi de ${nome}, com endereço em ${end}, o valor de ${valorTotalFormatado} em ${this.formtData()}, referente a:`;
+        // Declaração com valor total ou parcial
+        let declaracao;
+        if (isParcial) {
+            const valorRestante = totalValor / 2;
+            const valorRestanteFormatado = `R$ ${valorRestante.toFixed(2).replace('.', ',')}`;
+            declaracao = `Declaro que recebi de ${nome}, com endereço em ${end}, o valor de ${valorPagoFormatado} em ${this.formtData()}, referente a 50% do valor total de ${valorTotalFormatado} dos serviços listados abaixo. O valor restante de ${valorRestanteFormatado} será pago na entrega do serviço.`;
+        } else {
+            declaracao = `Declaro que recebi de ${nome}, com endereço em ${end}, o valor de ${valorTotalFormatado} em ${this.formtData()}, referente a:`;
+        }
 
-        const FormadePagamento = `${iptForma.value}`;
+        const FormadePagamento = `${iptForma.value}${isParcial ? ' (Pagamento Parcial - 50%)' : ''}`;
         document.getElementById('declaracao-recibo').innerText = declaracao;
         document.getElementById('forma-pagamento').innerText = FormadePagamento;
 
         // Remove a classe 'hidden' para exibir os elementos
-    h1Declaracao.classList.remove("hidden");
-    declaracaoDiv.classList.remove("hidden");
-    h1Pagamento.classList.remove("hidden");
-    pagamentoDiv.classList.remove("hidden");
-    h1Servicos.classList.remove("hidden");
-    tabelaServicos.classList.remove("hidden");
+        h1Declaracao.classList.remove("hidden");
+        declaracaoDiv.classList.remove("hidden");
+        h1Pagamento.classList.remove("hidden");
+        pagamentoDiv.classList.remove("hidden");
+        h1Servicos.classList.remove("hidden");
+        tabelaServicos.classList.remove("hidden");
 
         const valorRecibo = document.querySelector('.valor-recibo');
         if (valorRecibo) {
-            valorRecibo.innerText = valorTotalFormatado;
+            valorRecibo.innerText = valorPagoFormatado;
         }
     };
 
@@ -327,102 +338,133 @@ function EnvDados() {
   
     const { jsPDF } = window.jspdf;
 
-this.baixarPdf = async function () {
-    const dadosConta = await carregarDadosConta(); // Carrega os dados da conta
+    this.baixarPdf = async function () {
+        const dadosConta = await carregarDadosConta(); // Carrega os dados da conta
+        const isParcial = iptTipoPagamento.value === 'Parcial';
 
-    // Verifique se os dados estão sendo carregados corretamente
-    console.log("Dados da Conta:", dadosConta);
+        // Verifique se os dados estão sendo carregados corretamente
+        console.log("Dados da Conta:", dadosConta);
 
-    if (!dadosConta) {
-        Swal.fire('Erro!', 'Não foi possível carregar os dados da conta.', 'error');
-        return;
-    }
+        if (!dadosConta) {
+            Swal.fire('Erro!', 'Não foi possível carregar os dados da conta.', 'error');
+            return;
+        }
 
-    // Cria o PDF com jsPDF
-    const doc = new jsPDF();
+        // Cria o PDF com jsPDF
+        const doc = new jsPDF();
 
-    const item = document.querySelector('.recibo');
-    const opt = {
-        filename: iptCliente.value + 'recibo.pdf',
-        html2canvas: { dpi: 150, scale: 3, letterRendering: true },
-        jsPDF: { format: 'a4', orientation: 'portrait' },
+        const item = document.querySelector('.recibo');
+        const opt = {
+            filename: iptCliente.value + 'recibo.pdf',
+            html2canvas: { 
+                dpi: 150,
+                scale: 2, // Reduzido de 3 para 2
+                letterRendering: true,
+                width: 800 // Largura maior
+            },
+            jsPDF: { 
+                format: 'a4',
+                orientation: 'portrait',
+                unit: 'mm',
+                margins: {
+                    top: 10,
+                    bottom: 10,
+                    left: 10,
+                    right: 10
+                }
+            },
+            margin: 10
+        };
+
+        await html2pdf().set(opt).from(item).toPdf().get('pdf').then((pdf) => {
+            let yPosition = 20;
+            
+            const pageHeight = pdf.internal.pageSize.height;
+            const contentHeight = pdf.internal.getNumberOfPages() === 1 ? pdf.internal.pageSize.height : 0;
+
+            if (contentHeight + 60 > pageHeight) {
+                pdf.addPage();
+                yPosition = 20; 
+            }
+
+            function addBankData(pdf, yPosition) {
+                pdf.setFont('helvetica', 'bold');
+                pdf.setFontSize(16);
+                pdf.text('Pagamento', 14, yPosition);
+                yPosition += 10;
+
+                pdf.setFont('helvetica', 'normal');  // Tira o negrito para os dados
+                pdf.setFontSize(12);
+                yPosition = addTextWrapped(pdf, `Método de Pagamento: ${iptForma.value}${isParcial ? ' (Pagamento Parcial - 50%)' : ''}`, 14, yPosition);
+                yPosition = addTextWrapped(pdf, `Tipo de Chave Pix: ${dadosConta.tipoChavePix || 'Não disponível'}`, 14, yPosition);
+                yPosition = addTextWrapped(pdf, `Chave Pix: ${dadosConta.chavePix || 'Não disponível'}`, 14, yPosition);
+                yPosition += 5;
+
+                // Adicionar informação sobre pagamento parcial se for o caso
+                if (isParcial) {
+                    const totalValor = this.calcularTotalValor();
+                    const valorRestante = totalValor / 2;
+                    const valorRestanteFormatado = `R$ ${valorRestante.toFixed(2).replace('.', ',')}`;
+                    
+                    pdf.setFont('helvetica', 'bold');
+                    pdf.setFontSize(14);
+                    pdf.text('Informações de Pagamento Parcial', 14, yPosition);
+                    yPosition += 7;
+                    
+                    pdf.setFont('helvetica', 'normal');
+                    pdf.setFontSize(12);
+                    yPosition = addTextWrapped(pdf, `Valor restante a ser pago na entrega: ${valorRestanteFormatado}`, 14, yPosition);
+                    yPosition += 5;
+                }
+
+                pdf.setFont('helvetica', 'bold');
+                pdf.setFontSize(16);
+                pdf.text('Dados Bancários', 14, yPosition);
+                yPosition += 10;
+
+                pdf.setFont('helvetica', 'normal');  // Tira o negrito para os dados
+                pdf.setFontSize(12);
+                yPosition = addTextWrapped(pdf, `Banco: ${dadosConta.nomeBanco || 'Não disponível'}`, 14, yPosition);
+                yPosition = addTextWrapped(pdf, `Agência: ${dadosConta.codigoAgencia || 'Não disponível'}`, 14, yPosition);
+                yPosition = addTextWrapped(pdf, `Conta: ${dadosConta.numeroConta || 'Não disponível'}`, 14, yPosition);
+                yPosition = addTextWrapped(pdf, `Tipo de Conta: ${dadosConta.tipoConta || 'Não disponível'}`, 14, yPosition);
+                yPosition = addTextWrapped(pdf, `Titular da conta: ${dadosConta.nomeBanco || 'Não disponível'}`, 14, yPosition);
+                yPosition += 5;
+
+                pdf.setFont('helvetica', 'bold');
+                pdf.setFontSize(16);
+                pdf.text('Informações Adicionais', 14, yPosition);
+                yPosition += 10;
+
+                pdf.setFont('helvetica', 'normal');  
+                pdf.setFontSize(12);  
+                yPosition = addTextWrapped(pdf, `${dadosConta.notas || 'Não disponível'}`, 14, yPosition);
+
+                return yPosition;
+            }
+
+            
+            function addTextWrapped(pdf, text, x, y) {
+                const margin = 14;
+                const maxWidth = pdf.internal.pageSize.width - 2 * margin;
+                const textArray = pdf.splitTextToSize(text, maxWidth);
+                pdf.text(textArray, x, y);
+                return y + textArray.length * 7; 
+            }
+
+            yPosition = addBankData.call(this, pdf, yPosition);
+
+            
+            if (yPosition > 250) {  
+                pdf.addPage();  
+                yPosition = 20; 
+                yPosition = addBankData.call(this, pdf, yPosition);  
+            }
+
+            // Salva o PDF depois de gerar
+            pdf.save(iptCliente.value + 'recibo.pdf');
+        });
     };
-
-    await html2pdf().set(opt).from(item).toPdf().get('pdf').then((pdf) => {
-        let yPosition = 20;
-        
-        const pageHeight = pdf.internal.pageSize.height;
-
-        const contentHeight = pdf.internal.getNumberOfPages() === 1 ? pdf.internal.pageSize.height : 0;
-
-        if (contentHeight + 60 > pageHeight) {
-            pdf.addPage();
-            yPosition = 20; 
-        }
-
-        function addBankData(pdf, yPosition) {
-            pdf.setFont('helvetica', 'bold');
-            pdf.setFontSize(16);
-            pdf.text('Pagamento', 14, yPosition);
-            yPosition += 10;
-
-            pdf.setFont('helvetica', 'normal');  // Tira o negrito para os dados
-            pdf.setFontSize(12);
-            yPosition = addTextWrapped(pdf, `Método de Pagamento: ${dadosConta.metodoPagamento || 'Não disponível'}`, 14, yPosition);
-            yPosition = addTextWrapped(pdf, `Tipo de Chave Pix: ${dadosConta.tipoChavePix || 'Não disponível'}`, 14, yPosition);
-            yPosition = addTextWrapped(pdf, `Chave Pix: ${dadosConta.chavePix || 'Não disponível'}`, 14, yPosition);
-            yPosition += 5;
-
-            pdf.setFont('helvetica', 'bold');
-            pdf.setFontSize(16);
-            pdf.text('Dados Bancários', 14, yPosition);
-            yPosition += 10;
-
-            pdf.setFont('helvetica', 'normal');  // Tira o negrito para os dados
-            pdf.setFontSize(12);
-            yPosition = addTextWrapped(pdf, `Banco: ${dadosConta.nomeBanco || 'Não disponível'}`, 14, yPosition);
-            yPosition = addTextWrapped(pdf, `Agência: ${dadosConta.codigoAgencia || 'Não disponível'}`, 14, yPosition);
-            yPosition = addTextWrapped(pdf, `Conta: ${dadosConta.numeroConta || 'Não disponível'}`, 14, yPosition);
-            yPosition = addTextWrapped(pdf, `Tipo de Conta: ${dadosConta.tipoConta || 'Não disponível'}`, 14, yPosition);
-            yPosition = addTextWrapped(pdf, `Titular da conta: ${dadosConta.nomeBanco || 'Não disponível'}`, 14, yPosition);
-            yPosition += 5;
-
-            pdf.setFont('helvetica', 'bold');
-            pdf.setFontSize(16);
-            pdf.text('Informações Adicionais', 14, yPosition);
-            yPosition += 10;
-
-            pdf.setFont('helvetica', 'normal');  
-            pdf.setFontSize(12);  
-            yPosition = addTextWrapped(pdf, `${dadosConta.notas || 'Não disponível'}`, 14, yPosition);
-
-            return yPosition;
-        }
-
-        
-        function addTextWrapped(pdf, text, x, y) {
-            const margin = 14;
-            const maxWidth = pdf.internal.pageSize.width - 2 * margin;
-            const textArray = pdf.splitTextToSize(text, maxWidth);
-            pdf.text(textArray, x, y);
-            return y + textArray.length * 7; 
-        }
-
-        yPosition = addBankData(pdf, yPosition);
-
-        
-        if (yPosition > 250) {  
-            pdf.addPage();  
-            yPosition = 20; 
-            yPosition = addBankData(pdf, yPosition);  
-        }
-
-        // Salva o PDF depois de gerar
-        pdf.save(iptCliente.value + 'recibo.pdf');
-    });
-};
-
-     
 }
 
 const enviar = new EnvDados();

@@ -1,60 +1,90 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="images/Logo/Logo2.jpg" type="image/x-icon">
-    <title>Gerar PDF</title>
+    <title>Sistema de Tempera - Especificações</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
-    <link rel ="stylesheet" href="/stylesheets/Drawer/Sistematempera/Tempera.css">  
+    <link rel="stylesheet" href="/stylesheets/Drawer/Sistematempera/Tempera.css">
 </head>
+
 <body>
     <header>
         <i class="fa-solid fa-arrow-left" onclick="window.history.back()"></i>
-        <p>Sistema de tempera</p>
+        <p>Sistema de Tempera</p>
         <i></i>
     </header>
+
     <form id="detailsForm">
-        <label for="width">Largura (cm):</label>
-        <input type="number" id="width" name="width" required>
+        <h3><i class="fas fa-pencil-ruler"></i> Especificações do Vidro</h3>
 
-        <label for="height">Altura (cm):</label>
-        <input type="number" id="height" name="height" required>
+        <div class="form-group">
+            <label for="width"><i class="fas fa-arrows-alt-h"></i> Largura (cm):</label>
+            <input type="number" id="width" name="width" min="1" placeholder="Insira a largura" required>
+        </div>
 
-        <label for="Quantidade">Quantidade</label>
-        <input type="number" id="Quantidade" name="Quantidade" required>
+        <div class="form-group">
+            <label for="height"><i class="fas fa-arrows-alt-v"></i> Altura (cm):</label>
+            <input type="number" id="height" name="height" min="1" placeholder="Insira a altura" required>
+        </div>
 
-        <label for="glassColor">Cor do Vidro:</label>
-        <select id="glassColor" name="glassColor" required>
-            <option value="Incolor">Incolor</option>
-            <option value="Fumê">Fumê</option>
-            <option value="Verde">Verde</option>
-            <option value="Pontilhado">Pontilhado</option>
-            <option value="Bronze">Bronze</option>
-        </select>
+        <div class="form-group">
+            <label for="Quantidade"><i class="fas fa-layer-group"></i> Quantidade:</label>
+            <input type="number" id="Quantidade" name="Quantidade" min="1" placeholder="Insira a quantidade" required>
+        </div>
 
-        <label for="glassThickness">Espessura do Vidro:</label>
-        <select id="glassThickness" name="glassThickness" required>
-            <option value="6mm">6mm</option>
-            <option value="8mm">8mm</option>
-            <option value="10mm">10mm</option>
-        </select>
+        <div class="form-group">
+            <label for="glassColor"><i class="fas fa-palette"></i> Cor do Vidro:</label>
+            <select id="glassColor" name="glassColor" required>
+                <option value="" disabled selected>Selecione uma cor</option>
+                <option value="Incolor">Incolor</option>
+                <option value="Fumê">Fumê</option>
+                <option value="Verde">Verde</option>
+                <option value="Pontilhado">Pontilhado</option>
+                <option value="Bronze">Bronze</option>
+            </select>
+        </div>
 
-        <button type="button" onclick="openImageModal()">Escolher Imagem</button>
-        <button type="button" onclick="saveItemData()">Adicionar Item</button>
-        <button type="button" onclick="generateFinalPDF()">Gerar PDF Final</button>
+        <div class="form-group">
+            <label for="glassThickness"><i class="fas fa-ruler-vertical"></i> Espessura do Vidro:</label>
+            <select id="glassThickness" name="glassThickness" required>
+                <option value="" disabled selected>Selecione uma espessura</option>
+                <option value="6mm">6mm</option>
+                <option value="8mm">8mm</option>
+                <option value="10mm">10mm</option>
+            </select>
+        </div>
+
+        <button type="button" class="button-primary" onclick="openImageModal()">
+            <i class="fas fa-images"></i> Escolher Imagem
+        </button>
+        
+        
+        <button type="button" class="button-success" onclick="generateFinalPDF()">
+            <i class="fas fa-file-pdf"></i> Gerar PDF Final
+        </button>
     </form>
 
     <div id="imageModal">
         <div>
             <h2>Selecione uma Imagem</h2>
             <div id="tabContainer">
-                <button class="tabButton" onclick="showTab('PortasImagens')">Porta</button>
-                <button class="tabButton" onclick="showTab('JanelasImagens')">Janela</button>
-                <button class="tabButton" onclick="showTab('BoxImagens')">Box</button>
-                <button class="tabButton" onclick="showTab('OutrosImagens')">Outros</button>
+                <button class="tabButton active" onclick="showTab('PortasImagens')">
+                    <i class="fas fa-door-open"></i> Porta
+                </button>
+                <button class="tabButton" onclick="showTab('JanelasImagens')">
+                    <i class="fas fa-window-maximize"></i> Janela
+                </button>
+                <button class="tabButton" onclick="showTab('BoxImagens')">
+                    <i class="fas fa-shower"></i> Box
+                </button>
+                <button class="tabButton" onclick="showTab('OutrosImagens')">
+                    <i class="fas fa-shapes"></i> Outros
+                </button>
             </div>
             <div id="tabContent">
                 <ul id="PortasImagens" class="tab">
@@ -106,50 +136,54 @@
                             onclick="selectImage('images/SistemaTempera/Janelas/Janelas (5).png')"></li>
                 </ul>
                 <ul id="BoxImagens" class="tab">
-                    <li><img src="images/SistemaTempera/Box´s/Box (1).png" alt="Janela 1"
+                    <li><img src="images/SistemaTempera/Box´s/Box (1).png" alt="Box 1"
                             onclick="selectImage('images/SistemaTempera/Box´s/Box (1).png')"></li>
-                    <li><img src="images/SistemaTempera/Box´s/Box (2).png" alt="Janela 2"
+                    <li><img src="images/SistemaTempera/Box´s/Box (2).png" alt="Box 2"
                             onclick="selectImage('images/SistemaTempera/Box´s/Box (2).png')"></li>
-                    <li><img src="images/SistemaTempera/Box´s/Box (3).png" alt="Janela 3"
+                    <li><img src="images/SistemaTempera/Box´s/Box (3).png" alt="Box 3"
                             onclick="selectImage('images/SistemaTempera/Box´s/Box (3).png')"></li>
-                    <li><img src="images/SistemaTempera/Box´s/Box (4).png" alt="Janela 4"
+                    <li><img src="images/SistemaTempera/Box´s/Box (4).png" alt="Box 4"
                             onclick="selectImage('images/SistemaTempera/Box´s/Box (4).png')"></li>
-                    <li><img src="images/SistemaTempera/Box´s/Box (5).png" alt="Janela 5"
+                    <li><img src="images/SistemaTempera/Box´s/Box (5).png" alt="Box 5"
                             onclick="selectImage('images/SistemaTempera/Box´s/Box (5).png')"></li>
-                    <li><img src="images/SistemaTempera/Box´s/Box (6).png" alt="Janela 6"
+                    <li><img src="images/SistemaTempera/Box´s/Box (6).png" alt="Box 6"
                             onclick="selectImage('images/SistemaTempera/Box´s/Box (6).png')"></li>
                 </ul>
                 <ul id="OutrosImagens" class="tab">
-                    <li><img src="images/SistemaTempera/Outros/Outros (1).png" alt="Janela 1"
+                    <li><img src="images/SistemaTempera/Outros/Outros (1).png" alt="Outro 1"
                             onclick="selectImage('images/SistemaTempera/Outros/Outros (1).png')"></li>
-                    <li><img src="images/SistemaTempera/Outros/Outros (2).png" alt="Janela 2"
+                    <li><img src="images/SistemaTempera/Outros/Outros (2).png" alt="Outro 2"
                             onclick="selectImage('images/SistemaTempera/Outros/Outros (2).png')"></li>
-                    <li><img src="images/SistemaTempera/Outros/Outros (3).png" alt="Janela 3"
+                    <li><img src="images/SistemaTempera/Outros/Outros (3).png" alt="Outro 3"
                             onclick="selectImage('images/SistemaTempera/Outros/Outros (3).png')"></li>
-                    <li><img src="images/SistemaTempera/Outros/Outros (4).png" alt="Janela 4"
+                    <li><img src="images/SistemaTempera/Outros/Outros (4).png" alt="Outro 4"
                             onclick="selectImage('images/SistemaTempera/Outros/Outros (4).png')"></li>
-                    <li><img src="images/SistemaTempera/Outros/Outros (5).png" alt="Janela 5"
+                    <li><img src="images/SistemaTempera/Outros/Outros (5).png" alt="Outro 5"
                             onclick="selectImage('images/SistemaTempera/Outros/Outros (5).png')"></li>
-                    <li><img src="images/SistemaTempera/Outros/Outros (6).png" alt="Janela 6"
+                    <li><img src="images/SistemaTempera/Outros/Outros (6).png" alt="Outro 6"
                             onclick="selectImage('images/SistemaTempera/Outros/Outros (6).png')"></li>
-                    <li><img src="images/SistemaTempera/Outros/Outros (7).png" alt="Janela 7"
+                    <li><img src="images/SistemaTempera/Outros/Outros (7).png" alt="Outro 7"
                             onclick="selectImage('images/SistemaTempera/Outros/Outros (7).png')"></li>
-                    <li><img src="images/SistemaTempera/Outros/Outros (8).png" alt="Janela 8"
+                    <li><img src="images/SistemaTempera/Outros/Outros (8).png" alt="Outro 8"
                             onclick="selectImage('images/SistemaTempera/Outros/Outros (8).png')"></li>
-                    <li><img src="images/SistemaTempera/Outros/Outros (9).png" alt="Janela 9"
+                    <li><img src="images/SistemaTempera/Outros/Outros (9).png" alt="Outro 9"
                             onclick="selectImage('images/SistemaTempera/Outros/Outros (9).png')"></li>
                 </ul>
             </div>
-            <button onclick="closeImageModal()">Fechar</button>
+            <div class="modal-actions">
+                <button onclick="closeImageModal()">
+                    <i class="fas fa-times"></i> Fechar
+                </button>
+            </div>
         </div>
     </div>
 
     <div id="previewSection">
-        <h2>Itens Adicionados:</h2>
+        <h2>Itens Adicionados</h2>
         <ul id="itemPreviewList"></ul>
     </div>
 
-    <script src ="javascripts/Drawer/SistemaTempera/Tempera.js"></script>
+    <script src="javascripts/Drawer/SistemaTempera/Tempera.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>
 

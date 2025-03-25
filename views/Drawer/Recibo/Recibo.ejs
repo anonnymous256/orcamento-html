@@ -8,11 +8,19 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="/stylesheets/Drawer/Recibo/Recibo.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-
 </head>
 <body>
+    <!-- Novo header da aplicação -->
+    <header class="app-header">
+        <div class="header-content">
+            <button class="voltar-btn" onclick="window.history.back()">
+                <i class="arrow-left"></i> Voltar
+            </button>
+            <h1 class="header-title">Sistema de Recibos</h1>
+        </div>
+    </header>
+
     <div class="container">
-        <div class="voltar" onclick="window.history.back()">Voltar</div>
         <div class="info">
             <div class="info-ipt">
                 <div class="info-cliente">
@@ -25,31 +33,31 @@
                     </div>
                     
                     <div class="input-item">
-                        <label for="input-data">Data:</label>
+                        <label for="input-data">Data do Recibo:</label>
                         <input type="date" name="input-data" id="input-data">
                     </div>
                     <div class="input-item">
-                        <label for="input-end">Endereço para instalação:</label>
-                        <input type="text" name="input-end" id="input-end" > 
+                        <label for="input-end">Endereço para Instalação:</label>
+                        <input type="text" name="input-end" id="input-end" placeholder="Ex: Rua São João, 123 - Centro">
                     </div>
-                    
                 </div>
+                
                 <div class="info-servicos">
                     <h2>Informações do Serviço</h2>
                     <div class="input-item">
-                        <label for="desc-serv">Descrição:</label>
-                        <input type="text" name="desc-serv" id="desc-serv">
+                        <label for="desc-serv">Descrição do Serviço:</label>
+                        <input type="text" name="desc-serv" id="desc-serv" placeholder="Ex: Instalação de portão automático">
                     </div>
                     <div class="input-item">
                         <label for="quantidade">Quantidade:</label>
-                        <input type="number" name="quantidade" id="quantidade">
+                        <input type="number" name="quantidade" id="quantidade" placeholder="1" min="1">
                     </div>
                     <div class="input-item">
-                        <label for="valor">Valor:</label>
-                        <input type="number" name="valor" id="valor">
+                        <label for="valor">Valor (R$):</label>
+                        <input type="number" name="valor" id="valor" placeholder="0,00" step="0.01" min="0">
                     </div>
                     <div class="input-item">
-                        <label for="forma-pagamento">Forma de Pagamento:</label>
+                        <label for="formapagamento">Forma de Pagamento:</label>
                         <select name="formapagamento" id="formapagamento">
                             <option value="Dinheiro">Dinheiro</option>
                             <option value="Pix">Pix</option>
@@ -59,26 +67,34 @@
                             <option value="Deposito">Depósito</option>
                             <option value="Outro">Outro</option>
                         </select>
-                        
                     </div>
-            </div>
+                    <div class="input-item">
+                        <label for="tipopagamento">Tipo de Pagamento:</label>
+                        <select name="tipopagamento" id="tipopagamento">
+                            <option value="Integral">Pagamento Integral</option>
+                            <option value="Parcial">Pagamento Parcial (50%)</option>
+                        </select>
+                    </div>
+                </div>
+                
                 <div class="btn">
-                    <button class="enviar">Enviar Dados</button>
-                    <button class="remover">Limpar Item</button>
-                    <p><button class="baixar">Baixar PDF</button></p>
+                    <button class="enviar">✓ Adicionar Item</button>
+                    <button class="remover">✕ Limpar Item</button>
+                    <p><button class="baixar">⤓ Baixar PDF</button></p>
                 </div>
             </div>
         </div> 
+        
         <div class="recibo">
-            <header>
-                <img  alt="Logo da empresa" id="logo-usuario">
-                    <div class="info-empresa">
-                        <h2 id="nome-empresa">Nome da Empresa</h2>
-                        <p id="endereco-empresa">Endereço: </p>
-                        <p id="cnpj-empresa">CNPJ: </p>
-                        <p id="telefone-empresa">Telefone: </p>
-                    </div>
-                    <hr>
+            <header class="recibo-header">
+                <img alt="Logo da empresa" id="logo-usuario">
+                <div class="info-empresa">
+                    <h2 id="nome-empresa">Nome da Empresa</h2>
+                    <p id="endereco-empresa">Endereço: </p>
+                    <p id="cnpj-empresa">CNPJ: </p>
+                    <p id="telefone-empresa">Telefone: </p>
+                </div>
+                <hr>
                 <div class="dados">
                     <p class="nome-cliente">Cliente:</p>
                     <p class="data-recibo">Data:</p>
@@ -86,16 +102,19 @@
                 </div>
                 <hr>
             </header>
+            
             <main>
-                <h1 class = "hidden">Declaração</h1>
-                <div class="recibo-declaracao">
+                <h1 class="hidden">Declaração</h1>
+                <div class="recibo-declaracao hidden">
                     <p id="declaracao-recibo"></p> <!-- Parágrafo para a declaração -->
                 </div>
-                <h1 class = "hidden">Forma de Pagamento</h1>
-                <div class = "pagamento-recibo">
-                <p id = "forma-pagamento"></p>
+                
+                <h1 class="hidden">Forma de Pagamento</h1>
+                <div class="pagamento-recibo hidden">
+                    <p id="forma-pagamento"></p>
                 </div>
-                <h1 class = "hidden">Serviços</h1>
+                
+                <h1 class="hidden">Serviços</h1>
                 <table class="tabela-servicos hidden">
                     <tr class="titulo-tabela">
                         <th>Item</th>
@@ -108,9 +127,7 @@
         </div>
     </div>
 
-
-    <script type = "module" src="/javascripts/Drawer/Recibo/Recibo.js"></script>
+    <script type="module" src="/javascripts/Drawer/Recibo/Recibo.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
 </body>
 </html>
