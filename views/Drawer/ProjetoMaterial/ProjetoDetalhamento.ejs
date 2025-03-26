@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalhes do Modelo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="stylesheets/Drawer/ProjetoMaterial/ProjetoDetalhamento.css">
+    <!-- Bibliotecas para geração de PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body>
+    <header>
+        <i class="fa-solid fa-arrow-left" onclick="voltarParaModelos()"></i>
+        <p id="header-title">Detalhes do Modelo</p>
+        <div class="header-icons">
+            <div class="cart-icon-container">
+                <i class="fa-solid fa-shopping-cart" id="btn-cart"></i>
+                <span class="cart-count" id="cart-count">0</span>
+            </div>
+            <i class="fa-solid fa-file-pdf" id="btn-gerar-pdf"></i>
+        </div>
+    </header>
+    
+    <div class="detail-screen">
+        <h1 class="title" id="model-title">Detalhes do Modelo</h1>
+        
+        <div class="detail-container">
+            <div class="image-container">
+                <img id="detail-image" src="" alt="Imagem do modelo" class="detail-image">
+            </div>
+            
+            <div class="info-container">
+                <h2 id="detail-name" class="detail-name"></h2>
+                <p id="detail-description" class="detail-description"></p>
+                <div id="detail-price" class="detail-price"></div>
+                
+                <button id="lista-materiais-btn" class="material-list-btn">
+                    <i class="fas fa-list-ul"></i> Lista de Materiais
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para lista de materiais -->
+    <div id="material-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Lista de Materiais</h2>
+                <span class="close-modal" onclick="fecharModalMateriais()">&times;</span>
+            </div>
+            <div class="modal-body" id="material-list">
+                <!-- Lista de materiais será inserida aqui dinamicamente -->
+            </div>
+            <div class="modal-footer">
+                <button id="btn-add-all-to-cart" class="btn-secondary">
+                    <i class="fas fa-cart-plus"></i> Adicionar Todos
+                </button>
+                <button id="btn-pdf-materiais" class="btn-pdf">
+                    <i class="fas fa-file-pdf"></i> Gerar PDF
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para carrinho -->
+    <div id="cart-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Itens Selecionados</h2>
+                <span class="close-modal" onclick="fecharModalCarrinho()">&times;</span>
+            </div>
+            <div class="modal-body" id="cart-items">
+                <!-- Itens do carrinho serão inseridos aqui dinamicamente -->
+            </div>
+            <div class="modal-footer">
+                <button id="btn-clear-cart" class="btn-secondary">
+                    <i class="fas fa-trash"></i> Limpar
+                </button>
+                <button id="btn-pdf-cart" class="btn-pdf">
+                    <i class="fas fa-file-pdf"></i> Gerar PDF
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Elemento para renderizar o PDF (invisível) -->
+    <div id="pdf-content" style="display: none;">
+        <!-- Conteúdo para o PDF será gerado aqui -->
+    </div>
+
+    <footer>
+        <p>&copy; 2025 - Sistema de Projetos</p>
+    </footer>
+
+    <script src="javascripts/Drawer/ProjetoMaterial/ProjetoDetalhamento.js"></script>
+</body>
+</html>

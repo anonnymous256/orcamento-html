@@ -9,153 +9,151 @@
     <link rel="stylesheet" href="stylesheets/Drawer/ProjetoMaterial/Projeto.css">
 </head>
 <body>
+    <header>
+        <i class="fa-solid fa-arrow-left" onclick="goBack()"></i>
+        <p>Tipos de Projeto</p>
+        <div class="cart-icon-container">
+            <i class="fa-solid fa-shopping-cart" id="btn-cart" onclick="abrirCarrinho()"></i>
+        </div>
+    </header>
+    
     <!-- Tela principal -->
     <div id="main-screen" class="screen">
-        <div class="header">
-            <div class="back-arrow" onclick="goBack()">
-                <i class="fas fa-arrow-left"></i>
-            </div>
-            <h1 class="title">Tipos de Projeto</h1>
-        </div>
+        <h1 class="title">Escolha o tipo de projeto</h1>
         
         <div class="cards-container">
-            <div class="card" onclick="openModelScreen('Portas')">
+            <div class="card" onclick="openModelScreen('Janelas')">
                 <div class="card-image-container">
-                    <img src="images/ModelosCapa/portass.png" alt="Portas" class="card-image">
+                    <img src="images/ModelosCapa/janelas.png" alt="Janelas" class="card-image">
                 </div>
                 <div class="card-content">
                     <div class="card-name">Janelas</div>
                 </div>
             </div>
             
-            <div class="card" onclick="openModelScreen('Janelas')">
+            <div class="card" onclick="openModelScreen('Portas')">
                 <div class="card-image-container">
-                    <img src="images/ModelosCapa/portass.png" alt="Janelas" class="card-image">
+                    <img src="images/ModelosCapa/portass.png" alt="Portas" class="card-image">
                 </div>
                 <div class="card-content">
                     <div class="card-name">Portas</div>
                 </div>
             </div>
             
-            <div class="card" onclick="openModelScreen('Portões')">
+            <div class="card" onclick="openModelScreen('Fixos')">
                 <div class="card-image-container">
-                    <img src="images/ModelosCapa/fixos.png" alt="Portões" class="card-image">
+                    <img src="images/ModelosCapa/fixos.png" alt="Fixos" class="card-image">
                 </div>
                 <div class="card-content">
                     <div class="card-name">Fixos</div>
                 </div>
             </div>
             
-            <div class="card" onclick="openModelScreen('Guarda-Corpos')">
+            <div class="card" onclick="openModelScreen('Boxs')">
                 <div class="card-image-container">
-                    <img src="images/ModelosCapa/boxs.png" alt="Guarda-Corpos" class="card-image">
+                    <img src="images/ModelosCapa/boxs.png" alt="Boxs" class="card-image">
                 </div>
                 <div class="card-content">
                     <div class="card-name">Boxs</div>
                 </div>
             </div>
 
-            <div class="card" onclick="openModelScreen('Portões')">
+            <div class="card" onclick="openModelScreen('Fechamentos')">
                 <div class="card-image-container">
-                    <img src="images/ModelosCapa/kitpia.png" alt="Portões" class="card-image">
+                    <img src="images/ModelosCapa/kitpia.png" alt="Fechamento de Pia" class="card-image">
                 </div>
                 <div class="card-content">
                     <div class="card-name">Fechamento de Pia</div>
                 </div>
             </div>
 
-            <div class="card" onclick="openModelScreen('Portões')">
+            <div class="card" onclick="openModelScreen('Espelhos')">
                 <div class="card-image-container">
-                    <img src="images/ModelosCapa/espelho.jpg" alt="Portões" class="card-image">
+                    <img src="images/ModelosCapa/espelho.jpg" alt="Espelhos" class="card-image">
                 </div>
                 <div class="card-content">
-                    <div class="card-name">espelhos</div>
+                    <div class="card-name">Espelhos</div>
                 </div>
             </div>
 
-            <div class="card" onclick="openModelScreen('Portões')">
+            <div class="card" onclick="openModelScreen('Basculantes')">
                 <div class="card-image-container">
-                    <img src="images/ModelosCapa/basculantes.png" alt="Portões" class="card-image">
+                    <img src="images/ModelosCapa/basculantes.png" alt="Basculantes" class="card-image">
                 </div>
                 <div class="card-content">
                     <div class="card-name">Basculantes/Maxi-ar</div>
                 </div>
             </div>
 
-            <div class="card" onclick="openModelScreen('Portões')">
+            <div class="card" onclick="openModelScreen('Guarda Corpo')">
                 <div class="card-image-container">
-                    <img src="images/ModelosCapa/guarda_corpo.jpeg" alt="Portões" class="card-image">
+                    <img src="images/ModelosCapa/guarda_corpo.jpeg" alt="Guarda-Corpo" class="card-image">
                 </div>
                 <div class="card-content">
                     <div class="card-name">Guarda-Corpo</div>
                 </div>
             </div>
 
-            <div class="card" onclick="openModelScreen('Portões')">
+            <div class="card" onclick="openModelScreen('Stanleys')">
                 <div class="card-image-container">
-                    <img src="images/ModelosCapa/stanley.png" alt="Portões" class="card-image">
+                    <img src="images/ModelosCapa/stanley.png" alt="Stanley" class="card-image">
                 </div>
                 <div class="card-content">
                     <div class="card-name">Stanley</div>
                 </div>
             </div>
 
-            <div class="card" onclick="openModelScreen('Portões')">
+            <div class="card" onclick="openModelScreen('SlidesDoor')">
                 <div class="card-image-container">
-                    <img src="images/ModelosCapa/slidedoor.png" alt="Portões" class="card-image">
+                    <img src="images/ModelosCapa/slidedoor.png" alt="Slide Door" class="card-image">
                 </div>
                 <div class="card-content">
                     <div class="card-name">Slide Door</div>
                 </div>
             </div>
 
-            <div class="card" onclick="openModelScreen('Portões')">
+            <div class="card" onclick="openModelScreen('Retrateis')">
                 <div class="card-image-container">
-                    <img src="images/ModelosCapa/retrateis.png" alt="Portões" class="card-image">
+                    <img src="images/ModelosCapa/retrateis.png" alt="Retráteis" class="card-image">
                 </div>
                 <div class="card-content">
                     <div class="card-name">Retráteis WD</div>
                 </div>
             </div>
 
-            <div class="card" onclick="openModelScreen('Portões')">
+            <div class="card" onclick="openModelScreen('RollDoor')">
                 <div class="card-image-container">
-                    <img src="images/ModelosCapa/rolldoor.png" alt="Portões" class="card-image">
+                    <img src="images/ModelosCapa/rolldoor.png" alt="Roll Door" class="card-image">
                 </div>
                 <div class="card-content">
                     <div class="card-name">Roll Door</div>
                 </div>
             </div>
 
-            <div class="card" onclick="openModelScreen('Portões')">
+            <div class="card" onclick="openModelScreen('Elegance')">
                 <div class="card-image-container">
-                    <img src="images/ModelosCapa/elegance.jpg" alt="Portões" class="card-image">
+                    <img src="images/ModelosCapa/elegance.jpg" alt="Box Elegance" class="card-image">
                 </div>
                 <div class="card-content">
                     <div class="card-name">Box Elegance</div>
                 </div>
             </div>
-
-
-
         </div>
     </div>
     
     <!-- Tela de modelos -->
     <div id="model-screen" class="screen hidden">
-        <div class="header">
-            <div class="back-arrow" onclick="backToMainScreen()">
-                <i class="fas fa-arrow-left"></i>
-            </div>
-            <h1 class="title" id="model-screen-title">Modelos</h1>
-        </div>
+        <h1 class="title" id="model-screen-title">Modelos</h1>
         
         <div class="models-container" id="models-container">
             <!-- Modelos serão inseridos dinamicamente via JavaScript -->
         </div>
     </div>
-    
-    <script src = "javascripts/ModelosMaterial/Portas.js"></script>
-    <script src = "javascripts/Drawer/ProjetoMaterial/Projeto.js"></script>
+
+
+    <script src="javascripts/Drawer/ProjetoMaterial/Projeto.js"></script>
+    <script src="javascripts/ModelosMaterial/Portas.js"></script>
+    <script src="javascripts/ModelosMaterial/Janelas.js"></script>
+    <script src="javascripts/ModelosMaterial/Boxs.js"></script>
 </body>
 </html>
