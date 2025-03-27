@@ -15,13 +15,7 @@
     <header>
         <i class="fa-solid fa-arrow-left" onclick="voltarParaModelos()"></i>
         <p id="header-title">Detalhes do Modelo</p>
-        <div class="header-icons">
-            <div class="cart-icon-container">
-                <i class="fa-solid fa-shopping-cart" id="btn-cart"></i>
-                <span class="cart-count" id="cart-count">0</span>
-            </div>
-            <i class="fa-solid fa-file-pdf" id="btn-gerar-pdf"></i>
-        </div>
+        <i></i>
     </header>
     
     <div class="detail-screen">
@@ -54,46 +48,13 @@
             <div class="modal-body" id="material-list">
                 <!-- Lista de materiais será inserida aqui dinamicamente -->
             </div>
-            <div class="modal-footer">
-                <button id="btn-add-all-to-cart" class="btn-secondary">
-                    <i class="fas fa-cart-plus"></i> Adicionar Todos
-                </button>
+            <div class="modal-footer">         
                 <button id="btn-pdf-materiais" class="btn-pdf">
                     <i class="fas fa-file-pdf"></i> Gerar PDF
                 </button>
             </div>
         </div>
     </div>
-
-    <!-- Modal para carrinho -->
-    <div id="cart-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Itens Selecionados</h2>
-                <span class="close-modal" onclick="fecharModalCarrinho()">&times;</span>
-            </div>
-            <div class="modal-body" id="cart-items">
-                <!-- Itens do carrinho serão inseridos aqui dinamicamente -->
-            </div>
-            <div class="modal-footer">
-                <button id="btn-clear-cart" class="btn-secondary">
-                    <i class="fas fa-trash"></i> Limpar
-                </button>
-                <button id="btn-pdf-cart" class="btn-pdf">
-                    <i class="fas fa-file-pdf"></i> Gerar PDF
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Elemento para renderizar o PDF (invisível) -->
-    <div id="pdf-content" style="display: none;">
-        <!-- Conteúdo para o PDF será gerado aqui -->
-    </div>
-
-    <footer>
-        <p>&copy; 2025 - Sistema de Projetos</p>
-    </footer>
 
     <script src="javascripts/Drawer/ProjetoMaterial/ProjetoDetalhamento.js"></script>
 </body>

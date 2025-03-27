@@ -1,7 +1,6 @@
 // Variáveis globais para armazenar os dados do modelo atual
 let currentModel = null;
 let currentCategory = null;
-let cartItems = []; // Array para armazenar itens no carrinho
 
 // Definir a variável modelsData se ela ainda não existir
 if (typeof modelsData === 'undefined') {
@@ -14,10 +13,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const urlParams = new URLSearchParams(window.location.search);
     const modelIndex = urlParams.get('index');
     currentCategory = urlParams.get('category');
-    
-    // Carregar o carrinho do localStorage
-    loadCartFromStorage();
-    updateCartCount();
     
     if (modelIndex && currentCategory) {
         // Carregar os dados do modelo
@@ -32,50 +27,22 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Adicionar evento de clique ao botão de gerar PDF no modal
     document.getElementById('btn-pdf-materiais').addEventListener('click', function() {
-        gerarPDFMateriais(currentModel.materiais);
+        perguntarQuantidadeMateriais();
     });
-    
-    // Adicionar evento de clique ao botão de gerar PDF no header
-    document.getElementById('btn-gerar-pdf').addEventListener('click', function() {
-        abrirModalMateriais();
-        setTimeout(() => {
-            gerarPDFMateriais(currentModel.materiais);
-        }, 500);
-    });
-    
-    // Adicionar evento de clique ao botão do carrinho
-    document.getElementById('btn-cart').addEventListener('click', abrirModalCarrinho);
-    
-    // Adicionar evento de clique ao botão de limpar carrinho
-    document.getElementById('btn-clear-cart').addEventListener('click', limparCarrinho);
-    
-    // Adicionar evento de clique ao botão de gerar PDF do carrinho
-    document.getElementById('btn-pdf-cart').addEventListener('click', function() {
-        if (cartItems.length === 0) {
-            alert('O carrinho está vazio. Adicione itens antes de gerar o PDF.');
-            return;
-        }
-        gerarPDFMateriais(cartItems);
-    });
-    
-    // Adicionar evento de clique ao botão de adicionar todos ao carrinho
-    document.getElementById('btn-add-all-to-cart').addEventListener('click', adicionarTodosAoCarrinho);
 });
 
 // Função para carregar os dados do modelo selecionado
 function carregarDadosModelo(category, index) {
-    // Importar dinamicamente o arquivo JS correspondente à categoria
     const script = document.createElement('script');
     script.src = `/javascripts/ModelosMaterial/${category}.js`;
     
     script.onload = function() {
-        // Aguardar um momento para garantir que o script foi processado
         setTimeout(function() {
-            // Verificar se os dados existem
             if (modelsData && modelsData[category] && modelsData[category][index]) {
                 currentModel = modelsData[category][index];
+                currentModel.categoria = category;
+                currentModel.index = index;
                 
-                // Preencher os detalhes na página
                 document.getElementById('model-title').textContent = `Detalhes - ${category}`;
                 document.getElementById('header-title').textContent = `${category} - Detalhes`;
                 document.getElementById('detail-name').textContent = currentModel.titulo;
@@ -89,7 +56,7 @@ function carregarDadosModelo(category, index) {
                 alert('Modelo não encontrado!');
                 window.location.href = '/projeto';
             }
-        }, 100); // Pequeno delay para garantir que o script foi processado
+        }, 100);
     };
     
     script.onerror = function() {
@@ -111,30 +78,18 @@ function abrirModalMateriais() {
     const modal = document.getElementById('material-modal');
     const materialList = document.getElementById('material-list');
 
-    // Limpar a lista atual
     materialList.innerHTML = '';
 
-    // Verificar se o modelo tem lista de materiais
     if (currentModel && currentModel.materiais && currentModel.materiais.length > 0) {
-        // Criar um objeto para agrupar materiais por categoria
         let categorias = {};
 
         currentModel.materiais.forEach(material => {
             if (!categorias[material.categoria]) {
                 categorias[material.categoria] = [];
             }
-            
-            // Criar uma cópia do material e adicionar um ID único
-            const materialCopy = { ...material };
-            materialCopy.id = `${currentCategory}_${currentModel.titulo.replace(/\s+/g, '_')}_${material.nome.replace(/\s+/g, '_')}_${Math.random().toString(36).substr(2, 9)}`;
-            materialCopy.modeloCategoria = currentCategory;
-            materialCopy.modeloTitulo = currentModel.titulo;
-            materialCopy.modeloImage = currentModel.image;
-            
-            categorias[material.categoria].push(materialCopy);
+            categorias[material.categoria].push(material);
         });
 
-        // Preencher a lista de materiais agrupados por categoria
         for (let categoria in categorias) {
             const categoriaTitle = document.createElement('h6');
             categoriaTitle.className = 'categoria-title';
@@ -147,31 +102,13 @@ function abrirModalMateriais() {
             categorias[categoria].forEach(material => {
                 const item = document.createElement('div');
                 item.className = 'material-item';
-                
-                // Verificar se a imagem existe
                 const imageUrl = material.image || 'images/placeholder.png';
-                
-                // Verificar se o item já está no carrinho
-                const isInCart = cartItems.some(item => 
-                    item.nome === material.nome && 
-                    item.modeloCategoria === material.modeloCategoria && 
-                    item.modeloTitulo === material.modeloTitulo
-                );
                 
                 item.innerHTML = `
                     <img src="${imageUrl}" alt="${material.nome}" class="material-image">
                     <div>
                         <span class="material-name"><strong>${material.nome}</strong></span>
                         ${material.quantidade ? `<div class="material-quantity">Qtd: ${material.quantidade}</div>` : ''}
-                    </div>
-                    <div class="material-actions">
-                        <button class="btn-pdf-single" onclick="gerarPDFMaterialUnico('${material.id}')">
-                            <i class="fas fa-file-pdf"></i>
-                        </button>
-                        <button class="${isInCart ? 'btn-remove-cart' : 'btn-add-cart'}" id="cart-btn-${material.id}" 
-                            onclick="${isInCart ? 'removerDoCarrinho' : 'adicionarAoCarrinho'}('${material.id}')">
-                            <i class="fas ${isInCart ? 'fa-trash' : 'fa-cart-plus'}"></i>
-                        </button>
                     </div>
                 `;
                 categoriaContainer.appendChild(item);
@@ -180,11 +117,9 @@ function abrirModalMateriais() {
             materialList.appendChild(categoriaContainer);
         }
     } else {
-        // Mostrar mensagem se não houver materiais
         materialList.innerHTML = '<p style="text-align: center; padding: 20px;">Nenhum material cadastrado para este modelo.</p>';
     }
 
-    // Mostrar o modal
     modal.classList.add('show');
 }
 
@@ -192,325 +127,6 @@ function abrirModalMateriais() {
 function fecharModalMateriais() {
     const modal = document.getElementById('material-modal');
     modal.classList.remove('show');
-}
-
-// Função para abrir o modal do carrinho
-function abrirModalCarrinho() {
-    const modal = document.getElementById('cart-modal');
-    const cartItemsContainer = document.getElementById('cart-items');
-    
-    // Limpar o conteúdo atual
-    cartItemsContainer.innerHTML = '';
-    
-    if (cartItems.length === 0) {
-        cartItemsContainer.innerHTML = '<div class="cart-empty"><i class="fas fa-shopping-cart" style="font-size: 3rem; margin-bottom: 15px;"></i><p>Seu carrinho está vazio</p><p style="font-size: 14px; margin-top: 10px;">Adicione itens da lista de materiais</p></div>';
-    } else {
-        // Agrupar itens por modelo
-        let modelos = {};
-        
-        cartItems.forEach(item => {
-            const modelKey = `${item.modeloCategoria}_${item.modeloTitulo}`;
-            if (!modelos[modelKey]) {
-                modelos[modelKey] = {
-                    categoria: item.modeloCategoria,
-                    titulo: item.modeloTitulo,
-                    image: item.modeloImage,
-                    itens: []
-                };
-            }
-            modelos[modelKey].itens.push(item);
-        });
-        
-        // Adicionar itens agrupados por modelo
-        for (let modelKey in modelos) {
-            const modelo = modelos[modelKey];
-            
-            // Criar cabeçalho do grupo
-            const groupHeader = document.createElement('div');
-            groupHeader.className = 'cart-group-header';
-            groupHeader.innerHTML = `
-                <div class="cart-group-title">${modelo.categoria}</div>
-                <button class="btn-remove-cart" onclick="removerModeloDoCarrinho('${modelKey}')">
-                    <i class="fas fa-trash"></i>
-                </button>
-            `;
-            cartItemsContainer.appendChild(groupHeader);
-            
-            // Adicionar informações do modelo
-            const modelInfo = document.createElement('div');
-            modelInfo.className = 'cart-model-info';
-            modelInfo.innerHTML = `<strong>${modelo.titulo}</strong>`;
-            cartItemsContainer.appendChild(modelInfo);
-            
-            // Agrupar itens por categoria
-            let categorias = {};
-            modelo.itens.forEach(item => {
-                if (!categorias[item.categoria]) {
-                    categorias[item.categoria] = [];
-                }
-                categorias[item.categoria].push(item);
-            });
-            
-            // Adicionar itens por categoria
-            for (let categoria in categorias) {
-                const categoriaTitle = document.createElement('h6');
-                categoriaTitle.className = 'categoria-title';
-                categoriaTitle.textContent = categoria;
-                cartItemsContainer.appendChild(categoriaTitle);
-                
-                categorias[categoria].forEach(item => {
-                    const cartItem = document.createElement('div');
-                    cartItem.className = 'cart-item';
-                    
-                    const imageUrl = item.image || 'images/placeholder.png';
-                    
-                    cartItem.innerHTML = `
-                        <img src="${imageUrl}" alt="${item.nome}" class="material-image">
-                        <div class="cart-item-info">
-                            <span class="material-name"><strong>${item.nome}</strong></span>
-                            ${item.quantidade ? `<div class="material-quantity">Qtd: ${item.quantidade}</div>` : ''}
-                        </div>
-                        <div class="material-actions">
-                            <button class="btn-remove-cart" onclick="removerDoCarrinho('${item.id}')">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    `;
-                    
-                    cartItemsContainer.appendChild(cartItem);
-                });
-            }
-            
-            // Adicionar separador entre modelos
-            if (Object.keys(modelos).indexOf(modelKey) < Object.keys(modelos).length - 1) {
-                const divider = document.createElement('hr');
-                divider.style.margin = '20px 0';
-                divider.style.borderColor = 'rgba(255, 255, 255, 0.1)';
-                cartItemsContainer.appendChild(divider);
-            }
-        }
-    }
-    
-    modal.classList.add('show');
-}
-
-// Função para fechar o modal do carrinho
-function fecharModalCarrinho() {
-    const modal = document.getElementById('cart-modal');
-    modal.classList.remove('show');
-}
-
-// Função para adicionar um item ao carrinho
-function adicionarAoCarrinho(materialId) {
-    // Encontrar o material pelo ID
-    let material = null;
-    
-    if (currentModel && currentModel.materiais) {
-        for (let mat of currentModel.materiais) {
-            // Verificar se o material tem o ID gerado
-            if (mat.id === materialId) {
-                material = mat;
-                break;
-            }
-        }
-        
-        // Se não encontrou pelo ID, pode ser que o ID foi gerado dinamicamente
-        if (!material) {
-            for (let mat of currentModel.materiais) {
-                const tempId = `${currentCategory}_${currentModel.titulo.replace(/\s+/g, '_')}_${mat.nome.replace(/\s+/g, '_')}_`;
-                if (materialId.startsWith(tempId)) {
-                    material = { ...mat };
-                    material.id = materialId;
-                    material.modeloCategoria = currentCategory;
-                    material.modeloTitulo = currentModel.titulo;
-                    material.modeloImage = currentModel.image;
-                    break;
-                }
-            }
-        }
-    }
-    
-    if (material) {
-        // Verificar se o item já está no carrinho
-        const existingIndex = cartItems.findIndex(item => 
-            item.nome === material.nome && 
-            item.modeloCategoria === material.modeloCategoria && 
-            item.modeloTitulo === material.modeloTitulo
-        );
-        
-        if (existingIndex === -1) {
-            // Adicionar ao carrinho
-            cartItems.push({...material}); // Usar spread para criar uma cópia
-            
-            // Atualizar o botão
-            const button = document.getElementById(`cart-btn-${materialId}`);
-            if (button) {
-                button.className = 'btn-remove-cart';
-                button.innerHTML = '<i class="fas fa-trash"></i>';
-                button.onclick = function() { removerDoCarrinho(materialId); };
-            }
-            
-            // Salvar no localStorage
-            saveCartToStorage();
-            
-            // Atualizar contador do carrinho
-            updateCartCount();
-            
-            // Mostrar feedback
-            showToast('Item adicionado ao carrinho');
-        }
-    }
-}
-
-// Função para adicionar todos os materiais do modelo atual ao carrinho
-function adicionarTodosAoCarrinho() {
-    if (!currentModel || !currentModel.materiais || currentModel.materiais.length === 0) {
-        showToast('Não há materiais para adicionar');
-        return;
-    }
-    
-    let adicionados = 0;
-    
-    currentModel.materiais.forEach(material => {
-        // Criar uma cópia do material com informações do modelo
-        const materialCopy = { ...material };
-        materialCopy.id = `${currentCategory}_${currentModel.titulo.replace(/\s+/g, '_')}_${material.nome.replace(/\s+/g, '_')}_${Math.random().toString(36).substr(2, 9)}`;
-        materialCopy.modeloCategoria = currentCategory;
-        materialCopy.modeloTitulo = currentModel.titulo;
-        materialCopy.modeloImage = currentModel.image;
-        
-        // Verificar se o item já está no carrinho
-        const existingIndex = cartItems.findIndex(item => 
-            item.nome === material.nome && 
-            item.modeloCategoria === materialCopy.modeloCategoria && 
-            item.modeloTitulo === materialCopy.modeloTitulo
-        );
-        
-        if (existingIndex === -1) {
-            // Adicionar ao carrinho
-            cartItems.push(materialCopy);
-            adicionados++;
-        }
-    });
-    
-    if (adicionados > 0) {
-        // Salvar no localStorage
-        saveCartToStorage();
-        
-        // Atualizar contador do carrinho
-        updateCartCount();
-        
-        // Atualizar os botões na lista de materiais
-        abrirModalMateriais();
-        
-        // Mostrar feedback
-        showToast(`${adicionados} item(s) adicionado(s) ao carrinho`);
-    } else {
-        showToast('Todos os itens já estão no carrinho');
-    }
-}
-
-// Função para remover um item do carrinho
-function removerDoCarrinho(materialId) {
-    // Encontrar o índice do item no carrinho
-    const index = cartItems.findIndex(item => item.id === materialId);
-    
-    if (index !== -1) {
-        // Remover do array
-        cartItems.splice(index, 1);
-        
-        // Atualizar o botão se estiver visível
-        const button = document.getElementById(`cart-btn-${materialId}`);
-        if (button) {
-            button.className = 'btn-add-cart';
-            button.innerHTML = '<i class="fas fa-cart-plus"></i>';
-            button.onclick = function() { adicionarAoCarrinho(materialId); };
-        }
-        
-        // Salvar no localStorage
-        saveCartToStorage();
-        
-        // Atualizar contador do carrinho
-        updateCartCount();
-        
-        // Atualizar o modal do carrinho se estiver aberto
-        if (document.getElementById('cart-modal').classList.contains('show')) {
-            abrirModalCarrinho();
-        }
-        
-        // Mostrar feedback
-        showToast('Item removido do carrinho');
-    }
-}
-
-// Função para remover todos os itens de um modelo do carrinho
-function removerModeloDoCarrinho(modelKey) {
-    const [categoria, titulo] = modelKey.split('_');
-    
-    // Filtrar os itens para manter apenas os que não são deste modelo
-    const originalLength = cartItems.length;
-    cartItems = cartItems.filter(item => 
-        !(item.modeloCategoria === categoria && item.modeloTitulo.replace(/\s+/g, '_') === titulo)
-    );
-    
-    const removidos = originalLength - cartItems.length;
-    
-    if (removidos > 0) {
-        // Salvar no localStorage
-        saveCartToStorage();
-        
-        // Atualizar contador do carrinho
-        updateCartCount();
-        
-        // Atualizar o modal do carrinho
-        abrirModalCarrinho();
-        
-        // Mostrar feedback
-        showToast(`${removidos} item(s) removido(s) do carrinho`);
-    }
-}
-
-// Função para limpar o carrinho
-function limparCarrinho() {
-    if (cartItems.length === 0) return;
-    
-    if (confirm('Tem certeza que deseja limpar o carrinho?')) {
-        cartItems = [];
-        saveCartToStorage();
-        updateCartCount();
-        abrirModalCarrinho(); // Atualizar a visualização
-        showToast('Carrinho limpo com sucesso');
-    }
-}
-
-// Função para atualizar o contador de itens no carrinho
-function updateCartCount() {
-    const countElement = document.getElementById('cart-count');
-    countElement.textContent = cartItems.length;
-    
-    if (cartItems.length === 0) {
-        countElement.style.display = 'none';
-    } else {
-        countElement.style.display = 'flex';
-    }
-}
-
-// Função para salvar o carrinho no localStorage
-function saveCartToStorage() {
-    localStorage.setItem('materialCart', JSON.stringify(cartItems));
-}
-
-// Função para carregar o carrinho do localStorage
-function loadCartFromStorage() {
-    const savedCart = localStorage.getItem('materialCart');
-    if (savedCart) {
-        try {
-            cartItems = JSON.parse(savedCart);
-        } catch (e) {
-            console.error('Erro ao carregar carrinho:', e);
-            cartItems = [];
-        }
-    }
 }
 
 // Função para mostrar um toast de feedback
@@ -548,222 +164,523 @@ function showToast(message) {
     }, 2000);
 }
 
-// Função para gerar PDF de um único material
-function gerarPDFMaterialUnico(materialId) {
-    // Primeiro, procurar no modelo atual
-    let material = null;
+// Função para perguntar a quantidade de materiais antes de gerar o PDF
+function perguntarQuantidadeMateriais() {
+    if (!currentModel || !currentModel.materiais || currentModel.materiais.length === 0) {
+        alert('Nenhum material disponível para gerar o PDF.');
+        return;
+    }
+
+    // Criar modal para perguntar a quantidade
+    const modalOverlay = document.createElement('div');
+    modalOverlay.className = 'modal-overlay';
     
-    if (currentModel && currentModel.materiais) {
-        material = currentModel.materiais.find(m => m.id === materialId);
-        
-        // Se não encontrou pelo ID, pode ser que o ID foi gerado dinamicamente
-        if (!material) {
-            for (let mat of currentModel.materiais) {
-                const tempId = `${currentCategory}_${currentModel.titulo.replace(/\s+/g, '_')}_${mat.nome.replace(/\s+/g, '_')}_`;
-                if (materialId.startsWith(tempId)) {
-                    material = { ...mat };
-                    material.id = materialId;
-                    material.modeloCategoria = currentCategory;
-                    material.modeloTitulo = currentModel.titulo;
-                    material.modeloImage = currentModel.image;
-                    break;
-                }
-            }
+    const modalQuantidade = document.createElement('div');
+    modalQuantidade.className = 'modal-quantidade';
+    
+    modalQuantidade.innerHTML = `
+        <div class="modal-header">
+            <h3>Quantidade de Materiais</h3>
+            <span class="close-modal">&times;</span>
+        </div>
+        <div class="modal-body">
+            <p>Informe o multiplicador para a quantidade de materiais:</p>
+            <div class="quantidade-input">
+                <button class="btn-qtd minus">-</button>
+                <input type="number" id="multiplicador" value="1" min="1" max="100">
+                <button class="btn-qtd plus">+</button>
+            </div>
+            <p class="info-text">Isso multiplicará todas as quantidades de materiais pelo valor informado.</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancelar">Cancelar</button>
+            <button class="btn-confirmar">Confirmar</button>
+        </div>
+    `;
+    
+    modalOverlay.appendChild(modalQuantidade);
+    document.body.appendChild(modalOverlay);
+    
+    // Adicionar estilos inline para o modal
+    const style = document.createElement('style');
+    style.textContent = `
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
         }
-    }
+        
+        .modal-quantidade {
+            background-color: white;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .modal-header {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-body {
+            padding: 20px;
+        }
+        
+        .modal-footer {
+            padding: 15px;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        
+        .quantidade-input {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        
+        #multiplicador {
+            width: 80px;
+            text-align: center;
+            font-size: 18px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin: 0 10px;
+        }
+        
+        .btn-qtd {
+            width: 40px;
+            height: 40px;
+            font-size: 20px;
+            background-color: #f1f1f1;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        
+        .btn-qtd:hover {
+            background-color: #e0e0e0;
+        }
+        
+        .btn-cancelar, .btn-confirmar {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .btn-cancelar {
+            background-color: #f1f1f1;
+            color: #333;
+        }
+        
+        .btn-confirmar {
+            background-color: #2980b9;
+            color: white;
+        }
+        
+        .info-text {
+            font-size: 12px;
+            color: #777;
+            text-align: center;
+            margin-top: 10px;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    `;
     
-    // Se não encontrou no modelo atual, procurar no carrinho
-    if (!material) {
-        material = cartItems.find(m => m.id === materialId);
-    }
+    document.head.appendChild(style);
     
-    if (material) {
-        // Gerar PDF apenas para este material
-        gerarPDFMateriais([material]);
-    }
+    // Adicionar eventos aos botões
+    const btnMinus = modalQuantidade.querySelector('.minus');
+    const btnPlus = modalQuantidade.querySelector('.plus');
+    const inputMultiplicador = modalQuantidade.querySelector('#multiplicador');
+    const btnCancelar = modalQuantidade.querySelector('.btn-cancelar');
+    const btnConfirmar = modalQuantidade.querySelector('.btn-confirmar');
+    const btnClose = modalQuantidade.querySelector('.close-modal');
+    
+    btnMinus.addEventListener('click', () => {
+        const valor = parseInt(inputMultiplicador.value);
+        if (valor > 1) {
+            inputMultiplicador.value = valor - 1;
+        }
+    });
+    
+    btnPlus.addEventListener('click', () => {
+        const valor = parseInt(inputMultiplicador.value);
+        if (valor < 100) {
+            inputMultiplicador.value = valor + 1;
+        }
+    });
+    
+    btnCancelar.addEventListener('click', () => {
+        document.body.removeChild(modalOverlay);
+    });
+    
+    btnClose.addEventListener('click', () => {
+        document.body.removeChild(modalOverlay);
+    });
+    
+    btnConfirmar.addEventListener('click', () => {
+        const multiplicador = parseInt(inputMultiplicador.value) || 1;
+        document.body.removeChild(modalOverlay);
+        
+        // Criar uma cópia do modelo atual para não afetar o original
+        const modeloComQuantidade = JSON.parse(JSON.stringify(currentModel));
+        
+        // Multiplicar as quantidades
+        if (modeloComQuantidade.materiais && modeloComQuantidade.materiais.length > 0) {
+            modeloComQuantidade.materiais.forEach(material => {
+                if (material.quantidade) {
+                    // Se for um número, multiplicar
+                    const qtdOriginal = parseInt(material.quantidade) || 1;
+                    material.quantidade = qtdOriginal * multiplicador;
+                } else {
+                    // Se não tiver quantidade, definir como o multiplicador
+                    material.quantidade = multiplicador;
+                }
+            });
+        }
+        
+        // Gerar o PDF com as quantidades ajustadas
+        gerarPDFMateriais(modeloComQuantidade);
+    });
 }
 
-// Função para gerar PDF dos materiais
-function gerarPDFMateriais(materiais) {
-    // Verificar se as bibliotecas estão carregadas
-    if (typeof window.jspdf === 'undefined' || typeof html2canvas === 'undefined') {
-        alert('Erro: Bibliotecas necessárias não foram carregadas.');
-        return;
-    }
-    
-    // Verificar se há materiais para gerar o PDF
-    if (!materiais || materiais.length === 0) {
-        alert('Não há materiais para gerar o PDF.');
+// Função para gerar PDF dos materiais com estilo profissional
+function gerarPDFMateriais(modelo) {
+    if (!modelo || !modelo.materiais || modelo.materiais.length === 0) {
+        alert('Nenhum material disponível para gerar o PDF.');
         return;
     }
 
-    // Criar o conteúdo do PDF
-    const pdfContent = document.getElementById('pdf-content');
-    pdfContent.innerHTML = ''; // Limpar conteúdo anterior
+    // Cores para o PDF
+    const cores = {
+        primaria: [41, 128, 185], // Azul
+        secundaria: [52, 73, 94], // Azul escuro
+        texto: [44, 62, 80], // Quase preto
+        cinzaClaro: [236, 240, 241], // Cinza muito claro
+        cinzaMedio: [189, 195, 199], // Cinza médio
+        branco: [255, 255, 255],
+        destaque: [231, 76, 60] // Vermelho
+    };
+
+    // Iniciar o PDF
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF();
     
-    // Adicionar cabeçalho
-    const header = document.createElement('div');
-    header.className = 'pdf-header';
-    header.innerHTML = `
-        <h1>Lista de Materiais</h1>
-        <p>Data: ${new Date().toLocaleDateString()}</p>
-    `;
-    pdfContent.appendChild(header);
+    // Configurações de página
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const margin = 15;
+    const contentWidth = pageWidth - (2 * margin);
+    let yPos = margin;
+
+    // Função para adicionar texto com quebra de linha
+    function addWrappedText(text, x, y, maxWidth, lineHeight, align = 'left') {
+        const lines = pdf.splitTextToSize(text, maxWidth);
+        pdf.text(lines, x, y, { align: align });
+        return y + (lines.length * lineHeight);
+    }
+
+   
+
+    // Título do modelo
+    pdf.setTextColor(...cores.secundaria);
+    pdf.setFontSize(16);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text(`LISTA DE MATERIAIS`, pageWidth / 2, yPos, { align: 'center' });
+    yPos += 8;
     
-    // Verificar se estamos gerando PDF para um único modelo ou para múltiplos (carrinho)
-    const isMultiModel = materiais !== currentModel.materiais;
-    
-    if (!isMultiModel) {
-        // Adicionar informações do modelo atual
-        const modelSection = document.createElement('div');
-        modelSection.className = 'pdf-model';
-        modelSection.innerHTML = `
-            <img src="${currentModel.image}" alt="${currentModel.titulo}" class="pdf-model-image">
-            <div class="pdf-model-info">
-                <div class="pdf-model-name">${currentModel.titulo}</div>
-                <div class="pdf-model-description">${currentModel.descricao}</div>
-            </div>
-        `;
-        pdfContent.appendChild(modelSection);
-    } else {
-        // Para o carrinho, agrupar por modelo
-        let modelos = {};
+    pdf.setTextColor(...cores.secundaria);
+    pdf.setFontSize(14);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text(`${modelo.categoria} - ${modelo.titulo}`, pageWidth / 2, yPos, { align: 'center' });
+    yPos += 10;
+
+    // Descrição do modelo
+    if (modelo.descricao) {
+        pdf.setTextColor(...cores.texto);
+        pdf.setFontSize(10);
+        pdf.setFont('helvetica', 'normal');
+        yPos = addWrappedText(modelo.descricao, margin, yPos, contentWidth, 5);
+        yPos += 5;
+    }
+
+    // Adicionar imagem do modelo principal
+    if (modelo.image) {
+        // Carregar a imagem
+        const img = new Image();
+        img.src = modelo.image;
         
-        materiais.forEach(material => {
-            const modelKey = `${material.modeloCategoria}_${material.modeloTitulo}`;
-            if (!modelos[modelKey]) {
-                modelos[modelKey] = {
-                    categoria: material.modeloCategoria,
-                    titulo: material.modeloTitulo,
-                    image: material.modeloImage,
-                    itens: []
-                };
-            }
-            modelos[modelKey].itens.push(material);
-        });
-        
-        // Adicionar cada modelo
-        for (let modelKey in modelos) {
-            const modelo = modelos[modelKey];
-            
-            const modelSection = document.createElement('div');
-            modelSection.className = 'pdf-model';
-            modelSection.innerHTML = `
-                <img src="${modelo.image}" alt="${modelo.titulo}" class="pdf-model-image">
-                <div class="pdf-model-info">
-                    <div class="pdf-model-name">${modelo.categoria} - ${modelo.titulo}</div>
-                </div>
-            `;
-            pdfContent.appendChild(modelSection);
-            
-            // Adicionar título da lista de materiais para este modelo
-            const materialsTitle = document.createElement('h2');
-            materialsTitle.className = 'pdf-materials-title';
-            materialsTitle.textContent = `Materiais - ${modelo.categoria}`;
-            pdfContent.appendChild(materialsTitle);
-            
-            // Agrupar materiais por categoria
-            let categorias = {};
-            modelo.itens.forEach(material => {
-                if (!categorias[material.categoria]) {
-                    categorias[material.categoria] = [];
-                }
-                categorias[material.categoria].push(material);
-            });
-            
-            // Adicionar materiais por categoria
-            for (let categoria in categorias) {
-                const categoryTitle = document.createElement('h3');
-                categoryTitle.className = 'pdf-materials-title';
-                categoryTitle.textContent = categoria;
-                pdfContent.appendChild(categoryTitle);
+        // Função para continuar o PDF após carregar a imagem
+        function continuarPDF() {
+            try {
+                // Calcular dimensões proporcionais
+                const imgWidth = 60;
+                const imgHeight = img.height * (imgWidth / img.width);
                 
-                categorias[categoria].forEach(material => {
-                    const materialItem = document.createElement('div');
-                    materialItem.className = 'pdf-material-item';
-                    
-                    // Verificar se a imagem existe
-                    const imageUrl = material.image || 'images/placeholder.png';
-                    
-                    materialItem.innerHTML = `
-                        <img src="${imageUrl}" alt="${material.nome}" class="pdf-material-image">
-                        <div class="pdf-material-info">
-                            <div class="pdf-material-name">${material.nome}</div>
-                            ${material.quantidade ? `<div class="pdf-material-quantity">Quantidade: ${material.quantidade}</div>` : ''}
-                        </div>
-                    `;
-                    pdfContent.appendChild(materialItem);
+                // Verificar se a imagem cabe na página atual
+                if (yPos + imgHeight + 10 > pageHeight - 20) {
+                    // Adicionar nova página
+                    pdf.addPage();
+                    yPos = margin;
+                }
+                
+                // Adicionar a imagem
+                pdf.addImage(img, 'JPEG', (pageWidth - imgWidth) / 2, yPos, imgWidth, imgHeight);
+                
+                yPos += imgHeight + 10;
+                
+                // Adicionar título da seção de materiais
+                pdf.setFillColor(...cores.secundaria);
+                pdf.rect(margin, yPos, contentWidth, 8, 'F');
+                
+                pdf.setTextColor(...cores.branco);
+                pdf.setFontSize(12);
+                pdf.setFont('helvetica', 'bold');
+                pdf.text('MATERIAIS NECESSÁRIOS', margin + 5, yPos + 5.5);
+                
+                yPos += 12;
+                
+                // Agrupar materiais por categoria
+                let categorias = {};
+                modelo.materiais.forEach(material => {
+                    if (!categorias[material.categoria]) {
+                        categorias[material.categoria] = [];
+                    }
+                    categorias[material.categoria].push(material);
                 });
-            }
+                
+                // Processar cada categoria
+                for (let categoria in categorias) {
+                    // Verificar se precisa de nova página
+                    if (yPos + 20 > pageHeight - 20) {
+                        // Adicionar nova página
+                        pdf.addPage();
+                        yPos = margin;
+                    }
+                    
+                    // Título da categoria
+                    pdf.setFillColor(...cores.cinzaClaro);
+                    pdf.rect(margin, yPos, contentWidth, 7, 'F');
+                    
+                    pdf.setTextColor(...cores.secundaria);
+                    pdf.setFontSize(11);
+                    pdf.setFont('helvetica', 'bold');
+                    pdf.text(categoria.toUpperCase(), margin + 5, yPos + 5);
+                    
+                    yPos += 10;
+                    
+                    // Processar materiais desta categoria
+                    categorias[categoria].forEach((material, idx) => {
+                        // Altura estimada para este item (reduzida)
+                        const itemHeight = 25; // Altura reduzida para o item com imagem
+                        
+                        // Verificar se precisa de nova página
+                        if (yPos + itemHeight > pageHeight - 20) {
+                            // Adicionar nova página
+                            pdf.addPage();
+                            yPos = margin;
+                        }
+                        
+                        // Fundo alternado para os itens
+                        if (idx % 2 === 0) {
+                            pdf.setFillColor(...cores.cinzaClaro);
+                            pdf.rect(margin, yPos - 3, contentWidth, itemHeight, 'F');
+                        }
+                        
+                        // Carregar imagem do material
+                        const materialImg = new Image();
+                        materialImg.src = material.image || 'images/placeholder.png';
+                        
+                        // Adicionar imagem do material
+                        if (materialImg.complete) {
+                            const materialImgWidth = 20; // Tamanho reduzido
+                            const materialImgHeight = 20; // Tamanho reduzido
+                            pdf.addImage(materialImg, 'JPEG', margin + 5, yPos, materialImgWidth, materialImgHeight);
+                            
+                            // Adicionar informações do material
+                            pdf.setTextColor(...cores.texto);
+                            pdf.setFontSize(10);
+                            pdf.setFont('helvetica', 'bold');
+                            pdf.text(material.nome, margin + materialImgWidth + 10, yPos + 8);
+                            
+                            pdf.setFontSize(9);
+                            pdf.setFont('helvetica', 'normal');
+                            pdf.text(`Quantidade: ${material.quantidade || 'Não especificada'}`, margin + materialImgWidth + 10, yPos + 16);
+                            
+                            yPos += itemHeight;
+                        } else {
+                            // Se a imagem não carregou, adicionar apenas o texto
+                            pdf.setTextColor(...cores.texto);
+                            pdf.setFontSize(10);
+                            pdf.setFont('helvetica', 'bold');
+                            pdf.text(material.nome, margin + 5, yPos + 5);
+                            
+                            pdf.setFontSize(9);
+                            pdf.setFont('helvetica', 'normal');
+                            pdf.text(`Quantidade: ${material.quantidade || 'Não especificada'}`, margin + 5, yPos + 12);
+                            
+                            yPos += 20;
+                        }
+                    });
+                    
+                    yPos += 3; // Espaço reduzido após cada categoria
+                }
+                
             
-            // Adicionar separador entre modelos
-            if (Object.keys(modelos).indexOf(modelKey) < Object.keys(modelos).length - 1) {
-                const divider = document.createElement('hr');
-                divider.style.margin = '20px 0';
-                divider.style.borderColor = '#ccc';
-                pdfContent.appendChild(divider);
+                // Salvar o PDF
+                const fileName = `materiais_${modelo.categoria}_${modelo.titulo.replace(/\s+/g, '_')}.pdf`;
+                pdf.save(fileName);
+                
+                // Mostrar mensagem de sucesso
+                showToast('PDF gerado com sucesso!');
+            } catch (error) {
+                console.error('Erro ao gerar PDF:', error);
+                alert('Ocorreu um erro ao gerar o PDF. Por favor, tente novamente.');
             }
         }
+        
+        // Verificar se a imagem já está carregada
+        if (img.complete) {
+            continuarPDF();
+        } else {
+            // Aguardar o carregamento da imagem
+            img.onload = continuarPDF;
+            img.onerror = function() {
+                console.warn('Erro ao carregar imagem do modelo. Continuando sem imagem.');
+                continuarPDF();
+            };
+        }
+    } else {
+        // Se não houver imagem do modelo, continuar sem ela
+        continuarPDF();
     }
     
-    // Tornar o conteúdo visível temporariamente para capturar
-    pdfContent.style.display = 'block';
-    
-    // Usar html2canvas para capturar o conteúdo
-    html2canvas(pdfContent, {
-        scale: 2, // Melhor qualidade
-        useCORS: true, // Permitir imagens de outros domínios
-        logging: false
-    }).then(canvas => {
-        // Esconder o conteúdo novamente
-        pdfContent.style.display = 'none';
+    // Função para continuar sem imagem do modelo
+    function continuarPDF() {
+        // Adicionar título da seção de materiais
+        pdf.setFillColor(...cores.secundaria);
+        pdf.rect(margin, yPos, contentWidth, 8, 'F');
         
-        // Criar o PDF
-        const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF('p', 'mm', 'a4');
+        pdf.setTextColor(...cores.branco);
+        pdf.setFontSize(12);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text('MATERIAIS NECESSÁRIOS', margin + 5, yPos + 5.5);
         
-        // Dimensões da página A4
-        const pageWidth = pdf.internal.pageSize.getWidth();
-        const pageHeight = pdf.internal.pageSize.getHeight();
+        yPos += 12;
         
-        // Converter o canvas para imagem
-        const imgData = canvas.toDataURL('image/jpeg', 1.0);
+        // Agrupar materiais por categoria
+        let categorias = {};
+        modelo.materiais.forEach(material => {
+            if (!categorias[material.categoria]) {
+                categorias[material.categoria] = [];
+            }
+            categorias[material.categoria].push(material);
+        });
         
-        // Calcular a altura proporcional para manter a proporção
-        const imgWidth = pageWidth - 20; // Margem de 10mm em cada lado
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
-        
-        // Adicionar a imagem ao PDF
-        let heightLeft = imgHeight;
-        let position = 10; // Posição Y inicial (10mm do topo)
-        
-        // Adicionar a primeira página
-        pdf.addImage(imgData, 'JPEG', 10, position, imgWidth, imgHeight);
-        heightLeft -= (pageHeight - 20); // Altura restante após a primeira página
-        
-        // Adicionar páginas adicionais se necessário
-        while (heightLeft > 0) {
-            position = heightLeft - imgHeight; // Posição negativa para mover a imagem para cima
-            pdf.addPage();
-            pdf.addImage(imgData, 'JPEG', 10, position, imgWidth, imgHeight);
-            heightLeft -= (pageHeight - 20);
-        }
-        
-        // Definir nome do arquivo
-        let fileName = 'lista_materiais';
-        if (isMultiModel) {
-            fileName = 'materiais_multiplos_modelos';
-        } else if (materiais.length === 1) {
-            fileName = `material_${materiais[0].nome.replace(/\s+/g, '_')}`;
-        } else {
-            fileName = `materiais_${currentCategory}_${currentModel.titulo.replace(/\s+/g, '_')}`;
+        // Processar cada categoria
+        for (let categoria in categorias) {
+            // Verificar se precisa de nova página
+            if (yPos + 20 > pageHeight - 20) {
+                // Adicionar nova página
+                pdf.addPage();
+                yPos = margin;
+            }
+            
+            // Título da categoria
+            pdf.setFillColor(...cores.cinzaClaro);
+            pdf.rect(margin, yPos, contentWidth, 7, 'F');
+            
+            pdf.setTextColor(...cores.secundaria);
+            pdf.setFontSize(11);
+            pdf.setFont('helvetica', 'bold');
+            pdf.text(categoria.toUpperCase(), margin + 5, yPos + 5);
+            
+            yPos += 10;
+            
+            // Processar materiais desta categoria
+            categorias[categoria].forEach((material, idx) => {
+                // Altura estimada para este item (reduzida)
+                const itemHeight = 25; // Altura reduzida para o item com imagem
+                
+                // Verificar se precisa de nova página
+                if (yPos + itemHeight > pageHeight - 20) { 
+                    // Adicionar nova página
+                    pdf.addPage();
+                    yPos = margin;
+                }
+                
+                // Fundo alternado para os itens
+                if (idx % 2 === 0) {
+                    pdf.setFillColor(...cores.cinzaClaro);
+                    pdf.rect(margin, yPos - 3, contentWidth, itemHeight, 'F');
+                }
+                
+                // Carregar imagem do material
+                const materialImg = new Image();
+                materialImg.src = material.image || 'images/placeholder.png';
+                
+                // Adicionar imagem do material
+                if (materialImg.complete) {
+                    const materialImgWidth = 20; // Tamanho reduzido
+                    const materialImgHeight = 20; // Tamanho reduzido
+                    pdf.addImage(materialImg, 'JPEG', margin + 5, yPos, materialImgWidth, materialImgHeight);
+                    
+                    // Adicionar informações do material
+                    pdf.setTextColor(...cores.texto);
+                    pdf.setFontSize(10);
+                    pdf.setFont('helvetica', 'bold');
+                    pdf.text(material.nome, margin + materialImgWidth + 10, yPos + 8);
+                    
+                    pdf.setFontSize(9);
+                    pdf.setFont('helvetica', 'normal');
+                    pdf.text(`Quantidade: ${material.quantidade || 'Não especificada'}`, margin + materialImgWidth + 10, yPos + 16);
+                    
+                    yPos += itemHeight;
+                } else {
+                    // Se a imagem não carregou, adicionar apenas o texto
+                    pdf.setTextColor(...cores.texto);
+                    pdf.setFontSize(10);
+                    pdf.setFont('helvetica', 'bold');
+                    pdf.text(material.nome, margin + 5, yPos + 5);
+                    
+                    pdf.setFontSize(9);
+                    pdf.setFont('helvetica', 'normal');
+                    pdf.text(`Quantidade: ${material.quantidade || 'Não especificada'}`, margin + 5, yPos + 12);
+                    
+                    yPos += 20;
+                }
+            });
+            
+            yPos += 3; // Espaço reduzido após cada categoria
         }
         
         // Salvar o PDF
-        pdf.save(`${fileName}.pdf`);
-    }).catch(error => {
-        console.error('Erro ao gerar o PDF:', error);
-        alert('Ocorreu um erro ao gerar o PDF. Verifique o console para mais detalhes.');
-        pdfContent.style.display = 'none';
-    });
+        const fileName = `materiais_${modelo.categoria}_${modelo.titulo.replace(/\s+/g, '_')}.pdf`;
+        pdf.save(fileName);
+        
+        // Mostrar mensagem de sucesso
+        showToast('PDF gerado com sucesso!');
+    }
 }
